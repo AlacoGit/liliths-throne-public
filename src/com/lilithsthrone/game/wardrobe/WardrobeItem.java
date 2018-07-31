@@ -1,110 +1,132 @@
 package com.lilithsthrone.game.wardrobe;
 
 
+import com.lilithsthrone.game.character.GameCharacter;
 import com.lilithsthrone.game.inventory.clothing.AbstractClothing;
 import com.lilithsthrone.game.inventory.clothing.ClothingType;
 import com.lilithsthrone.game.inventory.enchanting.ItemEffect;
 import com.lilithsthrone.game.inventory.weapon.AbstractWeapon;
 import com.lilithsthrone.game.inventory.weapon.WeaponType;
+import com.lilithsthrone.utils.XMLSaving;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class WardrobeItem {
+/**
+ * @since 0.2.9
+ * @version 0.2.9
+ * @author Alaco
+ */
 
-//    private String type;
-//    private String itemID;
-//    private String name;
-    private String SVGString;
-    private int itemHashCode;
-//    private String colour;
-//    private String colourSecondary;
-//    private String colourTeritary;
-//    private String pattern;
-//    private String patternColour;
-//    private String patternColourSecondary;
-//    private String patternColourTeritary;
-//    private ArrayList<String> effectList;
-//    private boolean ignoreEnchantments;
+class WardrobeItem implements Serializable, XMLSaving {
 
-    public WardrobeItem(AbstractClothing clothing) {
-/*        this.itemID = ClothingType.getIdFromClothingType(clothing.getClothingType());
-        this.name = clothing.getName();
-        this.colour = clothing.getColour().getName();
-        this.colourSecondary = clothing.getSecondaryColour().getName();
-        this.colourTeritary = clothing.getTertiaryColour().getName();
-        this.pattern = clothing.getPattern();
-        this.patternColour = clothing.getPatternColour().getName();
-        this.patternColourSecondary = clothing.getPatternSecondaryColour().getName();
-        this.patternColourTeritary = clothing.getPatternTertiaryColour().getName();
-        this.effectList = new ArrayList<>();
-        for(ItemEffect effect : clothing.getEffects()) {
-            this.effectList.add(effect.toString());
-        }
-        */
-        this.SVGString = clothing.getSVGString();
-        this.itemHashCode = clothing.hashCode();
+    private static final long serialVersionUID = 1L;
+
+	private AbstractClothing clothing;
+	private AbstractWeapon weapon;
+   	private boolean ignoreEnchantments;
+    private boolean ignoreName;
+
+    WardrobeItem(AbstractClothing clothing) {
+        this.clothing = this.copyOf(clothing);
     }
 
-    public WardrobeItem(AbstractWeapon weapon) {
-/*        this.itemID = WeaponType.weaponToIdMap.get(weapon.getWeaponType());
-        this.name = weapon.getName();
-        this.colour = weapon.getColour().getName();
-        this.colourSecondary = weapon.getSecondaryColour().getName();
-
-        this.effectList = new ArrayList<>();
-        for(ItemEffect effect : weapon.getEffects()) {
-            this.effectList.add(effect.toString());
-        }*/
-        this.SVGString = weapon.getSVGString();
-        this.itemHashCode = weapon.hashCode();
+    WardrobeItem(AbstractWeapon weapon) {
+        this.weapon = this.copyOf(weapon);
     }
 
-    public boolean compareTo(AbstractClothing clothing, boolean ignoreEnchantments) {
-/*        if(this.itemID.compareTo(ClothingType.getIdFromClothingType(clothing.getClothingType()))!=0){
-            return false;
-        }
-        if(this.name.compareTo(clothing.getName())!=0){
-            return false;
-        }
-        if(this.colour.compareTo(clothing.getColour().getName())!=0){
-            return false;
-        }
-        if(this.colourSecondary.compareTo(clothing.getSecondaryColour().getName())!=0){
-            return false;
-        }
-        if(this.colourTeritary.compareTo(clothing.getTertiaryColour().getName())!=0){
-            return false;
-        }
-        if(this.pattern.compareTo(clothing.getPattern())!=0){
-            return false;
-        }
-        if(this.patternColour.compareTo(clothing.getPatternColour().getName())!=0){
-            return false;
-        }
-        if(this.patternColourSecondary.compareTo(clothing.getPatternSecondaryColour().getName())!=0){
-            return false;
-        }
-        if(this.patternColourTeritary.compareTo(clothing.getPatternTertiaryColour().getName())!=0){
+    // TODO
+    public AbstractClothing copyOf(AbstractClothing toCopy) {
+        return null;
+    }
+    // TODO
+    public AbstractWeapon copyOf(AbstractWeapon toCopy) {
+        return null;
+    }
+    public boolean compareTo(AbstractClothing clothing) {
+        return this.compareTo(clothing, this.ignoreEnchantments, this.ignoreName);
+    }
+    public boolean compareTo(AbstractClothing clothing, boolean ignoreEnchantments, boolean ignoreName) {
+        if(!ignoreName && this.clothing.getName().compareTo(clothing.getName()) != 0){
             return false;
         }
         if(!ignoreEnchantments){
+            ArrayList<ItemEffect> effectList = new ArrayList<ItemEffect>(this.clothing.getEffects());
             for(ItemEffect effect : clothing.getEffects()){
-                if(!effectList.contains(effect.toString())){
+                if(!effectList.contains(effect)){
                     return false;
                 }
             }
         }
-        return true;*/
-        return clothing.hashCode() == this.itemHashCode;
+        return (this.clothing.getClothingType().equals(clothing.getClothingType()) &&
+                (this.clothing.getColour() == clothing.getColour()) &&
+                (this.clothing.getSecondaryColour() == clothing.getSecondaryColour()) &&
+                (this.clothing.getTertiaryColour() == clothing.getTertiaryColour()) &&
+                (this.clothing.getPattern().equals(clothing.getPattern())));
     }
 
-    public boolean compareTo(AbstractWeapon weapon, boolean ignoreEnchantments) {
-        return weapon.hashCode() == this.itemHashCode;
+    public boolean compareTo(AbstractWeapon weapon) {
+        return this.compareTo(weapon, this.ignoreEnchantments, this.ignoreName);
+    }
+    public boolean compareTo(AbstractWeapon weapon, boolean ignoreEnchantments, boolean ignoreName) {
+        if(!ignoreName && this.weapon.getName().compareTo(weapon.getName()) != 0){
+            return false;
+        }
+        if(!ignoreEnchantments){
+            ArrayList<ItemEffect> effectList = new ArrayList<ItemEffect>(this.clothing.getEffects());
+            for(ItemEffect effect : clothing.getEffects()){
+                if(!effectList.contains(effect)){
+                    return false;
+                }
+            }
+        }
+        return (this.clothing.getClothingType().equals(clothing.getClothingType()) &&
+                (this.clothing.getColour() == clothing.getColour()) &&
+                (this.clothing.getSecondaryColour() == clothing.getSecondaryColour()) &&
+                (this.clothing.getTertiaryColour() == clothing.getTertiaryColour()) &&
+                (this.clothing.getPattern().equals(clothing.getPattern())));
     }
 
     public String getSVGString() {
-        return this.SVGString;
+        // WardrobeItem can be either AbstractClothing or AbstractWeapon but not both at the same time
+        if(this.clothing != null) {
+            return this.clothing.getSVGString();
+        } else {
+            return this.weapon.getSVGString();
+        }
+    }
+
+    public String getSVGEquippedString(GameCharacter character) {
+        // Only clothing has an equipped SVG String
+        if(this.clothing != null) {
+            return this.clothing.getSVGEquippedString(character);
+        } else {
+            return null;
+        }
+    }
+
+    public boolean isIgnoreEnchantments() {
+        return ignoreEnchantments;
+    }
+
+    public void setIgnoreEnchantments(boolean ignoreEnchantments) {
+        this.ignoreEnchantments = ignoreEnchantments;
+    }
+
+    public boolean isIgnoreName() {
+        return ignoreName;
+    }
+
+    public void setIgnoreName(boolean ignoreName) {
+        this.ignoreName = ignoreName;
     }
 
 
+    @Override
+    public Element saveAsXML(Element parentElement, Document doc) {
+        return null;
+    }
 }
