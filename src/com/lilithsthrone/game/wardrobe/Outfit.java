@@ -1,14 +1,18 @@
 package com.lilithsthrone.game.wardrobe;
 
 
+import com.lilithsthrone.game.character.CharacterUtils;
 import com.lilithsthrone.game.inventory.InventorySlot;
 import com.lilithsthrone.game.inventory.clothing.AbstractClothing;
 import com.lilithsthrone.game.inventory.weapon.AbstractWeapon;
+import com.lilithsthrone.utils.XMLSaving;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import java.util.EnumMap;
 import java.util.List;
 
-class Outfit {
+class Outfit implements XMLSaving {
 	private EnumMap<InventorySlot,WardrobeItem> equipmentMap;
     private String name;
 
@@ -62,4 +66,17 @@ class Outfit {
 	    return equipmentMap.values().toArray(new WardrobeItem[0]);
     }
 
+    @Override
+    public Element saveAsXML(Element parentElement, Document doc) {
+        Element outfit = doc.createElement("Outfit");
+        parentElement.appendChild(outfit);
+
+        CharacterUtils.createXMLElementWithValue(doc,parentElement,"hashCode",String.valueOf(this.hashCode));
+
+        return outfit;
+    }
+
+    public static Outfit loadFromXML(Element parentElement, Document doc) {
+	    return null;
+    }
 }

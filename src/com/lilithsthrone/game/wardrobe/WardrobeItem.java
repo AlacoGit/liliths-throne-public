@@ -23,18 +23,49 @@ class WardrobeItem implements Serializable, XMLSaving {
 
     private static final long serialVersionUID = 1L;
 
-    private int hashCode;
+    private AbstractClothing clothing = null;
+    private AbstractWeapon weapon = null;
 
     WardrobeItem(AbstractClothing clothing) {
-        this.hashCode = clothing.hashCode();
+        this(clothing,false);
     }
 
     WardrobeItem(AbstractWeapon weapon) {
-        this.hashCode = weapon.hashCode();
+        this(weapon,false);
     }
 
-    private WardrobeItem(int hashCode) {
-        this.hashCode = hashCode;
+    WardrobeItem(AbstractClothing clothing, boolean imported) {
+        if(imported){
+            this.clothing = clothing;
+        } else {
+            this.clothing = copyOf(clothing);
+        }
+    }
+
+    WardrobeItem(AbstractWeapon weapon, boolean imported) {
+        if(imported){
+            this.weapon = weapon;
+        } else {
+            this.weapon = copyOf(weapon);
+        }
+    }
+
+    private void importItem(AbstractClothing clothing){
+        this.clothing = clothing;
+    }
+
+    private void importItem(AbstractWeapon weapon) {
+        this.weapon = weapon;
+    }
+
+    // TODO
+    private AbstractClothing copyOf(AbstractClothing clothing){
+        return null;
+    }
+
+    //TODO
+    private AbstractWeapon copyOf(AbstractWeapon weapon) {
+        return null;
     }
 
     boolean compareTo(AbstractClothing clothing) {
@@ -54,7 +85,7 @@ class WardrobeItem implements Serializable, XMLSaving {
                 (this.clothing.getSecondaryColour() == clothing.getSecondaryColour()) &&
                 (this.clothing.getTertiaryColour() == clothing.getTertiaryColour()) &&
                 (this.clothing.getPattern().equals(clothing.getPattern())));*/
-        return this.hashCode == clothing.hashCode();
+        return this.clothing.equals(clothing);
     }
 
     boolean compareTo(AbstractWeapon weapon) {
@@ -74,7 +105,7 @@ class WardrobeItem implements Serializable, XMLSaving {
                 (this.clothing.getSecondaryColour() == clothing.getSecondaryColour()) &&
                 (this.clothing.getTertiaryColour() == clothing.getTertiaryColour()) &&
                 (this.clothing.getPattern().equals(clothing.getPattern())));*/
-        return this.hashCode == weapon.hashCode();
+        return this.weapon.equals(weapon);
     }
 
  /*   public boolean isIgnoreEnchantments() {
@@ -93,26 +124,40 @@ class WardrobeItem implements Serializable, XMLSaving {
         this.ignoreName = ignoreName;
     }*/
 
-    int getHashCode() {
-        return hashCode;
-    }
 
 
     @Override
     public Element saveAsXML(Element parentElement, Document doc) {
         Element wardrobeItem = doc.createElement("WardrobeItem");
         parentElement.appendChild(wardrobeItem);
+        if(this.clothing != null){
+            CharacterUtils.createXMLElementWithValue(doc,wardrobeItem,"isClothing", "true");
+        } else {
+            CharacterUtils.createXMLElementWithValue(doc,wardrobeItem,"isClothing", "false");
+        }
 
-        CharacterUtils.createXMLElementWithValue(doc,parentElement,"hashCode",String.valueOf(this.hashCode));
+        if(this.clothing != null) {
+            clothing.saveAsXML(wardrobeItem, doc);
+        } else {
+            weapon.saveAsXML(wardrobeItem, doc);
+        }
 
         return wardrobeItem;
     }
 
     static WardrobeItem loadFromXML(Element parentElement, Document doc) {
+        WardrobeItem importedItem;
+
         Element wardrobeItemElement = (Element) parentElement.getElementsByTagName("WardrobeItem").item(0);
 
-        int ImportedhashCode = (Integer.valueOf(wardrobeItemElement.getAttribute("hashCode")));
+        boolean isClothing = Boolean.valueOf(wardrobeItemElement.getAttribute("isClothing"));
 
-        return new WardrobeItem(ImportedhashCode);
+        if(isClothing){
+            importedItem = new WardrobeItem(AbstractClothing.loadFromXML(wardrobeItemElement,doc),true);
+        } else {
+            importedItem = new WardrobeItem(AbstractWeapon.loadFromXML(wardrobeItemElement,doc),true);
+        }
+
+        return importedItem;
     }
 }
