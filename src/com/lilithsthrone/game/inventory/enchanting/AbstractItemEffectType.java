@@ -217,6 +217,9 @@ public abstract class AbstractItemEffectType {
 						);
 
 				if(Main.getProperties().hasValue(PropertyValue.urethralContent)) {
+					mods.add(TFModifier.TF_MOD_CAPACITY_2);
+					mods.add(TFModifier.TF_MOD_ELASTICITY_2);
+					mods.add(TFModifier.TF_MOD_PLASTICITY_2);
 					mods.add(TFModifier.TF_MOD_ORIFICE_PUFFY_2);
 					mods.add(TFModifier.TF_MOD_ORIFICE_RIBBED_2);
 					mods.add(TFModifier.TF_MOD_ORIFICE_MUSCLED_2);
@@ -237,6 +240,12 @@ public abstract class AbstractItemEffectType {
 			case TF_MOD_ELASTICITY:
 				return OrificeElasticity.SEVEN_ELASTIC.getValue();
 			case TF_MOD_PLASTICITY:
+				return OrificePlasticity.SEVEN_MOULDABLE.getValue();
+			case TF_MOD_CAPACITY_2:
+				return Capacity.SEVEN_GAPING.getMaximumValue();
+			case TF_MOD_ELASTICITY_2:
+				return OrificeElasticity.SEVEN_ELASTIC.getValue();
+			case TF_MOD_PLASTICITY_2:
 				return OrificePlasticity.SEVEN_MOULDABLE.getValue();
 			case TF_MOD_WETNESS:
 				if(primaryModifier!=TFModifier.TF_PENIS
@@ -366,6 +375,15 @@ public abstract class AbstractItemEffectType {
 				break;
 			case TF_MOD_PLASTICITY:
 				descriptions.add(getClothingTFChangeDescriptionEntry(potency, orificeName+" plasticity", OrificePlasticity.getElasticityFromInt(limit).getDescriptor()));
+				break;
+			case TF_MOD_CAPACITY_2:
+				descriptions.add(getClothingTFChangeDescriptionEntry(potency, orificeName+"l urethra capacity", limit+" inches"));
+				break;
+			case TF_MOD_ELASTICITY_2:
+				descriptions.add(getClothingTFChangeDescriptionEntry(potency, orificeName+"l urethra elasticity", OrificeElasticity.getElasticityFromInt(limit).getDescriptor()));
+				break;
+			case TF_MOD_PLASTICITY_2:
+				descriptions.add(getClothingTFChangeDescriptionEntry(potency, orificeName+"l urethra plasticity", OrificePlasticity.getElasticityFromInt(limit).getDescriptor()));
 				break;
 			case TF_MOD_WETNESS:
 				if(primaryModifier!=TFModifier.TF_PENIS
@@ -1167,6 +1185,27 @@ public abstract class AbstractItemEffectType {
 								}
 							}
 							break;
+						case TF_MOD_CAPACITY_2:
+							if(isWithinLimits(capacityIncrement, target.getVaginaUrethraRawCapacityValue(), limit)) {
+								sb.append(target.incrementVaginaUrethraCapacity(capacityIncrement, true));
+							} else if(isSetToLimit(capacityIncrement, target.getVaginaUrethraRawCapacityValue(), limit)) {
+								sb.append(target.setVaginaUrethraCapacity(limit, true));
+							}
+							break;
+						case TF_MOD_ELASTICITY_2:
+							if(isWithinLimits(elasticityIncrement, target.getVaginaUrethraElasticity().getValue(), limit)) {
+								sb.append(target.incrementVaginaUrethraElasticity(elasticityIncrement));
+							} else if(isSetToLimit(elasticityIncrement, target.getVaginaUrethraElasticity().getValue(), limit)) {
+								sb.append(target.setVaginaUrethraElasticity(limit));
+							}
+							break;
+						case TF_MOD_PLASTICITY_2:
+							if(isWithinLimits(plasticityIncrement, target.getVaginaUrethraPlasticity().getValue(), limit)) {
+								sb.append(target.incrementVaginaUrethraPlasticity(plasticityIncrement));
+							} else if(isSetToLimit(plasticityIncrement, target.getVaginaUrethraPlasticity().getValue(), limit)) {
+								sb.append(target.setVaginaUrethraPlasticity(limit));
+							}
+							break;
 						case TF_MOD_ORIFICE_PUFFY_2:
 							if(potency == TFPotency.MINOR_BOOST || potency == TFPotency.BOOST || potency == TFPotency.MAJOR_BOOST) {
 								if(!target.hasVaginaUrethraOrificeModifier(OrificeModifier.PUFFY)) {
@@ -1665,6 +1704,7 @@ public abstract class AbstractItemEffectType {
 
 				secondaryModPotencyMap.put(TFModifier.TF_MOD_PENIS_BARBED, Util.newArrayListOfValues(TFPotency.MINOR_DRAIN, TFPotency.MINOR_BOOST));
 				secondaryModPotencyMap.put(TFModifier.TF_MOD_PENIS_FLARED, Util.newArrayListOfValues(TFPotency.MINOR_DRAIN, TFPotency.MINOR_BOOST));
+				secondaryModPotencyMap.put(TFModifier.TF_MOD_PENIS_BLUNT, Util.newArrayListOfValues(TFPotency.MINOR_DRAIN, TFPotency.MINOR_BOOST));
 				secondaryModPotencyMap.put(TFModifier.TF_MOD_PENIS_KNOTTED, Util.newArrayListOfValues(TFPotency.MINOR_DRAIN, TFPotency.MINOR_BOOST));
 				secondaryModPotencyMap.put(TFModifier.TF_MOD_PENIS_PREHENSILE, Util.newArrayListOfValues(TFPotency.MINOR_DRAIN, TFPotency.MINOR_BOOST));
 				secondaryModPotencyMap.put(TFModifier.TF_MOD_PENIS_RIBBED, Util.newArrayListOfValues(TFPotency.MINOR_DRAIN, TFPotency.MINOR_BOOST));
@@ -1714,6 +1754,7 @@ public abstract class AbstractItemEffectType {
 				
 				secondaryModPotencyMap.put(TFModifier.TF_MOD_PENIS_BARBED, Util.newArrayListOfValues(TFPotency.MINOR_DRAIN, TFPotency.MINOR_BOOST));
 				secondaryModPotencyMap.put(TFModifier.TF_MOD_PENIS_FLARED, Util.newArrayListOfValues(TFPotency.MINOR_DRAIN, TFPotency.MINOR_BOOST));
+				secondaryModPotencyMap.put(TFModifier.TF_MOD_PENIS_BLUNT, Util.newArrayListOfValues(TFPotency.MINOR_DRAIN, TFPotency.MINOR_BOOST));
 				secondaryModPotencyMap.put(TFModifier.TF_MOD_PENIS_KNOTTED, Util.newArrayListOfValues(TFPotency.MINOR_DRAIN, TFPotency.MINOR_BOOST));
 				secondaryModPotencyMap.put(TFModifier.TF_MOD_PENIS_PREHENSILE, Util.newArrayListOfValues(TFPotency.MINOR_DRAIN, TFPotency.MINOR_BOOST));
 				secondaryModPotencyMap.put(TFModifier.TF_MOD_PENIS_RIBBED, Util.newArrayListOfValues(TFPotency.MINOR_DRAIN, TFPotency.MINOR_BOOST));
@@ -2856,6 +2897,13 @@ public abstract class AbstractItemEffectType {
 							case MINOR_BOOST: default:
 								return new RacialEffectUtil("Adds flare to penis head.", 0, "") { @Override public String applyEffect() { return target.addPenisModifier(PenetrationModifier.FLARED); } };
 						}
+					case TF_MOD_PENIS_BLUNT:
+						switch(potency) {
+							case MINOR_DRAIN:
+								return new RacialEffectUtil("Removes blunted head from penis.", 0, "") { @Override public String applyEffect() { return target.removePenisModifier(PenetrationModifier.BLUNT); } };
+							case MINOR_BOOST: default:
+								return new RacialEffectUtil("Makes penis head blunt.", 0, "") { @Override public String applyEffect() { return target.addPenisModifier(PenetrationModifier.BLUNT); } };
+						}
 					case TF_MOD_PENIS_KNOTTED:
 						switch(potency) {
 							case MINOR_DRAIN:
@@ -3172,6 +3220,13 @@ public abstract class AbstractItemEffectType {
 								return new RacialEffectUtil("Removes flare from clitoris head.", 0, "") { @Override public String applyEffect() { return target.removeClitorisModifier(PenetrationModifier.FLARED); } };
 							case MINOR_BOOST: default:
 								return new RacialEffectUtil("Adds flare to clitoris head.", 0, "") { @Override public String applyEffect() { return target.addClitorisModifier(PenetrationModifier.FLARED); } };
+						}
+					case TF_MOD_PENIS_BLUNT:
+						switch(potency) {
+							case MINOR_DRAIN:
+								return new RacialEffectUtil("Removes blunted tip from clitoris.", 0, "") { @Override public String applyEffect() { return target.removeClitorisModifier(PenetrationModifier.BLUNT); } };
+							case MINOR_BOOST: default:
+								return new RacialEffectUtil("Makes tip of clitoris blunt.", 0, "") { @Override public String applyEffect() { return target.addClitorisModifier(PenetrationModifier.BLUNT); } };
 						}
 					case TF_MOD_PENIS_KNOTTED:
 						switch(potency) {

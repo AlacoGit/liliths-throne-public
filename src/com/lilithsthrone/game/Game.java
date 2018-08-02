@@ -686,27 +686,30 @@ public class Game implements Serializable, XMLSaving {
 //								System.out.println(className);
 							}
 						}
+						
 						NPC npc = loadNPC(doc, e, className, npcClasses, loadFromXMLMethods, constructors);
-						Main.game.addNPC(npc, true);
-						addedIds.add(npc.getId());
-						
-						// To fix issues with older versions hair length:
-						if(Main.isVersionOlderThan(loadingVersion, "0.1.90.5")) {
-							npc.getBody().getHair().setLength(null, npc.isFeminine()?RacialBody.valueOfRace(npc.getRace()).getFemaleHairLength():RacialBody.valueOfRace(npc.getRace()).getMaleHairLength());
-						}
-
-						// Generate desires in non-unique NPCs:
-						if(Main.isVersionOlderThan(loadingVersion, "0.1.98.5") && !npc.isUnique() && npc.getFetishDesireMap().isEmpty()) {
-							CharacterUtils.generateDesires(npc);
-						}
-						
-						if(Main.isVersionOlderThan(loadingVersion, "0.2.0") && npc.getFetishDesireMap().size()>10) {
-							npc.clearFetishDesires();
-							CharacterUtils.generateDesires(npc);
-						}
-						
-						if(npc instanceof SlaveImport) {
-							slaveImports.add(npc);
+						if(npc!=null)  {
+							Main.game.addNPC(npc, true);
+							addedIds.add(npc.getId());
+							
+							// To fix issues with older versions hair length:
+							if(Main.isVersionOlderThan(loadingVersion, "0.1.90.5")) {
+								npc.getBody().getHair().setLength(null, npc.isFeminine()?RacialBody.valueOfRace(npc.getRace()).getFemaleHairLength():RacialBody.valueOfRace(npc.getRace()).getMaleHairLength());
+							}
+	
+							// Generate desires in non-unique NPCs:
+							if(Main.isVersionOlderThan(loadingVersion, "0.1.98.5") && !npc.isUnique() && npc.getFetishDesireMap().isEmpty()) {
+								CharacterUtils.generateDesires(npc);
+							}
+							
+							if(Main.isVersionOlderThan(loadingVersion, "0.2.0") && npc.getFetishDesireMap().size()>10) {
+								npc.clearFetishDesires();
+								CharacterUtils.generateDesires(npc);
+							}
+							
+							if(npc instanceof SlaveImport) {
+								slaveImports.add(npc);
+							}
 						}
 					} else {
 						System.err.println("duplicate character attempted to be imported");
@@ -721,18 +724,45 @@ public class Game implements Serializable, XMLSaving {
 				}
 				
 				// Add in new NPCS:
+				
+				if(!Main.game.NPCMap.containsKey(Main.game.getUniqueNPCId(Scarlett.class))) {
+					Main.game.addNPC(new Scarlett(), false);
+					if(Main.game.getPlayer().isQuestProgressGreaterThan(QuestLine.MAIN, Quest.MAIN_1_F_SCARLETTS_FATE)) {
+						Main.game.getScarlett().setLocation(WorldType.HARPY_NEST, PlaceType.HARPY_NESTS_ALEXAS_NEST);
+					}
+				}
+				if(!Main.game.NPCMap.containsKey(Main.game.getUniqueNPCId(Rose.class))) {
+					Main.game.addNPC(new Rose(), false);
+				}
+				if(!Main.game.NPCMap.containsKey(Main.game.getUniqueNPCId(Kate.class))) {
+					Main.game.addNPC(new Kate(), false);
+				}
+				if(!Main.game.NPCMap.containsKey(Main.game.getUniqueNPCId(Vicky.class))) {
+					Main.game.addNPC(new Vicky(), false);
+				}
+				if(!Main.game.NPCMap.containsKey(Main.game.getUniqueNPCId(Pix.class))) {
+					Main.game.addNPC(new Pix(), false);
+				}
+				
+				if(!Main.game.NPCMap.containsKey(Main.game.getUniqueNPCId(Arthur.class))) {
+					Main.game.addNPC(new Arthur(), false);
+				}
+				if(!Main.game.NPCMap.containsKey(Main.game.getUniqueNPCId(Amber.class))) {
+					Main.game.addNPC(new Amber(), false);
+				}
+				if(!Main.game.NPCMap.containsKey(Main.game.getUniqueNPCId(ZaranixMaidKatherine.class))) {
+					Main.game.addNPC(new ZaranixMaidKatherine(), false);
+				}
+				if(!Main.game.NPCMap.containsKey(Main.game.getUniqueNPCId(ZaranixMaidKelly.class))) {
+					Main.game.addNPC(new ZaranixMaidKelly(), false);
+				}
 				if(!Main.game.NPCMap.containsKey(Main.game.getUniqueNPCId(Zaranix.class))) {
-					Zaranix zaranix = new Zaranix();
-					Main.game.addNPC(zaranix, false);
+					Main.game.addNPC(new Zaranix(), false);
 					
-					ZaranixMaidKatherine katherine = new ZaranixMaidKatherine();
-					Main.game.addNPC(katherine, false);
-					
-					ZaranixMaidKelly kelly = new ZaranixMaidKelly();
-					Main.game.addNPC(kelly, false);
-					
-					Amber amber = new Amber();
-					Main.game.addNPC(amber, false);
+					NPC zaranix = Main.game.getZaranix();
+					NPC amber = Main.game.getAmber();
+					NPC kelly = Main.game.getKelly();
+					NPC katherine = Main.game.getKatherine();
 					
 					zaranix.setAffection(katherine, AffectionLevel.POSITIVE_THREE_CARING.getMedianValue());
 					zaranix.setAffection(kelly, AffectionLevel.POSITIVE_THREE_CARING.getMedianValue());
@@ -749,8 +779,6 @@ public class Game implements Serializable, XMLSaving {
 					katherine.setAffection(zaranix, AffectionLevel.POSITIVE_THREE_CARING.getMedianValue());
 					katherine.setAffection(kelly, AffectionLevel.POSITIVE_THREE_CARING.getMedianValue());
 					katherine.setAffection(amber, AffectionLevel.POSITIVE_THREE_CARING.getMedianValue());
-					
-					Main.game.addNPC(new Arthur(), false);
 				}
 				
 				if(!Main.game.NPCMap.containsKey(Main.game.getUniqueNPCId(Ashley.class))) {
@@ -785,12 +813,20 @@ public class Game implements Serializable, XMLSaving {
 				}
 				if(!Main.game.NPCMap.containsKey(Main.game.getUniqueNPCId(Roxy.class))) { // Add gambling den NPCs:
 					Main.game.addNPC(new Roxy(), false);
+				}
+				if(!Main.game.NPCMap.containsKey(Main.game.getUniqueNPCId(Axel.class))) {
 					Main.game.addNPC(new Axel(), false);
+				}
+				if(!Main.game.NPCMap.containsKey(Main.game.getUniqueNPCId(Epona.class))) {
 					Main.game.addNPC(new Epona(), false);
 				}
 				if(!Main.game.NPCMap.containsKey(Main.game.getUniqueNPCId(Jules.class))) { // Add nightclub NPCs:
 					Main.game.addNPC(new Jules(), false);
+				}
+				if(!Main.game.NPCMap.containsKey(Main.game.getUniqueNPCId(Kruger.class))) {
 					Main.game.addNPC(new Kruger(), false);
+				}
+				if(!Main.game.NPCMap.containsKey(Main.game.getUniqueNPCId(Kalahari.class))) {
 					Main.game.addNPC(new Kalahari(), false);
 					Main.game.getKalahari().setFather(Main.game.getKruger());
 					Main.game.getKalahari().setAffection(Main.game.getKruger(), AffectionLevel.POSITIVE_FOUR_LOVE.getMedianValue());
@@ -895,23 +931,29 @@ public class Game implements Serializable, XMLSaving {
 			Map<Class<? extends NPC>, Constructor<? extends NPC>> constructorMap) throws ClassNotFoundException,
 			NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		
-		Class<? extends NPC> npcClass = classMap.get(className);
-		if (npcClass == null) {
-			npcClass = (Class<? extends NPC>) Class.forName(className);
-			classMap.put(className, npcClass);
-			Method m = npcClass.getMethod("loadFromXML", Element.class, Document.class, CharacterImportSetting[].class);
-			loadFromXMLMethodMap.put(npcClass, m);
-			
-			Constructor<? extends NPC> declaredConstructor = npcClass.getDeclaredConstructor(boolean.class);
-			constructorMap.put(npcClass, declaredConstructor);
-			NPC npc = declaredConstructor.newInstance(true);
-			m.invoke(npc, e, doc, new CharacterImportSetting[] {});
-			return npc;
-		} else {
-			Constructor<? extends NPC> declaredConstructor = constructorMap.get(npcClass);
-			NPC npc = declaredConstructor.newInstance(true);
-			loadFromXMLMethodMap.get(npcClass).invoke(npc, e, doc, new CharacterImportSetting[] {});
-			return npc;
+		try {
+			Class<? extends NPC> npcClass = classMap.get(className);
+			if (npcClass == null) {
+				npcClass = (Class<? extends NPC>) Class.forName(className);
+				classMap.put(className, npcClass);
+				Method m = npcClass.getMethod("loadFromXML", Element.class, Document.class, CharacterImportSetting[].class);
+				loadFromXMLMethodMap.put(npcClass, m);
+				
+				Constructor<? extends NPC> declaredConstructor = npcClass.getDeclaredConstructor(boolean.class);
+				constructorMap.put(npcClass, declaredConstructor);
+				NPC npc = declaredConstructor.newInstance(true);
+				m.invoke(npc, e, doc, new CharacterImportSetting[] {});
+				return npc;
+			} else {
+				Constructor<? extends NPC> declaredConstructor = constructorMap.get(npcClass);
+				NPC npc = declaredConstructor.newInstance(true);
+				loadFromXMLMethodMap.get(npcClass).invoke(npc, e, doc, new CharacterImportSetting[] {});
+				return npc;
+			}
+		} catch(Exception ex) {
+			System.err.println("Failed to load NPC class: "+className);
+			ex.printStackTrace();
+			return null;
 		}
 	}
 	
@@ -1149,14 +1191,18 @@ public class Game implements Serializable, XMLSaving {
 		}
 		
 		if(pendingSlaveInStocksReset && Main.game.getPlayer().getLocationPlace().getPlaceType()!=PlaceType.SLAVER_ALLEY_PUBLIC_STOCKS) {
+			List<NPC> npcsToBanish = new ArrayList<>();
 			for(NPC npc : Main.game.getCharactersPresent(Main.game.getWorlds().get(WorldType.SLAVER_ALLEY).getCell(PlaceType.SLAVER_ALLEY_PUBLIC_STOCKS))) {
 				if(npc instanceof SlaveInStocks) {
-					Main.game.banishNPC(npc);
+					npcsToBanish.add(npc);
 				}
+			}
+			for(NPC npc : npcsToBanish) {
+				Main.game.banishNPC(npc);
 			}
 			
 			for(int i=0; i<4; i++) {
-				SlaveInStocks slave = new SlaveInStocks(GenderPreference.getGenderFromUserPreferences());
+				SlaveInStocks slave = new SlaveInStocks(GenderPreference.getGenderFromUserPreferences(false, false));
 				if(Math.random()>0.5f) {
 					Main.game.getGenericFemaleNPC().addSlave(slave);
 				} else {

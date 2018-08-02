@@ -1,9 +1,12 @@
 package com.lilithsthrone.game.sex.sexActions.baseActions;
 
+import java.util.Map;
+
 import com.lilithsthrone.game.character.attributes.CorruptionLevel;
 import com.lilithsthrone.game.dialogue.utils.UtilText;
 import com.lilithsthrone.game.sex.ArousalIncrease;
 import com.lilithsthrone.game.sex.Sex;
+import com.lilithsthrone.game.sex.SexAreaInterface;
 import com.lilithsthrone.game.sex.SexAreaOrifice;
 import com.lilithsthrone.game.sex.SexAreaPenetration;
 import com.lilithsthrone.game.sex.SexPace;
@@ -100,6 +103,24 @@ public class ClitMouth {
 			CorruptionLevel.ONE_VANILLA,
 			Util.newHashMapOfValues(new Value<>(SexAreaOrifice.MOUTH, SexAreaPenetration.CLIT)),
 			SexParticipantType.NORMAL) {
+		
+		@Override
+		public Map<SexAreaInterface, SexAreaInterface> getSexAreaInteractions() {
+			if(Sex.getCharactersHavingOngoingActionWith(Sex.getCharacterTargetedForSexAction(this), SexAreaOrifice.VAGINA).contains(Sex.getCharacterPerformingAction())) {
+				return Util.newHashMapOfValues(new Value<>(SexAreaPenetration.TONGUE, SexAreaOrifice.VAGINA));
+			} else {
+				return Util.newHashMapOfValues(new Value<>(SexAreaOrifice.MOUTH, SexAreaPenetration.CLIT));
+			}
+		}
+		
+		@Override
+		public SexActionType getActionType(){
+			if(Sex.getCharactersHavingOngoingActionWith(Sex.getCharacterTargetedForSexAction(this), SexAreaOrifice.VAGINA).contains(Sex.getCharacterPerformingAction())) {
+				return SexActionType.ONGOING;
+			} else {
+				return SexActionType.REQUIRES_NO_PENETRATION_AND_EXPOSED;
+			}
+		}
 		
 		@Override
 		public String getActionTitle() {
@@ -199,7 +220,7 @@ public class ClitMouth {
 							" [npc2.Name] [npc2.verb(let)] out [npc2.a_moan+], and, roughly grinding [npc2.her] [npc2.hips] into [npc.namePos] [npc.face], [npc2.she] [npc2.verb(order)] [npc.herHim] to continue.",
 
 							" A shuddering [npc2.moan] bursts out from between [npc2.namePos] [npc2.lips+],"
-									+ " and, roughly grinding [npc2.her] [npc2.pussy] against [npc.namePos] [npc.face], [npc2.she] [npc.verb(command)] [npc.herHim] not to stop.",
+									+ " and, roughly grinding [npc2.her] [npc2.pussy] against [npc.namePos] [npc.face], [npc2.she] [npc2.verb(command)] [npc.herHim] not to stop.",
 
 							" Roughly grinding [npc2.her] [npc2.hips] out against [npc.namePos] [npc.face], [npc2.name] [npc2.verb(let)] out [npc2.a_moan+] before ordering [npc.herHim] to continue."));
 					break;

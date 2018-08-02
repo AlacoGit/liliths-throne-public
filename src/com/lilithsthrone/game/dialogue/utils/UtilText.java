@@ -34,6 +34,7 @@ import com.lilithsthrone.game.character.effects.Perk;
 import com.lilithsthrone.game.character.fetishes.Fetish;
 import com.lilithsthrone.game.character.gender.Gender;
 import com.lilithsthrone.game.character.gender.GenderPronoun;
+import com.lilithsthrone.game.character.npc.NPC;
 import com.lilithsthrone.game.character.persona.History;
 import com.lilithsthrone.game.character.race.Subspecies;
 import com.lilithsthrone.game.dialogue.DebugDialogue;
@@ -495,6 +496,13 @@ public class UtilText {
 	public static String parseFromXMLFile(String pathName, String tag) {
 		return parseFromXMLFile(pathName, tag, new ArrayList<>());
 	}
+
+	/**
+	 * Parses the tagged htmlContent from an xml file. If there is more than one htmlContent entry, it returns a random one.
+	 */
+	public static String parseFromXMLFile(String pathName, String tag, GameCharacter... specialNPCs) {
+		return parseFromXMLFile(pathName, tag, Util.newArrayListOfValues(specialNPCs));
+	}
 	
 	/**
 	 * Parses the tagged htmlContent from an xml file. If there is more than one htmlContent entry, it returns a random one.
@@ -512,7 +520,6 @@ public class UtilText {
 				
 				// Cast magic:
 				doc.getDocumentElement().normalize();
-				
 				
 				for(int i=0; i<((Element) doc.getElementsByTagName("dialogue").item(0)).getElementsByTagName("htmlContent").getLength(); i++){
 					Element e = (Element) ((Element) doc.getElementsByTagName("dialogue").item(0)).getElementsByTagName("htmlContent").item(i);
@@ -757,6 +764,8 @@ public class UtilText {
 	
 	public static List<ParserCommand> commandsList = new ArrayList<>();
 	public static Map<BodyPartType, List<ParserCommand>> commandsMap = new EnumMap<>(BodyPartType.class);
+
+	private static String[] lastDescriptors = new String[2];
 	
 	static{
 
@@ -787,6 +796,22 @@ public class UtilText {
 			@Override
 			public String parse(String command, String arguments, String target) {
 				return UtilText.formatAsMoneyUncoloured(Integer.valueOf(arguments.split(", ")[0]), arguments.split(", ")[1]);
+			}
+		});
+
+		commandsList.add(new ParserCommand(
+				Util.newArrayListOfValues("random"),
+				true,
+				false,
+				"(text1 | text2 | text3)",
+				"Returns a random string from the supplied arguments."){
+			@Override
+			public String parse(String command, String arguments, String target) {
+				List<String> strings = new ArrayList<>();
+				for(String s : arguments.split("\\|")) {
+					strings.add(s);
+				}
+				return Util.randomItemFrom(strings);
 			}
 		});
 		
@@ -1380,6 +1405,25 @@ public class UtilText {
 							+"</span>";
 				}
 				return character.getRaceStage().getName();
+			}
+		});
+		
+		commandsList.add(new ParserCommand(
+				Util.newArrayListOfValues(
+						"preferredBody"),
+				false,
+				false,
+				"(tag)",
+				"Returns the description of this character's preferred body."){
+			@Override
+			public String parse(String command, String arguments, String target) {
+				if(!(character instanceof NPC)) {
+					return "<i style='color:"+Colour.GENERIC_BAD.toWebHexString()+";'>preferredBody_not_npc</i>";
+				}
+				if(arguments!=null) {
+					return ((NPC) character).getPreferredBodyDescription(arguments);
+				}
+				return ((NPC) character).getPreferredBodyDescription("b");
 			}
 		});
 		
@@ -2161,6 +2205,13 @@ public class UtilText {
 						} else {
 							return returnStringAtRandom("miserable", "pathetic", "distressed") + " " + returnStringAtRandom("shout", "cry");
 						}
+						
+					} else if(Sex.getSexPace(character)==SexPace.DOM_GENTLE) {
+						if(character.isFeminine()) {
+							return returnStringAtRandom("softly", "gently", "quietly") + " " + returnStringAtRandom("moan", "sigh", "gasp");
+						} else {
+							return returnStringAtRandom("softly", "gently", "quietly") + " " + returnStringAtRandom("groan", "grunt");
+						}
 					}
 				}
 				
@@ -2259,6 +2310,13 @@ public class UtilText {
 							} else {
 								return returnStringAtRandom("miserably", "pathetically") + " " + returnStringAtRandom("shout", "cry");
 							}
+							
+						} else if(Sex.getSexPace(character)==SexPace.DOM_GENTLE) {
+							if(character.isFeminine()) {
+								return returnStringAtRandom("softly", "gently", "quietly") + " " + returnStringAtRandom("moan", "sigh", "cry", "gasp");
+							} else {
+								return returnStringAtRandom("softly", "gently", "quietly") + " " + returnStringAtRandom("groans", "grunts");
+							}
 						}
 					}
 					
@@ -2274,6 +2332,13 @@ public class UtilText {
 								return returnStringAtRandom("miserably", "pathetically", "desperately") + " " + returnStringAtRandom("sobs", "cries");
 							} else {
 								return returnStringAtRandom("miserably", "pathetically", "desperately") + " " + returnStringAtRandom("shouts", "cries");
+							}
+							
+						} else if(Sex.getSexPace(character)==SexPace.DOM_GENTLE) {
+							if(character.isFeminine()) {
+								return returnStringAtRandom("softly", "gently", "quietly") + " " + returnStringAtRandom("moans", "sighs", "gasps");
+							} else {
+								return returnStringAtRandom("softly", "gently", "quietly") + " " + returnStringAtRandom("groans", "grunts");
 							}
 						}
 					}
@@ -2302,7 +2367,7 @@ public class UtilText {
 			@Override
 			public String parse(String command, String arguments, String target) {
 				if(Main.game.isInSex()) {
-					if((character.isPlayer() && Sex.getSexPace(Main.game.getPlayer())==SexPace.SUB_RESISTING) || (!character.isPlayer() && Sex.getSexPace(Sex.getActivePartner())==SexPace.SUB_RESISTING)) {
+					if(Sex.getSexPace(character)==SexPace.SUB_RESISTING) {
 						if(character.isFeminine()) {
 							return returnStringAtRandom("sobs", "cries");
 						} else {
@@ -2339,11 +2404,18 @@ public class UtilText {
 			@Override
 			public String parse(String command, String arguments, String target) {
 				if(Main.game.isInSex()) {
-					if((character.isPlayer() && Sex.getSexPace(Main.game.getPlayer())==SexPace.SUB_RESISTING) || (!character.isPlayer() && Sex.getSexPace(Sex.getActivePartner())==SexPace.SUB_RESISTING)) {
+					if(Sex.getSexPace(character)==SexPace.SUB_RESISTING) {
 						if(character.isFeminine()) {
 							return returnStringAtRandom("miserable", "pathetic", "distressed") + " " + returnStringAtRandom("sobs", "cries");
 						} else {
 							return returnStringAtRandom("miserable", "pathetic", "distressed") + " " + returnStringAtRandom("shouts", "cries");
+						}
+						
+					} else if(Sex.getSexPace(character)==SexPace.DOM_GENTLE) {
+						if(character.isFeminine()) {
+							return returnStringAtRandom("softly", "gently", "quietly") + " " + returnStringAtRandom("moans", "sighs", "gasps");
+						} else {
+							return returnStringAtRandom("softly", "gently", "quietly") + " " + returnStringAtRandom("groans", "grunts");
 						}
 					}
 				}
@@ -2369,7 +2441,7 @@ public class UtilText {
 			@Override
 			public String parse(String command, String arguments, String target) {
 				if(Main.game.isInSex()) {
-					if((character.isPlayer() && Sex.getSexPace(Main.game.getPlayer())==SexPace.SUB_RESISTING) || (!character.isPlayer() && Sex.getSexPace(Sex.getActivePartner())==SexPace.SUB_RESISTING)) {
+					if(Sex.getSexPace(character)==SexPace.SUB_RESISTING) {
 						if(character.isFeminine()) {
 							return returnStringAtRandom("sobbing", "crying");
 						} else {
@@ -2403,11 +2475,18 @@ public class UtilText {
 			@Override
 			public String parse(String command, String arguments, String target) {
 				if(Main.game.isInSex()) {
-					if((character.isPlayer() && Sex.getSexPace(Main.game.getPlayer())==SexPace.SUB_RESISTING) || (!character.isPlayer() && Sex.getSexPace(Sex.getActivePartner())==SexPace.SUB_RESISTING)) {
+					if(Sex.getSexPace(character)==SexPace.SUB_RESISTING) {
 						if(character.isFeminine()) {
 							return returnStringAtRandom("miserably", "pathetically", "desperately") + " " + returnStringAtRandom("sobbing", "crying");
 						} else {
 							return returnStringAtRandom("miserably", "pathetically", "desperately") + " " + returnStringAtRandom("shouting", "protesting");
+						}
+						
+					} else if(Sex.getSexPace(character)==SexPace.DOM_GENTLE) {
+						if(character.isFeminine()) {
+							return returnStringAtRandom("softly", "gently", "quietly") + " " + returnStringAtRandom("moaning", "sighing");
+						} else {
+							return returnStringAtRandom("softly", "gently", "quietly") + " " + returnStringAtRandom("groaning", "grunting");
 						}
 					}
 				}
@@ -2417,6 +2496,67 @@ public class UtilText {
 				} else {
 					return returnStringAtRandom("lewdly", "eagerly", "desperately") + " " + returnStringAtRandom("groaning", "grunting");
 				}
+			}
+		});
+		
+		commandsList.add(new ParserCommand(
+				Util.newArrayListOfValues(
+						"eagerly",
+						"gently",
+						"roughly"),
+				true,
+				false,
+				"(Alternative start string)",
+				"Returns an appropriate descriptor based on the pace of the character. The argument is used in place of a descriptor if the pace is SUB_NORMAL."){
+			@Override
+			public String parse(String command, String arguments, String target) {
+				if(Main.game.isInSex()) {
+					List<String> descriptors = new ArrayList<>();
+					switch(Sex.getSexPace(character)) {
+						case DOM_GENTLE:
+							descriptors = Util.newArrayListOfValues("gently", "softly", "lovingly");
+							break;
+						case DOM_NORMAL:
+							descriptors = Util.newArrayListOfValues("happily", "eagerly", "enthusiastically", "desperately");
+							break;
+						case DOM_ROUGH:
+							descriptors = Util.newArrayListOfValues("roughly", "forcefully", "violently", "dominantly");
+							break;
+						case SUB_EAGER:
+							descriptors = Util.newArrayListOfValues("happily", "eagerly", "enthusiastically", "desperately");
+							break;
+						case SUB_NORMAL:
+							if(arguments!=null && !arguments.isEmpty()) {
+								return Util.capitaliseSentence(arguments); // Assume start of setnece, so capitalise.
+							} else if(Character.isUpperCase(command.charAt(0))) {
+								descriptors = Util.newArrayListOfValues("happily", "eagerly", "willingly"); // If start of sentence, need descriptor.
+								break;
+							} else {
+								return "";
+							}
+						case SUB_RESISTING:
+							descriptors = Util.newArrayListOfValues("frantically", "desperately", "maniacally");
+							break;
+					}
+					
+					
+					for(int i=lastDescriptors.length-1; i>=0; i--) {
+						descriptors.remove(lastDescriptors[i]);
+						if(i>0) {
+							lastDescriptors[i] = lastDescriptors[i-1];
+						}
+					}
+					String returnString = Util.randomItemFrom(descriptors);
+					
+					lastDescriptors[0] = returnString;
+
+					if(arguments!=null && !arguments.isEmpty()) {
+						return returnString+" "+arguments;
+					}
+					return returnString;
+				}
+					
+				return "eagerly";
 			}
 		});
 		
@@ -2805,6 +2945,38 @@ public class UtilText {
 							return Gender.M_P_MALE.getSecondPerson() + "'s";
 						} else {
 							return GenderPronoun.SECOND_PERSON.getMasculine() + "'s";
+						}
+					}
+				}
+			}
+		});
+		
+		commandsList.add(new ParserCommand(
+				Util.newArrayListOfValues(
+						"sheHasFull",
+						"sheHeHasFull",
+						"heHasFull",
+						"heSheHasFull"),
+				true,
+				true,
+				"",
+				"Returns the correct gender-specific pronoun contraction for this character (you have, she has, he has). By default, returns 'you have' for player character."){
+			@Override
+			public String parse(String command, String arguments, String target) {
+				if(target.startsWith("npc") && character.isPlayer()) {
+					return "you have";
+				} else {
+					if(character.isFeminine()) {
+						if(character.isPlayer()) {
+							return Gender.F_V_B_FEMALE.getSecondPerson() + " has";
+						} else {
+							return GenderPronoun.SECOND_PERSON.getFeminine() + " has";
+						}
+					} else {
+						if(character.isPlayer()) {
+							return Gender.M_P_MALE.getSecondPerson() + " has";
+						} else {
+							return GenderPronoun.SECOND_PERSON.getMasculine() + " has";
 						}
 					}
 				}
@@ -3990,6 +4162,29 @@ public class UtilText {
 			}
 		});
 		
+		commandsList.add(new ParserCommand(
+				Util.newArrayListOfValues(
+						"footjob"),
+				true,
+				true,
+				"",
+				"Description of method",
+				BodyPartType.LEG){//TODO
+			@Override
+			public String parse(String command, String arguments, String target) {
+				switch(character.getLegType().getFootType()) {
+					case HOOFS:
+						return "hoofjob";
+					case HUMANOID:
+					case PAWS:
+						return "footjob";
+					case TALONS:
+						return "clawjob";
+				}
+				return "footjob";
+			}
+		});
+		
 		// Penis:
 		
 		commandsList.add(new ParserCommand(
@@ -4863,7 +5058,13 @@ public class UtilText {
 		if (parserTarget == null) {
 			return "INVALID_TARGET_NAME("+target+")";
 		}
-		character = parserTarget.getCharacter(target.toLowerCase());
+		
+		try {
+			character = parserTarget.getCharacter(target.toLowerCase());
+		} catch(Exception ex) {
+			ex.printStackTrace();
+			return "<i style='color:"+Colour.GENERIC_BAD.toWebHexString()+";'>Error: parserTarget.getCharacter() not found!</i>";
+		}
 		
 		// Commands with arguments:
 		ParserCommand cmd = findCommandWithTag(command.replaceAll("\u200b", ""));
@@ -4942,6 +5143,7 @@ public class UtilText {
 		for(History history : History.values()) {
 			engine.put("HISTORY_"+history.toString(), history);
 		}
+		engine.put("sex", Main.sexEngine); //TODO static methods don't work...
 		
 //		StringBuilder sb = new StringBuilder();
 //		for(Entry<String, Object> entry : engine.getBindings(ScriptContext.ENGINE_SCOPE).entrySet()) {

@@ -1378,7 +1378,9 @@ public class MainControllerInitMethod {
 								Main.game.setContent(new Response("Rename", "", Main.game.getCurrentDialogueNode()){
 									@Override
 									public void effects() {
-										Main.game.getDialogueFlags().getSlaveryManagerSlaveSelected().setName(new NameTriplet(Main.mainController.getWebEngine().getDocument().getElementById("hiddenFieldName").getTextContent()));
+										NPC slave = Main.game.getDialogueFlags().getSlaveryManagerSlaveSelected();
+										slave.setName(new NameTriplet(Main.mainController.getWebEngine().getDocument().getElementById("hiddenFieldName").getTextContent()));
+										slave.loadImages();
 									}
 								});
 							}
@@ -1767,6 +1769,99 @@ public class MainControllerInitMethod {
 	
 						TooltipInformationEventListener el =  new TooltipInformationEventListener().setInformation("Send Slave to Kate",
 								UtilText.parse(slave, "You haven't met Kate yet!"));
+						MainController.addEventListener(MainController.document, id, "mouseenter", el, false);
+					}
+				}
+			}
+			
+			for(String occupantId : Main.game.getPlayer().getFriendlyOccupants()) {
+				id = occupantId;
+				NPC occupant = (NPC) Main.game.getNPCById(occupantId);
+				if(occupant!=null) { // It shouldn't equal null...
+					if (((EventTarget) MainController.document.getElementById(id)) != null) {
+						
+						MainController.addEventListener(MainController.document, id, "mousemove", MainController.moveTooltipListener, false);
+						MainController.addEventListener(MainController.document, id, "mouseleave", MainController.hideTooltipListener, false);
+	
+						TooltipInformationEventListener el =  new TooltipInformationEventListener().setInformation("Inspect", "Will be added soon!");
+						MainController.addEventListener(MainController.document, id, "mouseenter", el, false);
+					}
+					
+					id = occupantId+"_JOB"; //TODO
+					if (((EventTarget) MainController.document.getElementById(id)) != null) {
+						MainController.addEventListener(MainController.document, id, "mousemove", MainController.moveTooltipListener, false);
+						MainController.addEventListener(MainController.document, id, "mouseleave", MainController.hideTooltipListener, false);
+
+						TooltipInformationEventListener el =  new TooltipInformationEventListener().setInformation("Manage Job", "Will be added soon!");
+						MainController.addEventListener(MainController.document, id, "mouseenter", el, false);
+					}
+					
+					id = occupantId+"_PERMISSIONS"; //TODO
+					if (((EventTarget) MainController.document.getElementById(id)) != null) {
+						MainController.addEventListener(MainController.document, id, "mousemove", MainController.moveTooltipListener, false);
+						MainController.addEventListener(MainController.document, id, "mouseleave", MainController.hideTooltipListener, false);
+
+						TooltipInformationEventListener el =  new TooltipInformationEventListener().setInformation("Manage Permissions", "Will be added soon!");
+						MainController.addEventListener(MainController.document, id, "mouseenter", el, false);
+					}
+					
+					id = occupantId+"_INVENTORY";
+					if (((EventTarget) MainController.document.getElementById(id)) != null) {
+						((EventTarget) MainController.document.getElementById(id)).addEventListener("click", e -> {
+							Main.mainController.openInventory(occupant, InventoryInteraction.FULL_MANAGEMENT);
+						}, false);
+						MainController.addEventListener(MainController.document, id, "mousemove", MainController.moveTooltipListener, false);
+						MainController.addEventListener(MainController.document, id, "mouseleave", MainController.hideTooltipListener, false);
+	
+						TooltipInformationEventListener el =  new TooltipInformationEventListener().setInformation("Manage Inventory",
+								UtilText.parse(occupant, "Manage [npc.namePos] inventory."));
+						MainController.addEventListener(MainController.document, id, "mouseenter", el, false);
+					}
+					
+					id = occupantId+"_TRANSFER";
+					if (((EventTarget) MainController.document.getElementById(id)) != null) {
+						((EventTarget) MainController.document.getElementById(id)).addEventListener("click", e -> {
+							Main.game.setContent(new Response("", "", Main.game.getCurrentDialogueNode()) {
+								@Override
+								public void effects() {
+									occupant.setHomeLocation(Main.game.getPlayer().getWorldLocation(), Main.game.getPlayer().getLocation());
+									occupant.returnToHome();
+								}
+							});
+						}, false);
+						MainController.addEventListener(MainController.document, id, "mousemove", MainController.moveTooltipListener, false);
+						MainController.addEventListener(MainController.document, id, "mouseleave", MainController.hideTooltipListener, false);
+	
+						TooltipInformationEventListener el =  new TooltipInformationEventListener().setInformation("Move Here",
+								UtilText.parse(occupant, "Move [npc.name] to your current location."));
+						MainController.addEventListener(MainController.document, id, "mouseenter", el, false);
+					}
+					
+					id = occupantId+"_TRANSFER_DISABLED";
+					if (((EventTarget) MainController.document.getElementById(id)) != null) {
+						MainController.addEventListener(MainController.document, id, "mousemove", MainController.moveTooltipListener, false);
+						MainController.addEventListener(MainController.document, id, "mouseleave", MainController.hideTooltipListener, false);
+						
+						TooltipInformationEventListener el =  new TooltipInformationEventListener().setInformation("Move Here",
+								UtilText.parse(occupant, "You cannot move [npc.name] to this location, as there's no room for [npc.herHim] here."));
+						MainController.addEventListener(MainController.document, id, "mouseenter", el, false);
+					}
+					
+					id = occupantId+"_COSMETICS";
+					if (((EventTarget) MainController.document.getElementById(id)) != null) {
+						MainController.addEventListener(MainController.document, id, "mousemove", MainController.moveTooltipListener, false);
+						MainController.addEventListener(MainController.document, id, "mouseleave", MainController.hideTooltipListener, false);
+	
+						TooltipInformationEventListener el =  new TooltipInformationEventListener().setInformation("Send to Kate", "Will be added soon!");
+						MainController.addEventListener(MainController.document, id, "mouseenter", el, false);
+					}
+					
+					id = occupantId+"_COSMETICS_DISABLED";
+					if (((EventTarget) MainController.document.getElementById(id)) != null) {
+						MainController.addEventListener(MainController.document, id, "mousemove", MainController.moveTooltipListener, false);
+						MainController.addEventListener(MainController.document, id, "mouseleave", MainController.hideTooltipListener, false);
+
+						TooltipInformationEventListener el =  new TooltipInformationEventListener().setInformation("Send to Kate", "Will be added soon!");
 						MainController.addEventListener(MainController.document, id, "mouseenter", el, false);
 					}
 				}
@@ -2959,6 +3054,53 @@ public class MainControllerInitMethod {
 						}, false);
 					}
 				}
+				
+				for(Capacity capacity: Capacity.values()) {
+					id = "VAGINA_URETHRA_CAPACITY_"+capacity;
+					if (((EventTarget) MainController.document.getElementById(id)) != null) {
+						((EventTarget) MainController.document.getElementById(id)).addEventListener("click", e -> {
+							BodyChanging.getTarget().setVaginaUrethraCapacity(capacity.getMedianValue(), true);
+							Main.game.setContent(new Response("", "", Main.game.getCurrentDialogueNode()));
+						}, false);
+					}
+				}
+				for(OrificeElasticity elasticity: OrificeElasticity.values()) {
+					id = "VAGINA_URETHRA_ELASTICITY_"+elasticity;
+					if (((EventTarget) MainController.document.getElementById(id)) != null) {
+						((EventTarget) MainController.document.getElementById(id)).addEventListener("click", e -> {
+							BodyChanging.getTarget().setVaginaUrethraElasticity(elasticity.getValue());
+							Main.game.setContent(new Response("", "", Main.game.getCurrentDialogueNode()));
+						}, false);
+					}
+				}
+				
+				for(OrificePlasticity plasticity: OrificePlasticity.values()) {
+					id = "VAGINA_URETHRA_PLASTICITY_"+plasticity;
+					if (((EventTarget) MainController.document.getElementById(id)) != null) {
+						((EventTarget) MainController.document.getElementById(id)).addEventListener("click", e -> {
+							BodyChanging.getTarget().setVaginaUrethraPlasticity(plasticity.getValue());
+							Main.game.setContent(new Response("", "", Main.game.getCurrentDialogueNode()));
+						}, false);
+					}
+				}
+				
+				for(OrificeModifier orificeMod : OrificeModifier.values()) {
+					id = "CHANGE_VAGINA_URETHRA_MOD_"+orificeMod;
+					if (((EventTarget) MainController.document.getElementById(id)) != null) {
+						((EventTarget) MainController.document.getElementById(id)).addEventListener("click", e -> {
+							if(BodyChanging.getTarget().hasVaginaUrethraOrificeModifier(orificeMod)) {
+								BodyChanging.getTarget().removeVaginaUrethraOrificeModifier(orificeMod);
+							} else {
+								BodyChanging.getTarget().addVaginaUrethraOrificeModifier(orificeMod);
+							}
+							Main.game.setContent(new Response("", "", Main.game.getCurrentDialogueNode()));
+						}, false);
+					}
+				}
+				
+				
+				
+				
 				
 				// Penis:
 				
@@ -4542,7 +4684,40 @@ public class MainControllerInitMethod {
 		// Content preferences:
 
 		if (Main.game.getCurrentDialogueNode() == OptionsDialogue.CONTENT_PREFERENCE || Main.game.getCurrentDialogueNode() == CharacterCreation.CONTENT_PREFERENCES) {
-			
+			id = "ARTWORK_ON";
+			if (((EventTarget) MainController.document.getElementById(id)) != null) {
+				((EventTarget) MainController.document.getElementById(id)).addEventListener("click", e -> {
+					Main.getProperties().setValue(PropertyValue.artwork, true);
+					Main.saveProperties();
+					Main.game.setContent(new Response("", "", Main.game.getCurrentDialogueNode()));
+				}, false);
+			}
+			id = "ARTWORK_OFF";
+			if (((EventTarget) MainController.document.getElementById(id)) != null) {
+				((EventTarget) MainController.document.getElementById(id)).addEventListener("click", e -> {
+					Main.getProperties().setValue(PropertyValue.artwork, false);
+					Main.saveProperties();
+					Main.game.setContent(new Response("", "", Main.game.getCurrentDialogueNode()));
+				}, false);
+			}
+
+			id = "THUMBNAIL_ON";
+			if (((EventTarget) MainController.document.getElementById(id)) != null) {
+				((EventTarget) MainController.document.getElementById(id)).addEventListener("click", e -> {
+					Main.getProperties().setValue(PropertyValue.thumbnail, true);
+					Main.saveProperties();
+					Main.game.setContent(new Response("", "", Main.game.getCurrentDialogueNode()));
+				}, false);
+			}
+			id = "THUMBNAIL_OFF";
+			if (((EventTarget) MainController.document.getElementById(id)) != null) {
+				((EventTarget) MainController.document.getElementById(id)).addEventListener("click", e -> {
+					Main.getProperties().setValue(PropertyValue.thumbnail, false);
+					Main.saveProperties();
+					Main.game.setContent(new Response("", "", Main.game.getCurrentDialogueNode()));
+				}, false);
+			}
+
 			for(Artist artist : Artwork.allArtists) {
 				id = "ARTIST_"+artist.getFolderName();
 				if (((EventTarget) MainController.document.getElementById(id)) != null) {
@@ -4557,6 +4732,8 @@ public class MainControllerInitMethod {
 			Map<String, PropertyValue> settingsMap = Util.newHashMapOfValues(
 					new Value<>("ARTWORK", PropertyValue.artwork),
 					new Value<>("NON_CON", PropertyValue.nonConContent),
+					new Value<>("VOLUNTARY_NTR", PropertyValue.voluntaryNTR),
+					new Value<>("INVOLUNTARY_NTR", PropertyValue.involuntaryNTR),
 					new Value<>("INCEST", PropertyValue.incestContent),
 					new Value<>("LACTATION", PropertyValue.lactationContent),
 					new Value<>("CUM_REGENERATION", PropertyValue.cumRegenerationContent),

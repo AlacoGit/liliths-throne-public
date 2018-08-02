@@ -106,7 +106,7 @@ public class SlaveDialogue {
 			
 			if(Main.game.getActiveNPC().isVisiblyPregnant()){
 				// Pregnant encounters:
-				if(!Main.game.getActiveNPC().isReactedToPregnancy()) {
+				if(!Main.game.getActiveNPC().isCharacterReactedToPregnancy(Main.game.getPlayer())) {
 					UtilText.nodeContentSB.append(
 							"<p>"
 								+ "As you approach [npc.name], it's impossible not to notice the fact that [npc.sheIs] sporting a round belly."
@@ -350,6 +350,9 @@ public class SlaveDialogue {
 						return new Response("Background", "Ask [npc.name] about [npc.her] past life.", SLAVE_PROGRESSION) {
 							@Override
 							public void effects() {
+								if(slave().isVisiblyPregnant()){
+									slave().setCharacterReactedToPregnancy(Main.game.getPlayer(), true);
+								}
 								slave().NPCFlagValues.add(NPCFlagValue.flagSlaveBackground);
 								Main.game.getTextEndStringBuilder().append(Main.game.getActiveNPC().incrementAffection(Main.game.getPlayer(), 3));
 							}
@@ -363,6 +366,9 @@ public class SlaveDialogue {
 						return new Response("Small talk", "Chat about this and that with [npc.name].", SLAVE_MINOR) {
 							@Override
 							public void effects() {
+								if(slave().isVisiblyPregnant()){
+									slave().setCharacterReactedToPregnancy(Main.game.getPlayer(), true);
+								}
 								slave().NPCFlagValues.add(NPCFlagValue.flagSlaveSmallTalk);
 								switch(AffectionLevelBasic.getAffectionLevelFromValue(Main.game.getActiveNPC().getAffection(Main.game.getPlayer()))) {
 									case DISLIKE:
@@ -391,6 +397,9 @@ public class SlaveDialogue {
 								BodyChanging.BODY_CHANGING_CORE){
 							@Override
 							public void effects() {
+								if(slave().isVisiblyPregnant()){
+									slave().setCharacterReactedToPregnancy(Main.game.getPlayer(), true);
+								}
 								Main.game.saveDialogueNode();
 								BodyChanging.setTarget(slave());
 							}
@@ -405,6 +414,9 @@ public class SlaveDialogue {
 									SLAVE_START){
 								@Override
 								public void effects() {
+									if(slave().isVisiblyPregnant()){
+										slave().setCharacterReactedToPregnancy(Main.game.getPlayer(), true);
+									}
 									Main.game.getPlayer().addCompanion(slave());
 								}
 							};
@@ -419,6 +431,9 @@ public class SlaveDialogue {
 								SLAVE_START){
 							@Override
 							public void effects() {
+								if(slave().isVisiblyPregnant()){
+									slave().setCharacterReactedToPregnancy(Main.game.getPlayer(), true);
+								}
 								Main.game.getPlayer().removeCompanion(slave());
 							}
 						};
@@ -429,6 +444,9 @@ public class SlaveDialogue {
 						return new Response("Work", "Ask [npc.name] about how [npc.her] work's going.", SLAVE_ENCOURAGE) {
 							@Override
 							public void effects() {
+								if(slave().isVisiblyPregnant()){
+									slave().setCharacterReactedToPregnancy(Main.game.getPlayer(), true);
+								}
 								slave().NPCFlagValues.add(NPCFlagValue.flagSlaveEncourage);
 								switch(AffectionLevelBasic.getAffectionLevelFromValue(Main.game.getActiveNPC().getAffection(Main.game.getPlayer()))) {
 									case DISLIKE:
@@ -455,6 +473,9 @@ public class SlaveDialogue {
 						return new Response("Hug", "Hug [npc.name].", SLAVE_HUG) {
 							@Override
 							public void effects() {
+								if(slave().isVisiblyPregnant()){
+									slave().setCharacterReactedToPregnancy(Main.game.getPlayer(), true);
+								}
 								slave().NPCFlagValues.add(NPCFlagValue.flagSlaveHug);
 								
 								switch(AffectionLevelBasic.getAffectionLevelFromValue(Main.game.getActiveNPC().getAffection(Main.game.getPlayer()))) {
@@ -483,6 +504,9 @@ public class SlaveDialogue {
 						return new Response("Pettings", "Give [npc.name] some loving pettings.", SLAVE_PETTINGS) {
 							@Override
 							public void effects() {
+								if(slave().isVisiblyPregnant()){
+									slave().setCharacterReactedToPregnancy(Main.game.getPlayer(), true);
+								}
 								slave().NPCFlagValues.add(NPCFlagValue.flagSlavePettings);
 	
 								switch(AffectionLevelBasic.getAffectionLevelFromValue(Main.game.getActiveNPC().getAffection(Main.game.getPlayer()))) {
@@ -510,6 +534,9 @@ public class SlaveDialogue {
 						return new Response("Give Present", "Give [npc.name] the present that you're carrying.", SLAVE_PRESENT) {
 							@Override
 							public void effects() {
+								if(slave().isVisiblyPregnant()){
+									slave().setCharacterReactedToPregnancy(Main.game.getPlayer(), true);
+								}
 								Main.game.getPlayer().removeItem(AbstractItemType.generateItem(ItemType.PRESENT));
 								
 								Main.game.getTextEndStringBuilder().append(Main.game.getActiveNPC().incrementAffection(Main.game.getPlayer(), 10));
@@ -525,6 +552,9 @@ public class SlaveDialogue {
 						return new Response("Inspect", "Make [npc.name] strip and parade around [npc.her] room for your inspection.", SLAVE_INSPECT) {
 							@Override
 							public void effects() {
+								if(slave().isVisiblyPregnant()){
+									slave().setCharacterReactedToPregnancy(Main.game.getPlayer(), true);
+								}
 								slave().NPCFlagValues.add(NPCFlagValue.flagSlaveInspect);
 	
 								Main.game.getActiveNPC().getPlayerKnowsAreas().add(CoverableArea.ANUS);
@@ -550,6 +580,9 @@ public class SlaveDialogue {
 						return new Response("Spanking", "Bend [npc.name] over your knee and give [npc.herHim] a rough spanking.", SLAVE_SPANKING) {
 							@Override
 							public void effects() {
+								if(slave().isVisiblyPregnant()){
+									slave().setCharacterReactedToPregnancy(Main.game.getPlayer(), true);
+								}
 								slave().NPCFlagValues.add(NPCFlagValue.flagSlaveSpanking);
 								Main.game.getTextEndStringBuilder().append(Main.game.getActiveNPC().incrementAffection(Main.game.getPlayer(), -5));
 								Main.game.getTextEndStringBuilder().append(Main.game.getActiveNPC().incrementObedience(10));
@@ -564,6 +597,9 @@ public class SlaveDialogue {
 						return new Response("Molest", "Make [npc.name] sit still as you grope and molest [npc.her] body.", SLAVE_MOLEST) {
 							@Override
 							public void effects() {
+								if(slave().isVisiblyPregnant()){
+									slave().setCharacterReactedToPregnancy(Main.game.getPlayer(), true);
+								}
 								slave().NPCFlagValues.add(NPCFlagValue.flagSlaveMolest);
 								Main.game.getTextEndStringBuilder().append(Main.game.getActiveNPC().incrementObedience(10));
 								
@@ -592,6 +628,9 @@ public class SlaveDialogue {
 						}
 						@Override
 						public void effects() {
+							if(slave().isVisiblyPregnant()){
+								slave().setCharacterReactedToPregnancy(Main.game.getPlayer(), true);
+							}
 							Main.game.getDialogueFlags().setSlaveryManagerSlaveSelected(null);
 						}
 					};
@@ -612,14 +651,17 @@ public class SlaveDialogue {
 									new SMMilkingStall(
 											Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexPositionSlot.MILKING_STALL_FUCKING)),
 											Util.newHashMapOfValues(new Value<>(Main.game.getActiveNPC(), SexPositionSlot.MILKING_STALL_LOCKED_IN_MILKING_STALL))),
-									AFTER_SEX,
-									"<p>"
+									null,
+									AFTER_SEX, "<p>"
 										+ "As [npc.name] is locked into the milking machine, [npc.sheIs] left completely powerless as you step around behind [npc.herHim] and reach down to grab [npc.her] [npc.ass+]."
 										+ " Letting out [npc.a_sob+], [npc.she] pleads,"
 										+ " [npc.speech(No! Please! Just leave me alone!)]"
 									+ "</p>") {
 								@Override
 								public void effects() {
+									if(slave().isVisiblyPregnant()){
+										slave().setCharacterReactedToPregnancy(Main.game.getPlayer(), true);
+									}
 									if(Main.game.getActiveNPC().hasFetish(Fetish.FETISH_NON_CON_SUB)) {
 										Main.game.getTextEndStringBuilder().append(Main.game.getActiveNPC().incrementAffection(Main.game.getPlayer(), 5));
 									} else {
@@ -634,14 +676,17 @@ public class SlaveDialogue {
 									new SMMilkingStall(
 											Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexPositionSlot.MILKING_STALL_FUCKING)),
 											Util.newHashMapOfValues(new Value<>(Main.game.getActiveNPC(), SexPositionSlot.MILKING_STALL_LOCKED_IN_MILKING_STALL))),
-									AFTER_SEX,
-									"<p>"
+									null,
+									AFTER_SEX, "<p>"
 										+ "As [npc.name] is locked into the milking machine, [npc.sheIs] left completely powerless as you step around behind [npc.herHim] and reach down to grab [npc.her] [npc.ass+]."
 										+ " Letting out [npc.a_moan+], [npc.she] pleads,"
 										+ " [npc.speech(~Mmm!~ Yes! Fuck me!)]"
 									+ "</p>") {
 								@Override
 								public void effects() {
+									if(slave().isVisiblyPregnant()){
+										slave().setCharacterReactedToPregnancy(Main.game.getPlayer(), true);
+									}
 									Main.game.getTextEndStringBuilder().append(Main.game.getActiveNPC().incrementAffection(Main.game.getPlayer(), 5));
 								}
 							};
@@ -659,8 +704,8 @@ public class SlaveDialogue {
 										new SMDoggy(
 												Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexPositionSlot.DOGGY_BEHIND)),
 												Util.newHashMapOfValues(new Value<>(Main.game.getActiveNPC(), SexPositionSlot.DOGGY_ON_ALL_FOURS))),
-										AFTER_SEX,
-										"<p>"
+										null,
+										AFTER_SEX, "<p>"
 											+ "As you've instructed [npc.name] to crawl everywhere [npc.she] goes, there's nothing stopping you from simply stepping around behind [npc.herHim] and dropping to your knees,"
 												+ " ready to fuck [npc.herHim] in the doggy-style position."
 											+ " Reaching down to grab [npc.her] [npc.ass+], you [npc.moanVerb],"
@@ -673,6 +718,9 @@ public class SlaveDialogue {
 										+ "</p>") {
 									@Override
 									public void effects() {
+										if(slave().isVisiblyPregnant()){
+											slave().setCharacterReactedToPregnancy(Main.game.getPlayer(), true);
+										}
 										Main.game.getTextEndStringBuilder().append(Main.game.getActiveNPC().incrementAffection(Main.game.getPlayer(), 5));
 									}
 								};
@@ -683,14 +731,17 @@ public class SlaveDialogue {
 										new SMStanding(
 												Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexPositionSlot.STANDING_DOMINANT)),
 												Util.newHashMapOfValues(new Value<>(Main.game.getActiveNPC(), SexPositionSlot.STANDING_SUBMISSIVE))),
-										AFTER_SEX,
-										"<p>"
+										null,
+										AFTER_SEX, "<p>"
 											+ "Grinning, you step forwards and pull [npc.name] into a passionate kiss."
 											+ " [npc.She] desperately tries to push you away, [npc.moaning],"
 											+ " [npc.speech(No! Stop!)]"
 										+ "</p>") {
 									@Override
 									public void effects() {
+										if(slave().isVisiblyPregnant()){
+											slave().setCharacterReactedToPregnancy(Main.game.getPlayer(), true);
+										}
 										if(Main.game.getActiveNPC().hasFetish(Fetish.FETISH_NON_CON_SUB)) {
 											Main.game.getTextEndStringBuilder().append(Main.game.getActiveNPC().incrementAffection(Main.game.getPlayer(), 5));
 										} else {
@@ -707,8 +758,8 @@ public class SlaveDialogue {
 										new SMDoggy(
 												Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexPositionSlot.DOGGY_BEHIND)),
 												Util.newHashMapOfValues(new Value<>(Main.game.getActiveNPC(), SexPositionSlot.DOGGY_ON_ALL_FOURS))),
-										AFTER_SEX,
-										"<p>"
+										null,
+										AFTER_SEX, "<p>"
 											+ "As you've instructed [npc.name] to crawl everywhere [npc.she] goes, there's nothing stopping you from simply stepping around behind [npc.herHim] and dropping to your knees,"
 												+ " ready to fuck [npc.herHim] in the doggy-style position."
 											+ " Reaching down to grab [npc.her] [npc.ass+], you [npc.moanVerb],"
@@ -716,6 +767,9 @@ public class SlaveDialogue {
 										+ "</p>") {
 									@Override
 									public void effects() {
+										if(slave().isVisiblyPregnant()){
+											slave().setCharacterReactedToPregnancy(Main.game.getPlayer(), true);
+										}
 										Main.game.getTextEndStringBuilder().append(Main.game.getActiveNPC().incrementAffection(Main.game.getPlayer(), 5));
 									}
 								};
@@ -726,14 +780,17 @@ public class SlaveDialogue {
 										new SMStanding(
 												Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexPositionSlot.STANDING_DOMINANT)),
 												Util.newHashMapOfValues(new Value<>(Main.game.getActiveNPC(), SexPositionSlot.STANDING_SUBMISSIVE))),
-										AFTER_SEX,
-										"<p>"
+										null,
+										AFTER_SEX, "<p>"
 											+ "Grinning, you step forwards and pull [npc.name] into a passionate kiss."
 											+ " [npc.She] desperately leans into you, [npc.moaning],"
 											+ " [npc.speech(~Mmm!~ Yes!)]"
 										+ "</p>") {
 									@Override
 									public void effects() {
+										if(slave().isVisiblyPregnant()){
+											slave().setCharacterReactedToPregnancy(Main.game.getPlayer(), true);
+										}
 										Main.game.getTextEndStringBuilder().append(Main.game.getActiveNPC().incrementAffection(Main.game.getPlayer(), 5));
 									}
 								};
@@ -749,8 +806,8 @@ public class SlaveDialogue {
 										new SMDoggy(
 												Util.newHashMapOfValues(new Value<>(Main.game.getActiveNPC(), SexPositionSlot.DOGGY_BEHIND)),
 												Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexPositionSlot.DOGGY_ON_ALL_FOURS))),
-										AFTER_SEX,
-										"<p>"
+										null,
+										AFTER_SEX, "<p>"
 											+ "As you've instructed [npc.name] to crawl everywhere [npc.she] goes, there's nothing stopping you from simply dropping down onto all fours in front of [npc.herHim], presenting your [pc.ass+] as you [pc.moanVerb],"
 											+ " [pc.speech(~Mmm!~ Take me!)]"
 										+ "</p>"
@@ -760,6 +817,9 @@ public class SlaveDialogue {
 									+ "</p>") {
 									@Override
 									public void effects() {
+										if(slave().isVisiblyPregnant()){
+											slave().setCharacterReactedToPregnancy(Main.game.getPlayer(), true);
+										}
 										Main.game.getTextEndStringBuilder().append(Main.game.getActiveNPC().incrementAffection(Main.game.getPlayer(), 5));
 									}
 								};
@@ -771,14 +831,17 @@ public class SlaveDialogue {
 										new SMStanding(
 												Util.newHashMapOfValues(new Value<>(Main.game.getActiveNPC(), SexPositionSlot.STANDING_DOMINANT)),
 												Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexPositionSlot.STANDING_SUBMISSIVE))),
-										AFTER_SEX,
-										"<p>"
+										null,
+										AFTER_SEX, "<p>"
 											+ "Taking hold of [npc.namePos] [npc.arms], you take a step forwards, guiding [npc.her] [npc.hands] around your body as you press forwards into a passionate kiss."
 											+ " [npc.She] eagerly pulls you into [npc.herHim], [npc.moaning],"
 											+ " [npc.speech(Looking for some fun, hmm?)]"
 										+ "</p>") {
 									@Override
 									public void effects() {
+										if(slave().isVisiblyPregnant()){
+											slave().setCharacterReactedToPregnancy(Main.game.getPlayer(), true);
+										}
 										Main.game.getTextEndStringBuilder().append(Main.game.getActiveNPC().incrementAffection(Main.game.getPlayer(), 5));
 									}
 								};
@@ -809,10 +872,17 @@ public class SlaveDialogue {
 														new Value<>(charactersPresent.get(1), SexPositionSlot.DOGGY_INFRONT),
 														new Value<>(charactersPresent.get(0), SexPositionSlot.DOGGY_BEHIND)),
 												Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexPositionSlot.DOGGY_ON_ALL_FOURS))),
-										AFTER_SEX,
-										"<p>"
+										null,
+										AFTER_SEX, "<p>"
 											+ ""//TODO
-										+ "</p>");
+										+ "</p>") {
+									@Override
+									public void effects() {
+										if(slave().isVisiblyPregnant()){
+											slave().setCharacterReactedToPregnancy(Main.game.getPlayer(), true);
+										}
+									}
+								};
 							}
 						} else {
 							return new Response("Spitroast", "Another slave needs to be present for this...",null);
@@ -829,10 +899,17 @@ public class SlaveDialogue {
 											Util.newHashMapOfValues(
 													new Value<>(charactersPresent.get(0), SexPositionSlot.DOGGY_ON_ALL_FOURS),
 													new Value<>(charactersPresent.get(1), SexPositionSlot.DOGGY_ON_ALL_FOURS_SECOND))),
-									AFTER_SEX,
-									"<p>"
+									null,
+									AFTER_SEX, "<p>"
 										+ ""//TODO
-									+ "</p>");
+									+ "</p>") {
+								@Override
+								public void effects() {
+									if(slave().isVisiblyPregnant()){
+										slave().setCharacterReactedToPregnancy(Main.game.getPlayer(), true);
+									}
+								}
+							};
 						} else {
 							return new Response("Side-by-side", "Another slave needs to be present for this...",null);
 						}
@@ -845,6 +922,9 @@ public class SlaveDialogue {
 							}
 							@Override
 							public void effects() {
+								if(slave().isVisiblyPregnant()){
+									slave().setCharacterReactedToPregnancy(Main.game.getPlayer(), true);
+								}
 								Main.game.getDialogueFlags().setSlaveryManagerSlaveSelected(null);
 							}
 						};
@@ -862,6 +942,9 @@ public class SlaveDialogue {
 								SlaveryManagementDialogue.getSlaveryManagementInspectSlaveDialogue(Main.game.getActiveNPC())) {
 							@Override
 							public void effects() {
+								if(slave().isVisiblyPregnant()){
+									slave().setCharacterReactedToPregnancy(Main.game.getPlayer(), true);
+								}
 								Main.game.getDialogueFlags().setSlaveryManagerSlaveSelected(slave());
 							}
 						};
@@ -871,6 +954,9 @@ public class SlaveDialogue {
 								SlaveryManagementDialogue.getSlaveryManagementSlaveJobsDialogue(Main.game.getActiveNPC())) {
 							@Override
 							public void effects() {
+								if(slave().isVisiblyPregnant()){
+									slave().setCharacterReactedToPregnancy(Main.game.getPlayer(), true);
+								}
 								Main.game.getDialogueFlags().setSlaveryManagerSlaveSelected(slave());
 							}
 						};
@@ -880,6 +966,9 @@ public class SlaveDialogue {
 								SlaveryManagementDialogue.getSlaveryManagementSlavePermissionsDialogue(Main.game.getActiveNPC())) {
 							@Override
 							public void effects() {
+								if(slave().isVisiblyPregnant()){
+									slave().setCharacterReactedToPregnancy(Main.game.getPlayer(), true);
+								}
 								Main.game.getDialogueFlags().setSlaveryManagerSlaveSelected(slave());
 							}
 						};
@@ -888,6 +977,9 @@ public class SlaveDialogue {
 								"Manage [npc.namePos] inventory.") {
 									@Override
 									public void effects() {
+										if(slave().isVisiblyPregnant()){
+											slave().setCharacterReactedToPregnancy(Main.game.getPlayer(), true);
+										}
 										Main.game.getDialogueFlags().setSlaveryManagerSlaveSelected(slave());
 										Main.mainController.openInventory(Main.game.getActiveNPC(), InventoryInteraction.FULL_MANAGEMENT);
 									}
@@ -899,6 +991,9 @@ public class SlaveDialogue {
 									SlaveryManagementDialogue.SLAVE_MANAGEMENT_COSMETICS_HAIR) {
 										@Override
 										public void effects() {
+											if(slave().isVisiblyPregnant()){
+												slave().setCharacterReactedToPregnancy(Main.game.getPlayer(), true);
+											}
 											Main.game.getDialogueFlags().setSlaveryManagerSlaveSelected(slave());
 											Main.game.getDialogueFlags().setSlaveryManagerSlaveSelected(Main.game.getActiveNPC());
 											BodyChanging.setTarget(Main.game.getActiveNPC());
@@ -915,6 +1010,9 @@ public class SlaveDialogue {
 							}
 							@Override
 							public void effects() {
+								if(slave().isVisiblyPregnant()){
+									slave().setCharacterReactedToPregnancy(Main.game.getPlayer(), true);
+								}
 								Main.game.getDialogueFlags().setSlaveryManagerSlaveSelected(null);
 							}
 						};
@@ -2509,8 +2607,8 @@ public class SlaveDialogue {
 						new SMStanding(
 								Util.newHashMapOfValues(new Value<>(Main.game.getActiveNPC(), SexPositionSlot.STANDING_DOMINANT)),
 								Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexPositionSlot.STANDING_SUBMISSIVE))),
-						SLAVE_USES_YOU_POST_SEX,
-						"<p>"
+						null,
+						SLAVE_USES_YOU_POST_SEX, "<p>"
 							+ "[npc.NamePos] [npc.arms] wrap around your back, and [npc.she] continues passionately making out with you for a few moments, before finally pulling away."
 							+ " Giving you an evil grin, [npc.she] hungrily licks [npc.her] [npc.lips], and you realise that [npc.sheIs] probably not going to be content with just a kiss..."
 						+ "</p>");
@@ -2530,8 +2628,8 @@ public class SlaveDialogue {
 								return null;
 							}
 						},
-						SLAVE_USES_YOU_POST_SEX,
-						"<p>"
+						null,
+						SLAVE_USES_YOU_POST_SEX, "<p>"
 							+ "[npc.NamePos] [npc.arms] wrap around your back, and you eagerly lean into [npc.herHim], passionately returning [npc.her] kiss for a few moments, before [npc.she] breaks away from you."
 							+ " Giving you an evil grin, [npc.she] hungrily licks [npc.her] [npc.lips], and you feel a rush of excitement as you realise that [npc.sheIs] going to want more than just a kiss..."
 						+ "</p>");
@@ -2551,8 +2649,8 @@ public class SlaveDialogue {
 								return null;
 							}
 						},
-						SLAVE_USES_YOU_POST_SEX,
-						"<p>"
+						null,
+						SLAVE_USES_YOU_POST_SEX, "<p>"
 							+ "[npc.NamePos] [npc.arms] wrap around your back, and you let out a distressed cry as [npc.she] pulls you into a forceful kiss."
 							+ " Summoning the last of your strength, you desperately try to push [npc.herHim] away, pleading for [npc.herHim] to stop."
 							+ " Giving you an evil grin, [npc.she] ignores your protests, and as you see [npc.herHim] hungrily licking [npc.her] [npc.lips], you realise that [npc.sheIs] not going to let you go..."

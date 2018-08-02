@@ -49,8 +49,6 @@ import com.lilithsthrone.world.places.PlaceType;
  * @author Innoxia
  */
 public class DominionSuccubusAttacker extends NPC {
-
-	private static final long serialVersionUID = 1L;
 	
 	public DominionSuccubusAttacker() {
 		this(false);
@@ -72,7 +70,7 @@ public class DominionSuccubusAttacker extends NPC {
 			addFetish(Fetish.FETISH_DOMINANT);
 			CharacterUtils.addFetishes(this);
 			
-			if(!GenderPreference.getGenderFromUserPreferences().isFeminine()) {
+			if(!GenderPreference.getGenderFromUserPreferences(false, false).isFeminine()) {
 				this.setBody(Gender.M_P_MALE, RacialBody.DEMON, RaceStage.GREATER);
 				this.setGenderIdentity(Gender.M_P_MALE);
 			}
@@ -325,65 +323,6 @@ public class DominionSuccubusAttacker extends NPC {
 	
 	
 	// ****************** Sex & Dirty talk: ***************************
-	
-//	@Override
-//	public SexType getForeplayPreference() {
-//		if(Main.game.getPlayer().hasVagina() && Main.game.getPlayer().isAbleToAccessCoverableArea(CoverableArea.VAGINA, true)) {
-//			return new SexType(SexParticipantType.NORMAL, PenetrationType.FINGER, OrificeType.VAGINA);
-//			
-//		} else if(Main.game.getPlayer().isAbleToAccessCoverableArea(CoverableArea.ANUS, true)) {
-//			return new SexType(SexParticipantType.NORMAL, PenetrationType.FINGER, OrificeType.ANUS);
-//		}
-//		
-//		return foreplayPreference;
-//	}
-//	
-//	@Override
-//	public SexType getMainSexPreference() {
-//		if(Main.game.getPlayer().hasVagina() && Main.game.getPlayer().isAbleToAccessCoverableArea(CoverableArea.VAGINA, true)) {
-//			return new SexType(SexParticipantType.NORMAL, PenetrationType.PENIS, OrificeType.VAGINA);
-//			
-//		} else if(Main.game.getPlayer().isAbleToAccessCoverableArea(CoverableArea.ANUS, true)) {
-//			return new SexType(SexParticipantType.NORMAL, PenetrationType.PENIS, OrificeType.ANUS);
-//		}
-//		
-//		return mainSexPreference;
-//	}
-//	
-//	public Set<SexPositionSlot> getSexPositionPreferences() {
-//		sexPositionPreferences.clear();
-//		
-//		if(Sex.isInForeplay()) {
-//			if(Main.game.getPlayer().hasVagina() && Main.game.getPlayer().isAbleToAccessCoverableArea(CoverableArea.VAGINA, true)) {
-//				sexPositionPreferences.add(SexPositionSlot.BACK_TO_WALL_FACING_TARGET);
-//				sexPositionPreferences.add(SexPositionSlot.DOGGY_BEHIND);
-//				sexPositionPreferences.add(SexPositionSlot.FACE_TO_WALL_FACING_TARGET);
-//				
-//			} else if(Main.game.getPlayer().isAbleToAccessCoverableArea(CoverableArea.ANUS, true)) {
-//				sexPositionPreferences.add(SexPositionSlot.DOGGY_BEHIND);
-//				sexPositionPreferences.add(SexPositionSlot.FACE_TO_WALL_FACING_TARGET);
-//				
-//			} else {
-//				return super.getSexPositionPreferences();
-//			}
-//			
-//		} else {
-//			if(Main.game.getPlayer().hasVagina() && Main.game.getPlayer().isAbleToAccessCoverableArea(CoverableArea.VAGINA, true)) {
-//				sexPositionPreferences.add(SexPositionSlot.BACK_TO_WALL_FACING_TARGET);
-//				sexPositionPreferences.add(SexPositionSlot.DOGGY_BEHIND);
-//				sexPositionPreferences.add(SexPositionSlot.FACE_TO_WALL_FACING_TARGET);
-//				
-//			} else if(Main.game.getPlayer().isAbleToAccessCoverableArea(CoverableArea.ANUS, true)) {
-//				sexPositionPreferences.add(SexPositionSlot.DOGGY_BEHIND);
-//				sexPositionPreferences.add(SexPositionSlot.FACE_TO_WALL_FACING_TARGET);
-//				
-//			} else {
-//				return super.getSexPositionPreferences();
-//			}
-//		}
-//		
-//		return sexPositionPreferences;
-//	}
 	
 	@Override
 	public String getCondomEquipEffects(GameCharacter equipper, GameCharacter target, boolean rough) {

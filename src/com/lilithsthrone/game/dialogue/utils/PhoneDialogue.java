@@ -1209,7 +1209,7 @@ public class PhoneDialogue {
 							"<div class='container-full-width' style='text-align:center;'>"
 								+ "[style.boldGood(Resolved Pregnancy)]"
 								+ "<br/>"
-								+ "Conceived with [npc.name(a)] on day " + litter.getDayOfConception() + ", delivered on day " + litter.getDayOfBirth() + "."
+								+ "Conceived with [npc.name(a)] on " + Util.getStringOfLocalDateTime(litter.getConceptionDate()) + ", delivered on " + Util.getStringOfLocalDateTime(litter.getBirthDate()) + "."
 								+ "<br/>"
 								+ "You gave birth to "+ litter.getBirthedDescriptionList()+ "."
 							+ "</div>"));
@@ -1218,7 +1218,7 @@ public class PhoneDialogue {
 							"<div class='container-full-width' style='text-align:center;'>"
 								+ "[style.boldGood(Resolved Pregnancy)]"
 								+ "<br/>"
-								+ "Conceived with someone you can't remember on day " + litter.getDayOfConception() + ", delivered on day " + litter.getDayOfBirth() + "."
+								+ "Conceived with someone you can't remember on " + Util.getStringOfLocalDateTime(litter.getConceptionDate()) + ", delivered on " + Util.getStringOfLocalDateTime(litter.getBirthDate()) + "."
 								+ "<br/>"
 								+ "You gave birth to "+ litter.getBirthedDescriptionList()+ "."
 							+ "</div>");
@@ -1293,7 +1293,7 @@ public class PhoneDialogue {
 							"<div class='container-full-width' style='text-align:center;'>"
 								+ "[style.boldGood(Resolved Pregnancy)]"
 								+ "<br/>"
-								+ "Conceived with [npc.name(a)] on day " + litter.getDayOfConception() + ", delivered on day " + litter.getDayOfBirth() + "."
+								+ "Conceived with [npc.name(a)] on " + Util.getStringOfLocalDateTime(litter.getConceptionDate()) + ", delivered on " + Util.getStringOfLocalDateTime(litter.getBirthDate()) + "."
 								+ "<br/>"
 								+ "[npc.She] gave birth to "+ litter.getBirthedDescriptionList()+ "."
 							+ "</div>"));
@@ -1303,7 +1303,7 @@ public class PhoneDialogue {
 							"<div class='container-full-width' style='text-align:center;'>"
 								+ "[style.boldGood(Resolved Pregnancy)]"
 								+ "<br/>"
-								+ "Conceived with someone you can't remember on day " + litter.getDayOfConception() + ", delivered on day " + litter.getDayOfBirth() + "."
+								+ "Conceived with someone you can't remember on " + Util.getStringOfLocalDateTime(litter.getConceptionDate()) + ", delivered on " + Util.getStringOfLocalDateTime(litter.getBirthDate()) + "."
 								+ "<br/>"
 								+ "They gave birth to "+ litter.getBirthedDescriptionList()+ "."
 							+ "</div>");
@@ -1425,6 +1425,21 @@ public class PhoneDialogue {
 				+ "</div>";
 	}
 
+	private static String getContactEntry(GameCharacter contact) {
+		boolean isOffspring = contact.getMotherId().equals(Main.game.getPlayer().getId()) || contact.getFatherId().equals(Main.game.getPlayer().getId());
+		
+		return UtilText.parse(contact, "<b style='color:"+contact.getFemininity().getColour().toWebHexString()+";'>[npc.Name]</b>"+(isOffspring
+				?(contact.isFeminine()
+						?", your [style.colourFeminine(daughter)]"
+						:", your [style.colourMasculine(son)]")
+				:"")
+				+". [npc.She] is "
+				+ (contact.getRaceStage()==RaceStage.HUMAN || contact.isRaceConcealed()
+					?"[npc.a_race(true)]"
+					:"[npc.a_raceStage(true)] [npc.race(true)]")
+				+", whose current location is: <i>"+contact.getWorldLocation().getName()+", "+contact.getLocationPlace().getPlaceType().getName()+"</i>.");
+	}
+	
 	public static final DialogueNodeOld CONTACTS = new DialogueNodeOld("Contacts", "Look at your contacts.", true) {
 		private static final long serialVersionUID = 1L;
 
@@ -1434,46 +1449,10 @@ public class PhoneDialogue {
 			
 			for (int i = 0; i < charactersEncountered.size(); i++) {
 				GameCharacter npc = charactersEncountered.get(i);
-				boolean isOffspring = npc.getMotherId().equals(Main.game.getPlayer().getId()) || npc.getFatherId().equals(Main.game.getPlayer().getId());
 				
 				UtilText.nodeContentSB.append("<p>"
-												+ UtilText.parse(npc, "<b style='color:"+npc.getFemininity().getColour().toWebHexString()+";'>[npc.Name]</b>"+(isOffspring
-														?(npc.isFeminine()
-																?", your [style.colourFeminine(daughter)]"
-																:", your [style.colourMasculine(son)]")
-														:"")
-														+". [npc.She] is "
-														+ (npc.getRaceStage()==RaceStage.HUMAN || npc.isRaceConcealed()
-															?"[npc.a_race(true)]"
-															:"[npc.a_raceStage(true)] [npc.race(true)]")
-														+", whose current location is: <i>"+npc.getWorldLocation().getName()+", "+npc.getLocationPlace().getPlaceType().getName()+"</i>."
-														)
+												+ getContactEntry(npc)
 											+ "</p>");
-//				if(i%4==0) {
-//					if(i!=0) {
-//						UtilText.nodeContentSB.append("</div>");
-//					}
-//					if(i < charactersEncountered.size()-1) {
-//						UtilText.nodeContentSB.append("<div class='container-full-width' style='width:100%; margin:0; padding:0; background:transparent; text-align:center;'>");
-//					}
-//				}
-//				GameCharacter npc = charactersEncountered.get(i);
-//				boolean isOffspring = npc.getMotherId().equals(Main.game.getPlayer().getId()) || npc.getFatherId().equals(Main.game.getPlayer().getId());
-//				UtilText.nodeContentSB.append("<div class='container-half-width' style='width:calc(25% - 16px);'>"
-//													+ UtilText.parse(npc, "<b style='color:"+npc.getFemininity().getColour().toWebHexString()+";'>[npc.Name]</b>"+(isOffspring
-//															?(npc.isFeminine()
-//																	?", your [style.colourFeminine(daughter)]."
-//																	:", your [style.colourMasculine(son)].")
-//															:"")+"<br/>"
-//															+ (npc.getRaceStage()==RaceStage.HUMAN || npc.isRaceConcealed()
-//																?"[npc.A_Race(true)]<br/>"
-//																:"[npc.A_RaceStage(true)]<br/>[npc.Race(true)]")
-//															+"<br/>"
-//															)
-//												+ "</div>");
-//				if(i == charactersEncountered.size()-1 && i%4!=0) {
-//					UtilText.nodeContentSB.append("</div>");
-//				}
 			}
 			
 			return UtilText.nodeContentSB.toString();
@@ -1491,7 +1470,7 @@ public class PhoneDialogue {
 						UtilText.parse(npc, isOffspring
 								?(npc.isFeminine()?"[style.colourFeminine([npc.Name])]":"[style.colourMasculine([npc.Name])]")
 								:"[npc.Name]"),
-						UtilText.parse(npc, "[npc.Name] is [npc.a_fullRace(true)], whose current location is: '"+npc.getWorldLocation().getName()+", "+npc.getLocationPlace().getPlaceType().getName()+"'."),
+						getContactEntry(npc),
 						CONTACTS_CHARACTER){
 					@Override
 					public void effects() {

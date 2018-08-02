@@ -45,6 +45,7 @@ import com.lilithsthrone.game.combat.SpellUpgrade;
 import com.lilithsthrone.game.dialogue.DialogueFlagValue;
 import com.lilithsthrone.game.dialogue.utils.UtilText;
 import com.lilithsthrone.game.inventory.InventorySlot;
+import com.lilithsthrone.game.inventory.ItemTag;
 import com.lilithsthrone.game.inventory.clothing.AbstractClothing;
 import com.lilithsthrone.game.inventory.clothing.ClothingSet;
 import com.lilithsthrone.game.inventory.item.ItemType;
@@ -2808,7 +2809,8 @@ public enum StatusEffect {
 		public boolean isConditionsMet(GameCharacter target) {
 			if(!isCumEffectPositive(target)) {
 				for (AbstractClothing c : target.getClothingCurrentlyEquipped()) {
-					if (c.isDirty()) {
+					if (c.isDirty()
+							&& Collections.disjoint(c.getClothingType().getItemTags(), Util.newArrayListOfValues(ItemTag.PLUGS_ANUS, ItemTag.PLUGS_VAGINA, ItemTag.PLUGS_NIPPLES))) {
 						return true;
 					}
 				}
@@ -2846,7 +2848,8 @@ public enum StatusEffect {
 		public boolean isConditionsMet(GameCharacter target) {
 			if(isCumEffectPositive(target)) {
 				for (AbstractClothing c : target.getClothingCurrentlyEquipped()) {
-					if (c.isDirty()) {
+					if (c.isDirty()
+							&& Collections.disjoint(c.getClothingType().getItemTags(), Util.newArrayListOfValues(ItemTag.PLUGS_ANUS, ItemTag.PLUGS_VAGINA, ItemTag.PLUGS_NIPPLES))) {
 						return true;
 					}
 				}
@@ -4276,15 +4279,7 @@ public enum StatusEffect {
 		
 		@Override
 		public String extraRemovalEffects(GameCharacter target) {
-			if(target instanceof NPC) {
-				((NPC)target).setReactedToPregnancy(false);
-			} else {
-				if(target.isPlayer()) {
-					for(NPC npc : Main.game.getAllNPCs()) {
-						npc.setReactedToPlayerPregnancy(false);
-					}
-				}
-			}
+			target.resetAllPregnancyReactions();
 			
 			return "";
 		}
@@ -7008,7 +7003,7 @@ public enum StatusEffect {
 			80,
 			"fox-morph intuition",
 			"combatBonusFoxMorph",
-			Colour.RACE_WOLF_MORPH,
+			Colour.RACE_FOX_MORPH,
 			true,
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, 2f),
@@ -10300,8 +10295,8 @@ public enum StatusEffect {
 				return "";
 				
 			} else if(Main.game.isInSex()) {
-				SexType preference = Sex.isInForeplay()?((NPC)target).getForeplayPreference():((NPC)target).getMainSexPreference();
 				GameCharacter targetedCharacter = Sex.getTargetedPartner(target);
+				SexType preference = Sex.isInForeplay()?((NPC)target).getForeplayPreference(targetedCharacter):((NPC)target).getMainSexPreference(targetedCharacter);
 				return UtilText.parse(target, targetedCharacter, "Due to the underlying power of your arcane aura, you can sense [npc.namePos] non-neutral preferences towards sexual actions."
 						+ "<br/>"
 						+ "<i style='color:"+Colour.GENERIC_ARCANE.toWebHexString()+";'>"
@@ -10433,7 +10428,7 @@ public enum StatusEffect {
 		}
 	},
 	
-	PENIS_STATUS(//Just used for handjobs
+	PENIS_STATUS(
 			95,
 			"Penis status",
 			null,
@@ -10449,16 +10444,6 @@ public enum StatusEffect {
 
 		@Override
 		public float getArousalPerTurnPartner(GameCharacter self, GameCharacter target) {
-//			Map<GameCharacter, Set<SexAreaInterface>> contactingAreas = Sex.getContactingSexAreas(self, SexAreaPenetration.PENIS);
-//			if(contactingAreas!=null) {
-//				if(contactingAreas.get(target)!=null && !contactingAreas.get(target).isEmpty()) {
-//					for(SexAreaInterface area : contactingAreas.get(target)) {
-//						if(!area.isOrifice()) {
-//							return ((SexAreaPenetration)area).getBaseArousalWhenPenetrating();
-//						}
-//					}
-//				}
-//			}
 			return 0;
 		}
 				
@@ -10495,7 +10480,7 @@ public enum StatusEffect {
 							case CLIT:
 								descriptionSB.append(UtilText.parse(entry.getKey(), target, "[npc.NameIsFull] <b style='color:"+Colour.GENERIC_SEX.toWebHexString()+";'>clit-frotting</b> with [npc2.name]!"));
 								break;
-							case TOES:
+							case FOOT:
 								descriptionSB.append(UtilText.parse(entry.getKey(), target, "[npc.NameIsFull] giving [npc2.name] <b style='color:"+Colour.GENERIC_SEX.toWebHexString()+";'>a foot-job</b>!"));
 								break;
 						}
@@ -10587,7 +10572,7 @@ public enum StatusEffect {
 							case CLIT:
 								descriptionSB.append(UtilText.parse(entry.getKey(), target, "[npc.NameIsFull] <b style='color:"+Colour.GENERIC_SEX.toWebHexString()+";'>clit-fucking</b> [npc2.namePos] [npc2.asshole]!"));
 								break;
-							case TOES:
+							case FOOT:
 								descriptionSB.append(UtilText.parse(entry.getKey(), target, "[npc.NameIsFull] <b style='color:"+Colour.GENERIC_SEX.toWebHexString()+";'>foot-fucking</b> [npc2.namePos] [npc2.asshole]!"));
 								break;
 						}
@@ -10697,7 +10682,7 @@ public enum StatusEffect {
 							case CLIT:
 								descriptionSB.append(UtilText.parse(entry.getKey(), target, "[npc.NameIsFull] <b style='color:"+Colour.GENERIC_SEX.toWebHexString()+";'>clit-hotdogging</b> [npc2.name]!"));
 								break;
-							case TOES:
+							case FOOT:
 								descriptionSB.append(UtilText.parse(entry.getKey(), target, "[npc.NameIsFull] <b style='color:"+Colour.GENERIC_SEX.toWebHexString()+";'>groping</b> [npc2.namePos] [npc2.ass] with [npc.her] [npc.feet]!"));
 								break;
 						}
@@ -10808,7 +10793,7 @@ public enum StatusEffect {
 							case CLIT:
 								descriptionSB.append(UtilText.parse(entry.getKey(), target, "[npc2.NameIsFull] <b style='color:"+Colour.GENERIC_SEX.toWebHexString()+";'>sucking</b> [npc.namePos] [npc.clit]!"));
 								break;
-							case TOES:
+							case FOOT:
 								descriptionSB.append(UtilText.parse(entry.getKey(), target, "[npc2.NameIsFull] <b style='color:"+Colour.GENERIC_SEX.toWebHexString()+";'>licking</b> [npc.namePos] [npc.feet]!"));
 								break;
 						}
@@ -10938,7 +10923,7 @@ public enum StatusEffect {
 								descriptionSB.append(UtilText.parse(entry.getKey(), target,
 										"[npc2.NameIsFull] performing <b style='color:"+Colour.GENERIC_SEX.toWebHexString()+";'>"+(entry.getKey().hasBreasts()?"paizuri":"naizuri")+"</b> on [npc.namePos] [npc.clit]!"));
 								break;
-							case TOES:
+							case FOOT:
 								descriptionSB.append(UtilText.parse(entry.getKey(), target, "[npc.NameIsFull] <b style='color:"+Colour.GENERIC_SEX.toWebHexString()+";'>groping</b> [npc2.namePos] [npc2.breasts] with [npc.her] [npc.feet]!"));
 								break;
 						}
@@ -11049,7 +11034,7 @@ public enum StatusEffect {
 							case CLIT:
 								descriptionSB.append(UtilText.parse(entry.getKey(), target, "[npc.NameIsFull] <b style='color:"+Colour.GENERIC_SEX.toWebHexString()+";'>clit-fucking</b> [npc2.namePos] [npc2.nipples]!"));
 								break;
-							case TOES:
+							case FOOT:
 								descriptionSB.append(UtilText.parse(entry.getKey(), target, "[npc.NameIsFull] <b style='color:"+Colour.GENERIC_SEX.toWebHexString()+";'>pushing [npc.her] [npc.toes]</b> into [npc2.namePos] [npc2.nipples]!"));
 								break;
 						}
@@ -11160,7 +11145,7 @@ public enum StatusEffect {
 							case CLIT:
 								descriptionSB.append(UtilText.parse(entry.getKey(), target, "[npc.NameIsFull] <b style='color:"+Colour.GENERIC_SEX.toWebHexString()+";'>clit-fucking</b> [npc2.namePos] [npc2.urethraPenis]!"));
 								break;
-							case TOES:
+							case FOOT:
 								descriptionSB.append(UtilText.parse(entry.getKey(), target, "[npc.NameIsFull] <b style='color:"+Colour.GENERIC_SEX.toWebHexString()+";'>pushing [npc.her] [npc.toes]</b> into [npc2.namePos] [npc2.urethraPenis]!"));
 								break;
 						}
@@ -11270,7 +11255,7 @@ public enum StatusEffect {
 							case CLIT:
 								descriptionSB.append(UtilText.parse(entry.getKey(), target, "[npc.NameIsFull] <b style='color:"+Colour.GENERIC_SEX.toWebHexString()+";'>clit-fucking</b> [npc2.namePos] [npc2.urethraVagina]!"));
 								break;
-							case TOES:
+							case FOOT:
 								descriptionSB.append(UtilText.parse(entry.getKey(), target, "[npc.NameIsFull] <b style='color:"+Colour.GENERIC_SEX.toWebHexString()+";'>pushing [npc.her] [npc.toes]</b> into [npc2.namePos] [npc2.urethraVagina]!"));
 								break;
 						}
@@ -11380,7 +11365,7 @@ public enum StatusEffect {
 							case CLIT:
 								descriptionSB.append(UtilText.parse(entry.getKey(), target, "[npc.NameIsFull] <b style='color:"+Colour.GENERIC_SEX.toWebHexString()+";'>clit-fucking</b> [npc2.namePos] [npc2.pussy]!"));
 								break;
-							case TOES:
+							case FOOT:
 								descriptionSB.append(UtilText.parse(entry.getKey(), target, "[npc.NameIsFull] <b style='color:"+Colour.GENERIC_SEX.toWebHexString()+";'>pushing [npc.her] [npc.toes]</b> into [npc2.namePos] [npc2.pussy]!"));
 								break;
 						}
@@ -11495,7 +11480,7 @@ public enum StatusEffect {
 							case CLIT:
 								descriptionSB.append(UtilText.parse(entry.getKey(), target, "[npc.NameIsFull] <b style='color:"+Colour.GENERIC_SEX.toWebHexString()+";'>clit-fucking</b> [npc2.namePos] thighs!"));
 								break;
-							case TOES:
+							case FOOT:
 								descriptionSB.append(UtilText.parse(entry.getKey(), target, "[npc.NameIsFull] <b style='color:"+Colour.GENERIC_SEX.toWebHexString()+";'>pushing [npc.her] [npc.feet]</b> between [npc2.namePos] thighs!"));
 								break;
 						}
@@ -11741,7 +11726,7 @@ public enum StatusEffect {
 		if(!Sex.getContactingSexAreas(target, penetration).isEmpty()) {
 			arousal+=penetration.getBaseArousalWhenPenetrating();
 			
-			if(Sex.getWetAreas(target).get(penetration).isEmpty()) {
+			if(!Sex.hasLubricationTypeFromAnyone(target, penetration)) {
 				arousal += penetration.getArousalChangePenetratingDry();
 			}
 		}
@@ -11760,7 +11745,7 @@ public enum StatusEffect {
 			modifiersList.add("+"+penetration.getBaseArousalWhenPenetrating()
 				+" <b style='color: " + Colour.GENERIC_SEX.toWebHexString() + "'>"+targetName+" arousal/turn</b> (<b style='color: " + Colour.GENERIC_SEX.toWebHexString() + "'>Sex</b>)");
 			
-			if(Sex.getWetAreas(target).get(penetration).isEmpty()) {
+			if(!Sex.hasLubricationTypeFromAnyone(target, penetration)) {
 				modifiersList.add(penetration.getArousalChangePenetratingDry()
 						+ " <b style='color: " + Colour.GENERIC_SEX.toWebHexString() + "'>"+targetName+" arousal/turn</b> (<b style='color: " + Colour.GENERIC_BAD.toWebHexString() + "'>Dry</b>)");
 			}
@@ -11792,7 +11777,7 @@ public enum StatusEffect {
 			if(Sex.getAreasTooLoose(target).contains(orifice)) {
 				arousal += orifice.getArousalChangePenetratedTooLoose();
 			}
-			if(Sex.getWetAreas(target).get(orifice).isEmpty()) {
+			if(!Sex.hasLubricationTypeFromAnyone(target, orifice)) {
 				arousal += orifice.getArousalChangePenetratedDry();
 			}
 		}
@@ -11818,7 +11803,7 @@ public enum StatusEffect {
 			if(Sex.getAreasTooLoose(self).contains(orifice)) {
 				arousal += orifice.getArousalChangePenetratingTooLoose();
 			}
-			if(Sex.getWetAreas(self).get(orifice).isEmpty()) {
+			if(!Sex.hasLubricationTypeFromAnyone(self, orifice)) {
 				arousal += orifice.getArousalChangePenetratingDry();
 			}
 		}
@@ -11843,7 +11828,7 @@ public enum StatusEffect {
 				modifiersList.add((orifice.getArousalChangePenetratedTooLoose()>0?"+":"")+orifice.getArousalChangePenetratedTooLoose()
 						+ " <b style='color: " + Colour.GENERIC_SEX.toWebHexString() + "'>"+targetName+" arousal/turn</b> (<b style='color: " + Colour.GENERIC_BAD.toWebHexString() + "'>Too loose</b>)");
 			}
-			if(Sex.getWetAreas(target).get(orifice).isEmpty()) {
+			if(!Sex.hasLubricationTypeFromAnyone(target, orifice)) {
 				modifiersList.add((orifice.getArousalChangePenetratedDry()>0?"+":"")+orifice.getArousalChangePenetratedDry()
 						+ " <b style='color: " + Colour.GENERIC_SEX.toWebHexString() + "'>"+targetName+" arousal/turn</b> (<b style='color: " + Colour.GENERIC_BAD.toWebHexString() + "'>Dry</b>)");
 			}
@@ -11863,7 +11848,7 @@ public enum StatusEffect {
 						modifiersList.add((orifice.getArousalChangePenetratingTooLoose()>0?"+":"")+orifice.getArousalChangePenetratingTooLoose()
 								+ "<b style='color: " + Colour.GENERIC_SEX.toWebHexString() + "'>"+penetratorName+" arousal/turn</b> (<b style='color: " + Colour.GENERIC_BAD.toWebHexString() + "'>Too loose</b>)");
 					}
-					if(Sex.getWetAreas(target).get(orifice).isEmpty()) {
+					if(!Sex.hasLubricationTypeFromAnyone(target, orifice)) {
 						modifiersList.add((orifice.getArousalChangePenetratingDry()>0?"+":"")+orifice.getArousalChangePenetratingDry()
 								+ " <b style='color: " + Colour.GENERIC_SEX.toWebHexString() + "'>"+penetratorName+" arousal/turn</b> (<b style='color: " + Colour.GENERIC_BAD.toWebHexString() + "'>Dry</b>)");
 					}
@@ -11878,32 +11863,28 @@ public enum StatusEffect {
 	
 	public void appendPenetrationAdditionGenericDescriptions(GameCharacter owner, SexAreaPenetration penetration, String penetrationName, StringBuilder stringBuilderToAppendTo) {
 		
-		if(Sex.getWetAreas(owner).get(penetration).isEmpty()) {
+		if(!Sex.hasLubricationTypeFromAnyone(owner, penetration)) {
 			stringBuilderToAppendTo.append("<br/>"+penetrationName+" "+(penetration.isPlural()?"are":"is")+" <b style='color:"+Colour.GENERIC_ARCANE.toWebHexString()+";'>dry</b>!");
 			
 		} else {
 			stringBuilderToAppendTo.append("<br/>"+penetrationName+" "+(penetration.isPlural()?"have":"has")+" been <b style='color:"+Colour.GENERIC_SEX.toWebHexString()+";'>lubricated</b> by:<br/>");
 			int i=0;
-			for(LubricationType lt : Sex.getWetAreas(owner).get(penetration)) {
-				if(i!=0) {
-					if(i == Sex.getWetAreas(owner).get(penetration).size()-1) {
-						stringBuilderToAppendTo.append(", and ");
+			List<String> lubricants = new ArrayList<>();
+			for(GameCharacter lubricantProvidor : Sex.getAllParticipants()) {
+				for(LubricationType lt : Sex.getWetAreas(owner).get(penetration).get(lubricantProvidor)) {
+					if(i==0) {
+						lubricants.add(lubricantProvidor==null
+								?Util.capitaliseSentence(lt.getName(lubricantProvidor))
+								:UtilText.parse(lubricantProvidor, "[npc.NamePos] "+lt.getName(lubricantProvidor)));
 					} else {
-						stringBuilderToAppendTo.append(", ");
+						lubricants.add(lubricantProvidor==null
+								?lt.getName(lubricantProvidor)
+								:UtilText.parse(lubricantProvidor, "[npc.namePos] "+lt.getName(lubricantProvidor)));
 					}
+					i++;
 				}
-				
-				if(i==0)
-					stringBuilderToAppendTo.append(Util.capitaliseSentence(lt.getName()));
-				else
-					stringBuilderToAppendTo.append(lt.getName());
-				
-				if(i == Sex.getWetAreas(owner).get(penetration).size()-1) {
-					stringBuilderToAppendTo.append(".");
-				}
-				
-				i++;
 			}
+			stringBuilderToAppendTo.append(Util.stringsToStringList(lubricants, false)+".");
 		}
 		stringBuilderToAppendTo.append("</p>");
 	}
@@ -11920,37 +11901,36 @@ public enum StatusEffect {
 		} else if(Sex.getAreasTooLoose(owner).contains(orificeType)) {
 			stringBuilderToAppendTo.append("<br/>"+orificeName+" "+(orificeType.isPlural()?"are":"is")+" <b style='color:"+Colour.GENERIC_ARCANE.toWebHexString()+";'>too loose</b>!");
 			
+		} else if(Sex.getAreasStretched(owner).contains(orificeType)) {
+			stringBuilderToAppendTo.append("<br/>"+orificeName+" has been <b style='color:"+Colour.GENERIC_ARCANE.toWebHexString()+";'>stretched</b>!");
+			
 		} else {
 			stringBuilderToAppendTo.append("<br/><b style='color:"+Colour.TEXT_GREY.toWebHexString()+";'>No stretch effect.</b>");
 		}
 		
 		
-		if(Sex.getWetAreas(owner).get(orificeType).isEmpty()) {
+		if(!Sex.hasLubricationTypeFromAnyone(owner, orificeType)) {
 			stringBuilderToAppendTo.append("<br/>"+orificeName+" "+(orificeType.isPlural()?"are":"is")+" <b style='color:"+Colour.GENERIC_ARCANE.toWebHexString()+";'>dry</b>!");
 			
 		} else {
 			stringBuilderToAppendTo.append("<br/>"+orificeName+" "+(orificeType.isPlural()?"have":"has")+" been <b style='color:"+Colour.GENERIC_SEX.toWebHexString()+";'>lubricated</b> by:<br/>");
 			int i=0;
-			for(LubricationType lt : Sex.getWetAreas(owner).get(orificeType)) {
-				if(i!=0) {
-					if(i == Sex.getWetAreas(owner).get(orificeType).size()-1) {
-						stringBuilderToAppendTo.append(", and ");
+			List<String> lubricants = new ArrayList<>();
+			for(GameCharacter lubricantProvidor : Sex.getAllParticipants()) {
+				for(LubricationType lt : Sex.getWetAreas(owner).get(orificeType).get(lubricantProvidor)) {
+					if(i==0) {
+						lubricants.add(lubricantProvidor==null
+								?Util.capitaliseSentence(lt.getName(lubricantProvidor))
+								:UtilText.parse(lubricantProvidor, "[npc.NamePos] "+lt.getName(lubricantProvidor)));
 					} else {
-						stringBuilderToAppendTo.append(", ");
+						lubricants.add(lubricantProvidor==null
+								?lt.getName(lubricantProvidor)
+								:UtilText.parse(lubricantProvidor, "[npc.namePos] "+lt.getName(lubricantProvidor)));
 					}
+					i++;
 				}
-				
-				if(i==0)
-					stringBuilderToAppendTo.append(Util.capitaliseSentence(lt.getName()));
-				else
-					stringBuilderToAppendTo.append(lt.getName());
-				
-				if(i == Sex.getWetAreas(owner).get(orificeType).size()-1) {
-					stringBuilderToAppendTo.append(".");
-				}
-				
-				i++;
 			}
+			stringBuilderToAppendTo.append(Util.stringsToStringList(lubricants, false)+".");
 		}
 		stringBuilderToAppendTo.append("</p>");
 	}
@@ -11991,7 +11971,7 @@ public enum StatusEffect {
 			}
 		}
 		
-		if(Sex.getWetAreas(owner).get(penetration).isEmpty()) {
+		if(!Sex.hasLubricationTypeFromAnyone(owner, penetration)) {
 			SVGImageSB.append("<div style='width:100%;height:100%;position:absolute;left:0;bottom:0;'>"+SVGImages.SVG_IMAGE_PROVIDER.getCombinationDry()+"</div>");
 		} else {
 			SVGImageSB.append("<div style='width:100%;height:100%;position:absolute;left:0;bottom:0;'>"+SVGImages.SVG_IMAGE_PROVIDER.getCombinationWet()+"</div>");
@@ -12029,7 +12009,12 @@ public enum StatusEffect {
 				case TONGUE:
 					SVGImageSB.append("<div style='width:50%;height:50%;position:absolute;right:0;bottom:0;'>"+SVGImages.SVG_IMAGE_PROVIDER.getPenetrationTypeTongue()+"</div>");
 					break;
-				default:
+				case CLIT:
+					break;
+				case FOOT:
+					SVGImageSB.append("<div style='width:50%;height:50%;position:absolute;right:0;bottom:0;'>"+SVGImages.SVG_IMAGE_PROVIDER.getPenetrationTypeFoot()+"</div>");
+					break;
+				case TENTACLE:
 					break;
 			}
 		}
@@ -12042,7 +12027,7 @@ public enum StatusEffect {
 			SVGImageSB.append("<div style='width:100%;height:100%;position:absolute;left:0;bottom:0;'>"+SVGImages.SVG_IMAGE_PROVIDER.getCombinationTooLoose()+"</div>");
 		}
 		
-		if(Sex.getWetAreas(owner).get(orifice).isEmpty()) {
+		if(!Sex.hasLubricationTypeFromAnyone(owner, orifice)) {
 			SVGImageSB.append("<div style='width:100%;height:100%;position:absolute;left:0;bottom:0;'>"+SVGImages.SVG_IMAGE_PROVIDER.getCombinationDry()+"</div>");
 		} else {
 			SVGImageSB.append("<div style='width:100%;height:100%;position:absolute;left:0;bottom:0;'>"+SVGImages.SVG_IMAGE_PROVIDER.getCombinationWet()+"</div>");
@@ -12070,35 +12055,35 @@ public enum StatusEffect {
 		
 		switch(orifice) {
 			case ANUS:
-				SVGImageSB.append("<div style='width:100%;height:100%;position:absolute;left:0;bottom:0;'>"+SVGImages.SVG_IMAGE_PROVIDER.getCoverableAreaAnus()+"</div>");
+				SVGImageSB.append("<div style='width:50%;height:50%;position:absolute;left:0;top:0;'>"+SVGImages.SVG_IMAGE_PROVIDER.getCoverableAreaAnus()+"</div>");
 				break;
 			case ASS:
-				SVGImageSB.append("<div style='width:100%;height:100%;position:absolute;left:0;bottom:0;'>"+SVGImages.SVG_IMAGE_PROVIDER.getCoverableAreaAnus()+"</div>");
+				SVGImageSB.append("<div style='width:50%;height:50%;position:absolute;left:0;top:0;'>"+SVGImages.SVG_IMAGE_PROVIDER.getCoverableAreaAnus()+"</div>");
 				break;
 			case BREAST:
 				if(owner.hasBreasts()) {
-					SVGImageSB.append("<div style='width:100%;height:100%;position:absolute;left:0;bottom:0;'>"+SVGImages.SVG_IMAGE_PROVIDER.getCoverableAreaBreasts()+"</div>");
+					SVGImageSB.append("<div style='width:50%;height:50%;position:absolute;left:0;top:0;'>"+SVGImages.SVG_IMAGE_PROVIDER.getCoverableAreaBreasts()+"</div>");
 				} else {
-					SVGImageSB.append("<div style='width:100%;height:100%;position:absolute;left:0;bottom:0;'>"+SVGImages.SVG_IMAGE_PROVIDER.getCoverableAreaBreastsFlat()+"</div>");
+					SVGImageSB.append("<div style='width:50%;height:50%;position:absolute;left:0;top:0;'>"+SVGImages.SVG_IMAGE_PROVIDER.getCoverableAreaBreastsFlat()+"</div>");
 				}
 				break;
 			case MOUTH:
-				SVGImageSB.append("<div style='width:100%;height:100%;position:absolute;left:0;bottom:0;'>"+SVGImages.SVG_IMAGE_PROVIDER.getCoverableAreaMouth()+"</div>");
+				SVGImageSB.append("<div style='width:50%;height:50%;position:absolute;left:0;top:0;'>"+SVGImages.SVG_IMAGE_PROVIDER.getCoverableAreaMouth()+"</div>");
 				break;
 			case NIPPLE:
-				SVGImageSB.append("<div style='width:100%;height:100%;position:absolute;left:0;bottom:0;'>"+SVGImages.SVG_IMAGE_PROVIDER.getCoverableAreaNipple()+"</div>");
+				SVGImageSB.append("<div style='width:50%;height:50%;position:absolute;left:0;top:0;'>"+SVGImages.SVG_IMAGE_PROVIDER.getCoverableAreaNipple()+"</div>");
 				break;
 			case THIGHS:
-				SVGImageSB.append("<div style='width:100%;height:100%;position:absolute;left:0;bottom:0;'>"+SVGImages.SVG_IMAGE_PROVIDER.getCoverableAreaThighs()+"</div>");
+				SVGImageSB.append("<div style='width:50%;height:50%;position:absolute;left:0;top:0;'>"+SVGImages.SVG_IMAGE_PROVIDER.getCoverableAreaThighs()+"</div>");
 				break;
 			case URETHRA_PENIS:
-				SVGImageSB.append("<div style='width:100%;height:100%;position:absolute;left:0;bottom:0;'>"+SVGImages.SVG_IMAGE_PROVIDER.getCoverableAreaUrethraPenis()+"</div>");
+				SVGImageSB.append("<div style='width:50%;height:50%;position:absolute;left:0;top:0;'>"+SVGImages.SVG_IMAGE_PROVIDER.getCoverableAreaUrethraPenis()+"</div>");
 				break;
 			case URETHRA_VAGINA:
-				SVGImageSB.append("<div style='width:100%;height:100%;position:absolute;left:0;bottom:0;'>"+SVGImages.SVG_IMAGE_PROVIDER.getCoverableAreaUrethraVagina()+"</div>");
+				SVGImageSB.append("<div style='width:50%;height:50%;position:absolute;left:0;top:0;'>"+SVGImages.SVG_IMAGE_PROVIDER.getCoverableAreaUrethraVagina()+"</div>");
 				break;
 			case VAGINA:
-				SVGImageSB.append("<div style='width:100%;height:100%;position:absolute;left:0;bottom:0;'>"+SVGImages.SVG_IMAGE_PROVIDER.getCoverableAreaVagina()+"</div>");
+				SVGImageSB.append("<div style='width:50%;height:50%;position:absolute;left:0;top:0;'>"+SVGImages.SVG_IMAGE_PROVIDER.getCoverableAreaVagina()+"</div>");
 				break;
 		}
 		

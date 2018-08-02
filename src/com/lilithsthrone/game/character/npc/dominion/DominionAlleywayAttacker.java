@@ -25,6 +25,7 @@ import com.lilithsthrone.game.dialogue.DialogueFlagValue;
 import com.lilithsthrone.game.dialogue.DialogueNodeOld;
 import com.lilithsthrone.game.dialogue.npcDialogue.SlaveDialogue;
 import com.lilithsthrone.game.dialogue.npcDialogue.dominion.AlleywayAttackerDialogue;
+import com.lilithsthrone.game.dialogue.npcDialogue.dominion.AlleywayAttackerDialogueCompanions;
 import com.lilithsthrone.game.dialogue.npcDialogue.dominion.AlleywayProstituteDialogue;
 import com.lilithsthrone.game.dialogue.responses.Response;
 import com.lilithsthrone.game.dialogue.utils.UtilText;
@@ -43,8 +44,6 @@ import com.lilithsthrone.world.places.PlaceType;
  */
 public class DominionAlleywayAttacker extends NPC {
 
-	private static final long serialVersionUID = 1L;
-
 	public DominionAlleywayAttacker() {
 		this(Gender.F_V_B_FEMALE, false);
 	}
@@ -59,7 +58,7 @@ public class DominionAlleywayAttacker extends NPC {
 	
 	public DominionAlleywayAttacker(Gender gender, boolean isImported) {
 		super(null, "",
-				Util.random.nextInt(21)+18, Util.randomItemFrom(Month.values()), 1+Util.random.nextInt(25),
+				Util.random.nextInt(28)+18, Util.randomItemFrom(Month.values()), 1+Util.random.nextInt(25),
 				3, gender, RacialBody.DOG_MORPH, RaceStage.GREATER,
 				new CharacterInventory(10), WorldType.DOMINION, PlaceType.DOMINION_BACK_ALLEYS, false);
 
@@ -349,11 +348,17 @@ public class DominionAlleywayAttacker extends NPC {
 				|| pt == PlaceType.DOMINION_CANAL
 				|| pt == PlaceType.DOMINION_ALLEYS_CANAL_CROSSING
 				|| pt == PlaceType.DOMINION_CANAL_END) {
+			
 			if(this.getHistory()==History.NPC_PROSTITUTE) {
 				this.setPlayerKnowsName(true);
 				return AlleywayProstituteDialogue.ALLEY_PROSTITUTE;
+				
 			} else {
-				return AlleywayAttackerDialogue.ALLEY_ATTACK;
+				if(Main.game.getPlayer().getCompanions().isEmpty()) {
+					return AlleywayAttackerDialogue.ALLEY_ATTACK;
+				} else {
+					return AlleywayAttackerDialogueCompanions.ALLEY_ATTACK;
+				}
 			}
 			
 		} else {
@@ -372,10 +377,18 @@ public class DominionAlleywayAttacker extends NPC {
 				return new Response ("", "", AlleywayProstituteDialogue.AFTER_COMBAT_DEFEAT);
 			}
 		} else {
-			if (victory) {
-				return new Response("", "", AlleywayAttackerDialogue.AFTER_COMBAT_VICTORY);
+			if(Main.game.getPlayer().getCompanions().isEmpty()) {
+				if (victory) {
+					return new Response("", "", AlleywayAttackerDialogue.AFTER_COMBAT_VICTORY);
+				} else {
+					return new Response ("", "", AlleywayAttackerDialogue.AFTER_COMBAT_DEFEAT);
+				}
 			} else {
-				return new Response ("", "", AlleywayAttackerDialogue.AFTER_COMBAT_DEFEAT);
+				if (victory) {
+					return new Response("", "", AlleywayAttackerDialogueCompanions.AFTER_COMBAT_VICTORY);
+				} else {
+					return new Response ("", "", AlleywayAttackerDialogueCompanions.AFTER_COMBAT_DEFEAT);
+				}
 			}
 		}
 	}
