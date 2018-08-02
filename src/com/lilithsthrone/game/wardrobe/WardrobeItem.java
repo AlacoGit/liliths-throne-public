@@ -4,7 +4,10 @@ package com.lilithsthrone.game.wardrobe;
 import com.lilithsthrone.game.character.CharacterUtils;
 import com.lilithsthrone.game.character.GameCharacter;
 import com.lilithsthrone.game.inventory.clothing.AbstractClothing;
+import com.lilithsthrone.game.inventory.clothing.AbstractClothingType;
+import com.lilithsthrone.game.inventory.enchanting.ItemEffect;
 import com.lilithsthrone.game.inventory.weapon.AbstractWeapon;
+import com.lilithsthrone.game.inventory.weapon.AbstractWeaponType;
 import com.lilithsthrone.utils.XMLSaving;
 
 import org.w3c.dom.Document;
@@ -58,14 +61,29 @@ class WardrobeItem implements Serializable, XMLSaving {
         this.weapon = weapon;
     }
 
-    // TODO
     private AbstractClothing copyOf(AbstractClothing clothing){
-        return null;
+        AbstractClothing copy = AbstractClothingType.generateClothing(clothing.getClothingType(),clothing.getColour(),clothing.getSecondaryColour(),clothing.getTertiaryColour(),false);
+        for(ItemEffect e : clothing.getEffects()){
+            copy.addEffect(e);
+        }
+        copy.setEnchantmentKnown(true);
+        if(clothing.getPattern() != null){
+            copy.setPattern(clothing.getPattern());
+            copy.setPatternColour(clothing.getPatternColour());
+        }
+        if(clothing.getPatternSecondaryColour() != null){
+            copy.setPatternSecondaryColour(clothing.getPatternSecondaryColour());
+        }
+        if(clothing.getPatternTertiaryColour() != null){
+            copy.setPatternTertiaryColour(clothing.getPatternTertiaryColour());
+        }
+        return copy;
     }
 
-    //TODO
     private AbstractWeapon copyOf(AbstractWeapon weapon) {
-        return null;
+        AbstractWeapon copy = AbstractWeaponType.generateWeapon(weapon.getWeaponType(),weapon.getDamageType(),weapon.getPrimaryColour(),weapon.getSecondaryColour());
+
+        return copy;
     }
 
     boolean compareTo(AbstractClothing clothing) {
@@ -148,14 +166,14 @@ class WardrobeItem implements Serializable, XMLSaving {
     static WardrobeItem loadFromXML(Element parentElement, Document doc) {
         WardrobeItem importedItem;
 
-        Element wardrobeItemElement = (Element) parentElement.getElementsByTagName("WardrobeItem").item(0);
+//        Element wardrobeItemElement = (Element) parentElement.getElementsByTagName("WardrobeItem").item(0);
 
-        boolean isClothing = Boolean.valueOf(wardrobeItemElement.getAttribute("isClothing"));
+        boolean isClothing = Boolean.valueOf(((Element) parentElement.getElementsByTagName("isClothing").item(0)).getAttribute("isClothing"));
 
         if(isClothing){
-            importedItem = new WardrobeItem(AbstractClothing.loadFromXML(wardrobeItemElement,doc),true);
+            importedItem = new WardrobeItem(AbstractClothing.loadFromXML((Element) parentElement.getElementsByTagName("WardrobeItem").item(0),doc),true);
         } else {
-            importedItem = new WardrobeItem(AbstractWeapon.loadFromXML(wardrobeItemElement,doc),true);
+            importedItem = new WardrobeItem(AbstractWeapon.loadFromXML((Element) parentElement.getElementsByTagName("WardrobeItem").item(0),doc),true);
         }
 
         return importedItem;
