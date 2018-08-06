@@ -19,7 +19,9 @@ public enum DialogueNodeType {
 
 	SLAVERY_MANAGEMENT("slavery management"),
 	
-	OPTIONS("options");
+	OPTIONS("options"),
+
+	WARDROBE("wardrobe");
 
 	private String name;
 

@@ -3,6 +3,7 @@ package com.lilithsthrone.game.wardrobe;
 
 import com.lilithsthrone.game.character.CharacterUtils;
 import com.lilithsthrone.game.character.GameCharacter;
+import com.lilithsthrone.game.inventory.InventorySlot;
 import com.lilithsthrone.game.inventory.clothing.AbstractClothing;
 import com.lilithsthrone.game.inventory.clothing.AbstractClothingType;
 import com.lilithsthrone.game.inventory.enchanting.ItemEffect;
@@ -53,15 +54,7 @@ class WardrobeItem implements Serializable, XMLSaving {
         }
     }
 
-    private void importItem(AbstractClothing clothing){
-        this.clothing = clothing;
-    }
-
-    private void importItem(AbstractWeapon weapon) {
-        this.weapon = weapon;
-    }
-
-    private AbstractClothing copyOf(AbstractClothing clothing){
+    private static AbstractClothing copyOf(AbstractClothing clothing){
         AbstractClothing copy = AbstractClothingType.generateClothing(clothing.getClothingType(),clothing.getColour(),clothing.getSecondaryColour(),clothing.getTertiaryColour(),false);
         for(ItemEffect e : clothing.getEffects()){
             copy.addEffect(e);
@@ -80,10 +73,9 @@ class WardrobeItem implements Serializable, XMLSaving {
         return copy;
     }
 
-    private AbstractWeapon copyOf(AbstractWeapon weapon) {
-        AbstractWeapon copy = AbstractWeaponType.generateWeapon(weapon.getWeaponType(),weapon.getDamageType(),weapon.getPrimaryColour(),weapon.getSecondaryColour());
+    private static AbstractWeapon copyOf(AbstractWeapon weapon) {
+        return AbstractWeaponType.generateWeapon(weapon.getWeaponType(),weapon.getDamageType(),weapon.getPrimaryColour(),weapon.getSecondaryColour());
 
-        return copy;
     }
 
     boolean compareTo(AbstractClothing clothing) {
@@ -142,17 +134,20 @@ class WardrobeItem implements Serializable, XMLSaving {
         this.ignoreName = ignoreName;
     }*/
 
+    InventorySlot getSlot(){
+        if(this.clothing  != null) {
+            return this.clothing.getClothingType().getSlot();
+        } else {
+            return this.weapon.getWeaponType().getSlot();
+        }
+    }
+
 
 
     @Override
     public Element saveAsXML(Element parentElement, Document doc) {
         Element wardrobeItem = doc.createElement("WardrobeItem");
         parentElement.appendChild(wardrobeItem);
-        if(this.clothing != null){
-            CharacterUtils.createXMLElementWithValue(doc,wardrobeItem,"isClothing", "true");
-        } else {
-            CharacterUtils.createXMLElementWithValue(doc,wardrobeItem,"isClothing", "false");
-        }
 
         if(this.clothing != null) {
             clothing.saveAsXML(wardrobeItem, doc);
@@ -163,12 +158,10 @@ class WardrobeItem implements Serializable, XMLSaving {
         return wardrobeItem;
     }
 
-    static WardrobeItem loadFromXML(Element parentElement, Document doc) {
+    static WardrobeItem loadFromXML(Element parentElement, Document doc, boolean isClothing) {
         WardrobeItem importedItem;
 
 //        Element wardrobeItemElement = (Element) parentElement.getElementsByTagName("WardrobeItem").item(0);
-
-        boolean isClothing = Boolean.valueOf(((Element) parentElement.getElementsByTagName("isClothing").item(0)).getAttribute("isClothing"));
 
         if(isClothing){
             importedItem = new WardrobeItem(AbstractClothing.loadFromXML((Element) parentElement.getElementsByTagName("WardrobeItem").item(0),doc),true);
