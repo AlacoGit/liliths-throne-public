@@ -4,6 +4,7 @@ import java.time.Month;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -11,13 +12,12 @@ import com.lilithsthrone.game.Season;
 import com.lilithsthrone.game.Weather;
 import com.lilithsthrone.game.character.CharacterImportSetting;
 import com.lilithsthrone.game.character.CharacterUtils;
-import com.lilithsthrone.game.character.GameCharacter;
 import com.lilithsthrone.game.character.attributes.Attribute;
 import com.lilithsthrone.game.character.gender.Gender;
 import com.lilithsthrone.game.character.npc.NPC;
 import com.lilithsthrone.game.character.npc.misc.GenericSexualPartner;
-import com.lilithsthrone.game.character.persona.History;
 import com.lilithsthrone.game.character.persona.Name;
+import com.lilithsthrone.game.character.persona.Occupation;
 import com.lilithsthrone.game.character.race.RaceStage;
 import com.lilithsthrone.game.character.race.RacialBody;
 import com.lilithsthrone.game.character.race.Subspecies;
@@ -30,7 +30,6 @@ import com.lilithsthrone.game.dialogue.npcDialogue.dominion.AlleywayProstituteDi
 import com.lilithsthrone.game.dialogue.responses.Response;
 import com.lilithsthrone.game.dialogue.utils.UtilText;
 import com.lilithsthrone.game.inventory.CharacterInventory;
-import com.lilithsthrone.game.inventory.item.AbstractItem;
 import com.lilithsthrone.main.Main;
 import com.lilithsthrone.utils.Util;
 import com.lilithsthrone.utils.Vector2i;
@@ -225,7 +224,7 @@ public class DominionAlleywayAttacker extends NPC {
 			
 			CharacterUtils.setHistoryAndPersonality(this, true);
 			if(Main.game.getCurrentWeather()==Weather.MAGIC_STORM) {
-				this.setHistory(History.NPC_MUGGER);
+				this.setHistory(Occupation.NPC_MUGGER);
 			}
 			
 			// ADDING FETISHES:
@@ -269,7 +268,7 @@ public class DominionAlleywayAttacker extends NPC {
 	
 	@Override
 	public void hourlyUpdate() {
-		if(this.getHistory()==History.NPC_PROSTITUTE && this.getLocationPlace().getPlaceType()==PlaceType.ANGELS_KISS_BEDROOM) {
+		if(this.getHistory()==Occupation.NPC_PROSTITUTE && this.getLocationPlace().getPlaceType()==PlaceType.ANGELS_KISS_BEDROOM) {
 			// Remove client:
 			List<NPC> charactersPresent = Main.game.getCharactersPresent(this.getWorldLocation(), this.getLocation());
 			if(charactersPresent.size()>1) {
@@ -299,7 +298,7 @@ public class DominionAlleywayAttacker extends NPC {
 	
 	@Override
 	public String getDescription() {
-		if(this.getHistory()==History.NPC_PROSTITUTE) {
+		if(this.getHistory()==Occupation.NPC_PROSTITUTE) {
 			if(this.isSlave()) {
 				return (UtilText.parse(this,
 						"[npc.NamePos] days of whoring [npc.herself] out in the back alleys of Dominion are now over. Having run afoul of the law, [npc.sheIs] now a slave, and is no more than [npc.her] owner's property."));
@@ -349,7 +348,7 @@ public class DominionAlleywayAttacker extends NPC {
 				|| pt == PlaceType.DOMINION_ALLEYS_CANAL_CROSSING
 				|| pt == PlaceType.DOMINION_CANAL_END) {
 			
-			if(this.getHistory()==History.NPC_PROSTITUTE) {
+			if(this.getHistory()==Occupation.NPC_PROSTITUTE) {
 				this.setPlayerKnowsName(true);
 				return AlleywayProstituteDialogue.ALLEY_PROSTITUTE;
 				
@@ -370,7 +369,7 @@ public class DominionAlleywayAttacker extends NPC {
 
 	@Override
 	public Response endCombat(boolean applyEffects, boolean victory) {
-		if(this.getHistory()==History.NPC_PROSTITUTE) {
+		if(this.getHistory()==Occupation.NPC_PROSTITUTE) {
 			if (victory) {
 				return new Response("", "", AlleywayProstituteDialogue.AFTER_COMBAT_VICTORY);
 			} else {
@@ -392,10 +391,4 @@ public class DominionAlleywayAttacker extends NPC {
 			}
 		}
 	}
-	
-	@Override
-	public String getItemUseEffects(AbstractItem item, GameCharacter user, GameCharacter target){
-		return getItemUseEffectsAllowingUse(item, user, target);
-	}
-	
 }

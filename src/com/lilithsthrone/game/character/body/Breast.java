@@ -190,6 +190,8 @@ public class Breast implements BodyPartInterface, Serializable {
 		this.type = type;
 		nipples.setType(owner, type.getNippleType());
 		milk.setType(type.getFluidType());
+		owner.resetAreaKnownByCharacters(CoverableArea.BREASTS);
+		owner.resetAreaKnownByCharacters(CoverableArea.NIPPLES);
 		
 		switch (type) {
 			case HUMAN:
@@ -686,7 +688,7 @@ public class Breast implements BodyPartInterface, Serializable {
 										lactationChange+"ml of [npc.milk+] drips out of [npc.namePos] [npc.nipples+].")
 						+ "</i>"
 						+ (this.milkStored==0
-							?"<br/><i>[npc.Name] now has no more [pc.milk] stored in [npc.her] breasts!</i>"
+							?"<br/><i>[npc.Name] now has no more [npc.milk] stored in [npc.her] breasts!</i>"
 							:"")
 						+ "</p>");
 			}

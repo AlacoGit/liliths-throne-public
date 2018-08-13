@@ -13,7 +13,7 @@ import com.lilithsthrone.game.character.quests.Quest;
 import com.lilithsthrone.game.character.quests.QuestLine;
 import com.lilithsthrone.game.dialogue.DialogueFlagValue;
 import com.lilithsthrone.game.dialogue.utils.UtilText;
-import com.lilithsthrone.game.slavery.MilkingRoom;
+import com.lilithsthrone.game.occupantManagement.MilkingRoom;
 import com.lilithsthrone.main.Main;
 import com.lilithsthrone.rendering.SVGImages;
 import com.lilithsthrone.utils.Colour;
@@ -150,7 +150,18 @@ public enum PlaceUpgrade {
 		
 		@Override
 		protected boolean isExtraConditionsMet(Cell cell) {
-			return Main.game.getCharactersTreatingCellAsHome(cell).isEmpty() && !cell.getPlace().getPlaceUpgrades().contains(LILAYA_ARTHUR_ROOM);
+			return Main.game.getPlayer().isQuestCompleted(QuestLine.SIDE_ACCOMMODATION)
+					&& Main.game.getCharactersTreatingCellAsHome(cell).isEmpty()
+					&& !cell.getPlace().getPlaceUpgrades().contains(LILAYA_ARTHUR_ROOM);
+		}
+		
+		@Override
+		protected String getExtraConditionalAvailabilityDescription(Cell cell) {
+			if(!Main.game.getPlayer().isQuestCompleted(QuestLine.SIDE_ACCOMMODATION)) {
+				return "To install a guest bedroom, you'd need to first find someone to invite to live with you, and then get Lilaya's permission to make the upgrade!";
+			} else {
+				return super.getExtraConditionalAvailabilityDescription(cell);
+			}
 		}
 		
 		@Override
@@ -239,7 +250,7 @@ public enum PlaceUpgrade {
 		
 		@Override
 		public String getRoomDescription(Cell c) {
-			MilkingRoom room = Main.game.getSlaveryUtil().getMilkingRoom(c.getType(), c.getLocation());
+			MilkingRoom room = Main.game.getOccupancyUtil().getMilkingRoom(c.getType(), c.getLocation());
 			
 			StringBuilder milkyMilknessSB = new StringBuilder();
 			milkyMilknessSB.append(roomDescription);
@@ -418,8 +429,8 @@ public enum PlaceUpgrade {
 					place.removePlaceUpgrade(c, upgrade);
 				}
 			}
-			if(Main.game.getSlaveryUtil().getMilkingRoom(c.getType(), c.getLocation())==null) {
-				Main.game.getSlaveryUtil().addMilkingRoom(new MilkingRoom(c.getType(), c.getLocation()));
+			if(Main.game.getOccupancyUtil().getMilkingRoom(c.getType(), c.getLocation())==null) {
+				Main.game.getOccupancyUtil().addMilkingRoom(new MilkingRoom(c.getType(), c.getLocation()));
 			}
 		}
 		
