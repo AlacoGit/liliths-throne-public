@@ -6,6 +6,7 @@ import com.lilithsthrone.utils.XMLSaving;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -19,6 +20,8 @@ public class Wardrobe implements XMLSaving {
 
     private static final String WARDROBE_PATH = "res/wardrobe/Wardrobe.xml";
 
+    private static Wardrobe WARDROBE = null;
+
     private LinkedHashMap<String,Outfit> Outfits;
 	private List<AbstractClothing> clothingInventory;
 	private List<AbstractWeapon> weaponInventory;
@@ -27,12 +30,20 @@ public class Wardrobe implements XMLSaving {
 	    this.Outfits = new LinkedHashMap<>();
     }
 
+    public static Wardrobe getWardrobe(){
+	    if(WARDROBE == null){
+	        WARDROBE = Wardrobe.loadFromXML(new File(WARDROBE_PATH));
+        }
+
+        return WARDROBE;
+    }
+
     @Override
     public Element saveAsXML(Element parentElement, Document doc) {
         return null;
     }
 
-    public static Wardrobe loadFromXML(Element element, Document doc){
+    private static Wardrobe loadFromXML(File file){
 
         return null;
     }
