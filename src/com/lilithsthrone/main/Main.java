@@ -34,6 +34,7 @@ import com.lilithsthrone.utils.CreditsSlot;
 import com.lilithsthrone.world.Generation;
 import com.lilithsthrone.world.WorldType;
 import com.lilithsthrone.world.places.PlaceType;
+import com.lilithsthrone.debug.LTConsole;
 
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
@@ -516,7 +517,8 @@ public class Main extends Application {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
+		LTConsole.getInstance();
 		Main.game.setContent(new Response("", "", OptionsDialogue.MENU));
 		
 	}
@@ -556,7 +558,7 @@ public class Main extends Application {
 		dir.mkdir();
 		dir = new File("data/characters");
 		dir.mkdir();
-		
+
 		// Open error log
 		if(!DEBUG) {
 			try {
