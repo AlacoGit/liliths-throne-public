@@ -356,7 +356,7 @@ public enum Subspecies {
 		@Override
 		public void applySpeciesChanges(Body body) {
 			body.setHeight(Height.NEGATIVE_TWO_MIMIMUM.getMinimumValue() + Util.random.nextInt(Height.NEGATIVE_TWO_MIMIMUM.getMaximumValue() - Height.NEGATIVE_TWO_MIMIMUM.getMinimumValue()));
-			body.getPenis().setPenisSize(null, 8+Util.random.nextInt(13)); // 3-5 inches
+			body.getPenis().setPenisSize(null, 8+Util.random.nextInt(8)); // 3-7 inches
 			body.getWing().setSize(null,  WingSize.THREE_LARGE.getValue());
 		}
 		@Override
@@ -405,7 +405,7 @@ public enum Subspecies {
 		@Override
 		public void applySpeciesChanges(Body body) {
 			body.setHeight(Height.NEGATIVE_ONE_TINY.getMinimumValue() + Util.random.nextInt(Height.NEGATIVE_ONE_TINY.getMaximumValue() - Height.NEGATIVE_ONE_TINY.getMinimumValue()));
-			body.getPenis().setPenisSize(null, 8+Util.random.nextInt(15)); // 3-6 inches
+			body.getPenis().setPenisSize(null, 8+Util.random.nextInt(12)); // 3-8 inches
 			body.getWing().setSize(null,  WingSize.THREE_LARGE.getValue());
 		}
 		@Override
@@ -3248,16 +3248,17 @@ public enum Subspecies {
 					return feralName+getTaurEnding();
 			}
 		}
-		
-		if(character.getSubspecies() == Subspecies.WOLF_MORPH && Main.game.isSillyModeEnabled()){
-			return "awoo-boi";
-		} else if(character.getSubspecies() == Subspecies.CAT_MORPH && Main.game.isSillyModeEnabled()){
-			return "catte-boi";
-		} else if(character.getSubspecies() == Subspecies.HARPY && Main.game.isSillyModeEnabled()){
-			return "birb";
-		} else{
-			return singularMaleName;
+
+		if(Main.game.isSillyModeEnabled() && character!=null) {
+			if(character.getSubspecies() == Subspecies.WOLF_MORPH && Main.game.isSillyModeEnabled()){
+				return "awoo-boi";
+			} else if(character.getSubspecies() == Subspecies.CAT_MORPH && Main.game.isSillyModeEnabled()){
+				return "catte-boi";
+			} else if(character.getSubspecies() == Subspecies.HARPY && Main.game.isSillyModeEnabled()){
+				return "birb";
+			}
 		}
+		return singularMaleName;
 	}
 
 	/**
@@ -3282,15 +3283,17 @@ public enum Subspecies {
 			}
 		}
 		
-		if(character.getSubspecies() == Subspecies.WOLF_MORPH && Main.game.isSillyModeEnabled()){
-			return "awoo-girl";
-		} else if(character.getSubspecies() == Subspecies.CAT_MORPH && Main.game.isSillyModeEnabled()){
-			return "catte-girl";
-		} else if(character.getSubspecies() == Subspecies.HARPY && Main.game.isSillyModeEnabled()){
-			return "birb";
-		} else{
-			return singularFemaleName;
+		if(Main.game.isSillyModeEnabled() && character!=null) {
+			if(character.getSubspecies() == Subspecies.WOLF_MORPH){
+				return "awoo-girl";
+			} else if(character.getSubspecies() == Subspecies.CAT_MORPH && Main.game.isSillyModeEnabled()){
+				return "catte-girl";
+			} else if(character.getSubspecies() == Subspecies.HARPY && Main.game.isSillyModeEnabled()){
+				return "birb";
+			}
 		}
+		
+		return singularFemaleName;
 	}
 
 	/**

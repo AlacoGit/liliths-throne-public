@@ -470,7 +470,7 @@ public class Lab {
 							};
 							
 						} else {
-							if(Main.game.getNpc(Arthur.class).getLocationPlace().getPlaceType()==PlaceType.LILAYA_HOME_LAB) {
+							if(Main.game.getNpc(Arthur.class).getLocationPlace().getPlaceType().equals(PlaceType.LILAYA_HOME_LAB)) {
 								return new Response("\"Tests\"", "Lilaya can't run any \"tests\" on you while Arthur is still present in her lab. Find him a suitable room first.", null);
 								
 							} else if (Main.game.getDialogueFlags().hasFlag(DialogueFlagValue.hadSexWithLilaya)) {
@@ -1845,10 +1845,10 @@ public class Lab {
 						new SMChair(
 								Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexSlotBipeds.CHAIR_BOTTOM)),
 								Util.newHashMapOfValues(new Value<>(Main.game.getNpc(Lilaya.class), SexSlotBipeds.CHAIR_TOP))) {
-							@Override
-							public boolean isPositionChangingAllowed(GameCharacter character) {
-								return character.isPlayer();
-							}
+//							@Override
+//							public boolean isPositionChangingAllowed(GameCharacter character) {
+//								return character.isPlayer();
+//							}
 						},
 						null,
 						null,
@@ -2098,10 +2098,10 @@ public class Lab {
 						new SMChair(
 								Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexSlotBipeds.CHAIR_BOTTOM)),
 								Util.newHashMapOfValues(new Value<>(Main.game.getNpc(Lilaya.class), SexSlotBipeds.CHAIR_TOP))) {
-							@Override
-							public boolean isPositionChangingAllowed(GameCharacter character) {
-								return character.isPlayer();
-							}
+//							@Override
+//							public boolean isPositionChangingAllowed(GameCharacter character) {
+//								return character.isPlayer();
+//							}
 						},
 						null,
 						null,
