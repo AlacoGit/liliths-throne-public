@@ -78,7 +78,7 @@ public class Main extends Application {
 	 */
 	public final static boolean DEBUG = Boolean.valueOf(System.getProperty("debug", "false"));
 
-	public static final Image WINDOW_IMAGE = new Image("/com/lilithsthrone/res/images/windowIcon32.png");
+	//public static final Image WINDOW_IMAGE = new Image("/com/lilithsthrone/res/images/windowIcon32.png");
 	
 	private static Properties properties;
 	
@@ -658,7 +658,7 @@ public class Main extends Application {
 			}
 		});
 
-		Main.primaryStage.getIcons().add(WINDOW_IMAGE);
+		Main.primaryStage.getIcons().add(new Image("/com/lilithsthrone/res/images/windowIcon32.png"));
 
 		Main.primaryStage.setTitle("Lilith's Throne " + VERSION_NUMBER + " " + VERSION_DESCRIPTION+(DEBUG?" (Debug Mode)":""));
 
