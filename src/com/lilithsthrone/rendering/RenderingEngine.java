@@ -27,7 +27,7 @@ import com.lilithsthrone.game.character.markings.Tattoo;
 import com.lilithsthrone.game.character.npc.NPC;
 import com.lilithsthrone.game.character.race.Subspecies;
 import com.lilithsthrone.game.combat.Combat;
-import com.lilithsthrone.game.combat.SpecialAttack;
+import com.lilithsthrone.game.combat.CombatMove;
 import com.lilithsthrone.game.combat.Spell;
 import com.lilithsthrone.game.dialogue.DialogueNode;
 import com.lilithsthrone.game.dialogue.DialogueNodeType;
@@ -170,8 +170,8 @@ public enum RenderingEngine {
 		Set<InventorySlot> blockedSlots = new HashSet<>();
 		
 		for (AbstractClothing c : charactersInventoryToRender.getClothingCurrentlyEquipped()) {
-			if (c.getClothingType().getIncompatibleSlots(charactersInventoryToRender) != null) {
-				for (InventorySlot is : c.getClothingType().getIncompatibleSlots(charactersInventoryToRender)) {
+			if (c.getClothingType().getIncompatibleSlots(charactersInventoryToRender, c.getSlotEquippedTo()) != null) {
+				for (InventorySlot is : c.getClothingType().getIncompatibleSlots(charactersInventoryToRender, c.getSlotEquippedTo())) {
 					blockedSlots.add(is);
 				}
 			}
@@ -531,13 +531,17 @@ public enum RenderingEngine {
 		boolean renderQuestTab = false;
 		boolean hasQuestItems = false;
 		if(charactersInventoryToRender == null) {
-			totalUniques = Main.game.getPlayerCell().getInventory().getUniqueItemCount() + Main.game.getPlayerCell().getInventory().getUniqueClothingCount() + Main.game.getPlayerCell().getInventory().getUniqueWeaponCount();
+			totalUniques = Main.game.getPlayerCell().getInventory().getUniqueItemCount() - Main.game.getPlayerCell().getInventory().getUniqueQuestItemCount()
+					+ Main.game.getPlayerCell().getInventory().getUniqueClothingCount() - Main.game.getPlayerCell().getInventory().getUniqueQuestClothingCount()
+					+ Main.game.getPlayerCell().getInventory().getUniqueWeaponCount() - Main.game.getPlayerCell().getInventory().getUniqueQuestWeaponCount();
 			pageIdMod = "INV_PAGE_RIGHT_";
 			currentPage = pageRight;
 		} else {
 			renderQuestTab = charactersInventoryToRender.isPlayer();
 			hasQuestItems = Main.game.getPlayer().isCarryingQuestItems();
-			totalUniques = charactersInventoryToRender.getUniqueItemCount() + charactersInventoryToRender.getUniqueClothingCount() + charactersInventoryToRender.getUniqueWeaponCount();
+			totalUniques = charactersInventoryToRender.getUniqueItemCount() - charactersInventoryToRender.getUniqueQuestItemCount()
+					+ charactersInventoryToRender.getUniqueClothingCount() - charactersInventoryToRender.getUniqueQuestClothingCount()
+					+ charactersInventoryToRender.getUniqueWeaponCount() - charactersInventoryToRender.getUniqueQuestWeaponCount();
 			pageIdMod = (charactersInventoryToRender.isPlayer()?"INV_PAGE_LEFT_":"INV_PAGE_RIGHT_");
 			currentPage = (charactersInventoryToRender.isPlayer()?pageLeft:pageRight);
 		}
@@ -632,17 +636,17 @@ public enum RenderingEngine {
 		inventorySB.setLength(0);
 		
 		Map<AbstractCoreItem, Integer> giftsAvailable = new HashMap<>();
-		for(Entry<AbstractItem, Integer> entry : Main.game.getPlayer().getMapOfDuplicateItems().entrySet()) {
+		for(Entry<AbstractItem, Integer> entry : Main.game.getPlayer().getAllItemsInInventory().entrySet()) {
 			if(receiver.getGiftReaction(entry.getKey(), false) != null) {
 				giftsAvailable.put(entry.getKey(), entry.getValue());
 			}
 		}
-		for(Entry<AbstractClothing, Integer> entry : Main.game.getPlayer().getMapOfDuplicateClothing().entrySet()) {
+		for(Entry<AbstractClothing, Integer> entry : Main.game.getPlayer().getAllClothingInInventory().entrySet()) {
 			if(receiver.getGiftReaction(entry.getKey(), false) != null) {
 				giftsAvailable.put(entry.getKey(), entry.getValue());
 			}
 		}
-		for(Entry<AbstractWeapon, Integer> entry : Main.game.getPlayer().getMapOfDuplicateWeapons().entrySet()) {
+		for(Entry<AbstractWeapon, Integer> entry : Main.game.getPlayer().getAllWeaponsInInventory().entrySet()) {
 			if(receiver.getGiftReaction(entry.getKey(), false) != null) {
 				giftsAvailable.put(entry.getKey(), entry.getValue());
 			}
@@ -680,21 +684,21 @@ public enum RenderingEngine {
 		pageSB.setLength(0);
 		
 		if(charactersInventoryToRender == null) {
-			for(Entry<AbstractWeapon, Integer> entry : Main.game.getPlayerCell().getInventory().getMapOfDuplicateWeapons().entrySet()) {
+			for(Entry<AbstractWeapon, Integer> entry : Main.game.getPlayerCell().getInventory().getAllWeaponsInInventory().entrySet()) {
 				if(uniqueItemCount >= page*ITEMS_PER_PAGE && uniqueItemCount < (page+1)*ITEMS_PER_PAGE) {
 					pageSB.append(getInventoryItemDiv(Main.game.getPlayerCell().getInventory(), entry.getKey(), entry.getValue(), idModifier+"WEAPON_"));
 				}
 				uniqueItemCount++;
 			}
 			
-			for(Entry<AbstractClothing, Integer> entry : Main.game.getPlayerCell().getInventory().getMapOfDuplicateClothing().entrySet()) {
+			for(Entry<AbstractClothing, Integer> entry : Main.game.getPlayerCell().getInventory().getAllClothingInInventory().entrySet()) {
 				if(uniqueItemCount >= page*ITEMS_PER_PAGE && uniqueItemCount < (page+1)*ITEMS_PER_PAGE) {
 					pageSB.append(getInventoryItemDiv(Main.game.getPlayerCell().getInventory(), entry.getKey(), entry.getValue(), idModifier+"CLOTHING_"));
 				}
 				uniqueItemCount++;
 			}
 			
-			for(Entry<AbstractItem, Integer> entry : Main.game.getPlayerCell().getInventory().getMapOfDuplicateItems().entrySet()) {
+			for(Entry<AbstractItem, Integer> entry : Main.game.getPlayerCell().getInventory().getAllItemsInInventory().entrySet()) {
 				if(uniqueItemCount >= page*ITEMS_PER_PAGE && uniqueItemCount < (page+1)*ITEMS_PER_PAGE) {
 					pageSB.append(getInventoryItemDiv(Main.game.getPlayerCell().getInventory(), entry.getKey(), entry.getValue(), idModifier+"ITEM_"));
 				}
@@ -703,7 +707,7 @@ public enum RenderingEngine {
 			
 		} else {
 			if(page==5) { // Quest:
-				for(Entry<AbstractWeapon, Integer> entry : charactersInventoryToRender.getMapOfDuplicateWeapons().entrySet()) {
+				for(Entry<AbstractWeapon, Integer> entry : charactersInventoryToRender.getAllWeaponsInInventory().entrySet()) {
 					if(entry.getKey().getRarity()==Rarity.QUEST && charactersInventoryToRender.isPlayer()) {
 						if(uniqueItemCount < ITEMS_PER_PAGE) {
 							pageSB.append(getInventoryItemDiv(charactersInventoryToRender, entry.getKey(), entry.getValue(), idModifier+"WEAPON_"));
@@ -712,7 +716,7 @@ public enum RenderingEngine {
 					}
 				}
 				
-				for(Entry<AbstractClothing, Integer> entry : charactersInventoryToRender.getMapOfDuplicateClothing().entrySet()) {
+				for(Entry<AbstractClothing, Integer> entry : charactersInventoryToRender.getAllClothingInInventory().entrySet()) {
 					if(entry.getKey().getRarity()==Rarity.QUEST && charactersInventoryToRender.isPlayer()) {
 						if(uniqueItemCount < ITEMS_PER_PAGE) {
 							pageSB.append(getInventoryItemDiv(charactersInventoryToRender, entry.getKey(), entry.getValue(), idModifier+"CLOTHING_"));
@@ -721,7 +725,7 @@ public enum RenderingEngine {
 					}
 				}
 				
-				for(Entry<AbstractItem, Integer> entry : charactersInventoryToRender.getMapOfDuplicateItems().entrySet()) {
+				for(Entry<AbstractItem, Integer> entry : charactersInventoryToRender.getAllItemsInInventory().entrySet()) {
 					if(entry.getKey().getRarity()==Rarity.QUEST && charactersInventoryToRender.isPlayer()) {
 						if(uniqueItemCount < ITEMS_PER_PAGE) {
 							pageSB.append(getInventoryItemDiv(charactersInventoryToRender, entry.getKey(), entry.getValue(), idModifier+"ITEM_"));
@@ -731,7 +735,7 @@ public enum RenderingEngine {
 				}
 				
 			} else {
-				for(Entry<AbstractWeapon, Integer> entry : charactersInventoryToRender.getMapOfDuplicateWeapons().entrySet()) {
+				for(Entry<AbstractWeapon, Integer> entry : charactersInventoryToRender.getAllWeaponsInInventory().entrySet()) {
 					if(entry.getKey().getRarity()!=Rarity.QUEST || !charactersInventoryToRender.isPlayer()) {
 						if(uniqueItemCount >= page*ITEMS_PER_PAGE && uniqueItemCount < (page+1)*ITEMS_PER_PAGE) {
 							pageSB.append(getInventoryItemDiv(charactersInventoryToRender, entry.getKey(), entry.getValue(), idModifier+"WEAPON_"));
@@ -740,7 +744,7 @@ public enum RenderingEngine {
 					}
 				}
 				
-				for(Entry<AbstractClothing, Integer> entry : charactersInventoryToRender.getMapOfDuplicateClothing().entrySet()) {
+				for(Entry<AbstractClothing, Integer> entry : charactersInventoryToRender.getAllClothingInInventory().entrySet()) {
 					if(entry.getKey().getRarity()!=Rarity.QUEST || !charactersInventoryToRender.isPlayer()) {
 						if(uniqueItemCount >= page*ITEMS_PER_PAGE && uniqueItemCount < (page+1)*ITEMS_PER_PAGE) {
 							pageSB.append(getInventoryItemDiv(charactersInventoryToRender, entry.getKey(), entry.getValue(), idModifier+"CLOTHING_"));
@@ -749,7 +753,7 @@ public enum RenderingEngine {
 					}
 				}
 				
-				for(Entry<AbstractItem, Integer> entry : charactersInventoryToRender.getMapOfDuplicateItems().entrySet()) {
+				for(Entry<AbstractItem, Integer> entry : charactersInventoryToRender.getAllItemsInInventory().entrySet()) {
 					if(entry.getKey().getRarity()!=Rarity.QUEST || !charactersInventoryToRender.isPlayer()) {
 						if(uniqueItemCount >= page*ITEMS_PER_PAGE && uniqueItemCount < (page+1)*ITEMS_PER_PAGE) {
 							pageSB.append(getInventoryItemDiv(charactersInventoryToRender, entry.getKey(), entry.getValue(), idModifier+"ITEM_"));
@@ -964,9 +968,9 @@ public enum RenderingEngine {
 				+ "</div>"
 				+ "<div class='full-width-container' style='height: calc(100% - 128vw); overflow-y: auto;'>");
 			
-			uiAttributeSB.append(getCharacterPanelDiv(Combat.getAllies().size()>0, "PLAYER_", Main.game.getPlayer()));
+			uiAttributeSB.append(getCharacterPanelDiv(Combat.getAllies(Main.game.getPlayer()).size()>0, "PLAYER_", Main.game.getPlayer()));
 			
-			for(GameCharacter character : Combat.getAllies()) {
+			for(GameCharacter character : Combat.getAllies(Main.game.getPlayer())) {
 				uiAttributeSB.append(getCharacterPanelDiv(true, "NPC_"+character.getId()+"_", character));
 			}
 			
@@ -985,10 +989,10 @@ public enum RenderingEngine {
 			
 			for(GameCharacter character : Main.game.getPlayer().getCompanions()) {
 				uiAttributeSB.append(getCharacterPanelDiv(true, "NPC_"+character.getId()+"_", character));
-				for(GameCharacter characterCompanion : character.getCompanions()) {
-					uiAttributeSB.append(getCharacterPanelDiv(true, "NPC_"+characterCompanion.getId()+"_", characterCompanion));
-					
-				}
+//				for(GameCharacter characterCompanion : character.getCompanions()) {
+//					uiAttributeSB.append(getCharacterPanelDiv(true, "NPC_"+characterCompanion.getId()+"_", characterCompanion));
+//					
+//				}
 			}
 			
 			uiAttributeSB.append("</div>");
@@ -996,40 +1000,58 @@ public enum RenderingEngine {
 
 		uiAttributeSB.append("</div>");
 
-		uiAttributeSB.append(
-				"<div class='full-width-container' style='background-color:#19191a; border-radius:5px; margin-bottom:1px; padding:4px;'>"
-					+ "<div class='half-width-container' style='text-align:center; float:left; width:60%'>"
-						+ "<div class='overlay-alt' id='DATE_DISPLAY_TOGGLE'>"
-							+"<div class='item-inline' style='float:left;'>"
-								+SVGImages.SVG_IMAGE_PROVIDER.getCalendarIcon()
-							+ "</div>"
-							+ (Main.getProperties().hasValue(PropertyValue.calendarDisplay)
-								? Main.game.getDisplayDate(false)
-								:"Day "+Main.game.getDayNumber())
-						+ "</div>"	
-					+"</div>"
-					+ "<div class='half-width-container' style='text-align:center; float:left; width:40%'>"
-						+ "<div class='overlay-alt' id='TWENTY_FOUR_HOUR_TIME_TOGGLE'>"
-					);
 		
-		if(Main.game.getPlayer().getClothingInSlot(InventorySlot.WRIST)!=null
-				&& (Main.game.getPlayer().getClothingInSlot(InventorySlot.WRIST).getClothingType().equals(ClothingType.WRIST_WOMENS_WATCH)
-						|| Main.game.getPlayer().getClothingInSlot(InventorySlot.WRIST).getClothingType().equals(ClothingType.WRIST_MENS_WATCH))) {
-			uiAttributeSB.append(
-							"<div class='item-inline' style='float:left;'>"
-									+Main.game.getPlayer().getClothingInSlot(InventorySlot.WRIST).getSVGEquippedString(Main.game.getPlayer())
-							+ "</div>");
+		uiAttributeSB.append("<div class='full-width-container' style='background-color:#19191a; border-radius:5px; margin-bottom:1px; padding:4px;'>");
+		if(Main.game.getCurrentDialogueNode().getDialogueNodeType() == DialogueNodeType.INVENTORY && Main.game.isEnchantmentCapacityEnabled()) {
+			int enchantmentPointsUsed = Main.game.getPlayer().getEnchantmentPointsUsedTotal();
+			uiAttributeSB.append(UtilText.parse(
+					"<div class='full-width-container' style='text-align:center;'>"
+						+ "<div class='overlay-alt' id='INVENTORY_ENCHANTMENT_LIMIT' style='cursor:default;'>"
+							+ "[style.colourEnchantment("+Util.capitaliseSentence(Attribute.ENCHANTMENT_LIMIT.getName())+")]: "
+							+ (enchantmentPointsUsed>Main.game.getPlayer().getAttributeValue(Attribute.ENCHANTMENT_LIMIT)
+									?"[style.colourBad("
+									:(enchantmentPointsUsed==Main.game.getPlayer().getAttributeValue(Attribute.ENCHANTMENT_LIMIT)
+											?"[style.colourGood("
+											:"[style.colourMinorGood("))
+							+ enchantmentPointsUsed + ")]" + "/" + Math.round(Main.game.getPlayer().getAttributeValue(Attribute.ENCHANTMENT_LIMIT))
+						+ "</div>"	
+					+"</div>"));
 			
 		} else {
-			uiAttributeSB.append(
-					"<div class='item-inline' style='float:left;'>"
-							+SVGImages.SVG_IMAGE_PROVIDER.getJournalIcon()
-					+ "</div>");
+			uiAttributeSB.append("<div class='half-width-container' style='text-align:center; float:left; width:60%'>"
+									+ "<div class='overlay-alt' id='DATE_DISPLAY_TOGGLE'>"
+										+"<div class='item-inline' style='float:left;'>"
+											+SVGImages.SVG_IMAGE_PROVIDER.getCalendarIcon()
+										+ "</div>"
+										+ (Main.getProperties().hasValue(PropertyValue.calendarDisplay)
+											? Main.game.getDisplayDate(false)
+											:"Day "+Main.game.getDayNumber())
+									+ "</div>"	
+								+"</div>");
+			
+			uiAttributeSB.append("<div class='half-width-container' style='text-align:center; float:left; width:40%'>"
+									+ "<div class='overlay-alt' id='TWENTY_FOUR_HOUR_TIME_TOGGLE'>");
+			
+			if(Main.game.getPlayer().getClothingInSlot(InventorySlot.WRIST)!=null
+					&& (Main.game.getPlayer().getClothingInSlot(InventorySlot.WRIST).getClothingType().equals(ClothingType.WRIST_WOMENS_WATCH)
+							|| Main.game.getPlayer().getClothingInSlot(InventorySlot.WRIST).getClothingType().equals(ClothingType.WRIST_MENS_WATCH))) {
+				uiAttributeSB.append(
+								"<div class='item-inline' style='float:left;'>"
+										+Main.game.getPlayer().getClothingInSlot(InventorySlot.WRIST).getSVGEquippedString(Main.game.getPlayer())
+								+ "</div>");
+				
+			} else {
+				uiAttributeSB.append(
+						"<div class='item-inline' style='float:left;'>"
+								+SVGImages.SVG_IMAGE_PROVIDER.getJournalIcon()
+						+ "</div>");
+			}
+	
+			uiAttributeSB.append(Units.time(Main.game.getDateNow())
+							+ "</div>"
+						+ "</div>");
 		}
-
-		uiAttributeSB.append(Units.time(Main.game.getDateNow()) + "</div>"
-					+ "</div>"
-				+ "</div>");
+		uiAttributeSB.append("</div>");
 		
 		if(Main.game.getCurrentDialogueNode().getDialogueNodeType() == DialogueNodeType.INVENTORY || Main.game.isInCombat() || Main.game.isInSex()) {
 			uiAttributeSB.append(getInventoryEquippedPanel(Main.game.getPlayer()));
@@ -1139,14 +1161,14 @@ public enum RenderingEngine {
 					"<div class='full-width-container' style='background-color:#19191a; border-radius:5px; margin-bottom:8px;'>"
 						+ "<div class='full-width-container'>"
 							+ "<p class='character-name' style='color:"+ Colour.BASE_CRIMSON.toWebHexString()+";'>"
-								+ (Combat.getEnemies().size()>1?"Enemies":"Enemy")
+								+ (Combat.getEnemies(Main.game.getPlayer()).size()>1?"Enemies":"Enemy")
 							+"</p>"
 						+ "</div>"
 					+ "</div>"
 					+ "<div class='full-width-container' style='height: calc(100% - 128vw); overflow-y: auto;'>");
 				
-				for(GameCharacter character : Combat.getEnemies()) {
-					uiAttributeSB.append(getCharacterPanelDiv(Combat.getEnemies().size()>1, "NPC_"+character.getId()+"_", character));
+				for(GameCharacter character : Combat.getEnemies(Main.game.getPlayer())) {
+					uiAttributeSB.append(getCharacterPanelDiv(Combat.getEnemies(Main.game.getPlayer()).size()>1, "NPC_"+character.getId()+"_", character));
 				}
 				
 				
@@ -1165,17 +1187,34 @@ public enum RenderingEngine {
 				uiAttributeSB.append("</div>");
 
 			}
-			
-			uiAttributeSB.append(
-					"<div class='full-width-container' style='background-color:#19191a; border-radius:5px; margin-bottom:1px; padding:4px;'>"
-							+ "<div class='full-width-container' style='text-align:center;'>"
-									+ "<p style='white-space: nowrap;  overflow: hidden;  text-overflow: ellipsis;'>"
-										+ (getCharacterToRender()==null
-											?"No Character"
-											:UtilText.parse(getCharacterToRender(), "[npc.NamePos] Inventory"))
-									+ "</p>"
-							+ "</div>"
-						+ "</div>");
+
+			uiAttributeSB.append("<div class='full-width-container' style='background-color:#19191a; border-radius:5px; margin-bottom:1px; padding:4px;'>");
+			if(Main.game.getCurrentDialogueNode().getDialogueNodeType() == DialogueNodeType.INVENTORY && Main.game.isEnchantmentCapacityEnabled()) {
+				int enchantmentPointsUsed = getCharacterToRender().getEnchantmentPointsUsedTotal();
+				uiAttributeSB.append(UtilText.parse(
+						"<div class='full-width-container' style='text-align:center;'>"
+							+ "<div class='overlay-alt' id='INVENTORY_ENCHANTMENT_LIMIT_NPC' style='cursor:default;'>"
+								+ "[style.colourEnchantment("+Util.capitaliseSentence(Attribute.ENCHANTMENT_LIMIT.getName())+")]: "
+								+ (enchantmentPointsUsed>getCharacterToRender().getAttributeValue(Attribute.ENCHANTMENT_LIMIT)
+										?"[style.colourBad("
+										:(enchantmentPointsUsed==getCharacterToRender().getAttributeValue(Attribute.ENCHANTMENT_LIMIT)
+												?"[style.colourGood("
+												:"[style.colourMinorGood("))
+								+ enchantmentPointsUsed + ")]" + "/" + Math.round(getCharacterToRender().getAttributeValue(Attribute.ENCHANTMENT_LIMIT))
+							+ "</div>"	
+						+"</div>"));
+				
+			} else {
+				uiAttributeSB.append(
+								"<div class='full-width-container' style='text-align:center;'>"
+										+ "<p style='white-space: nowrap;  overflow: hidden;  text-overflow: ellipsis;'>"
+											+ (getCharacterToRender()==null
+												?"No Character"
+												:UtilText.parse(getCharacterToRender(), "[npc.NamePos] Inventory"))
+										+ "</p>"
+								+ "</div>");
+			}
+			uiAttributeSB.append("</div>");
 			
 			uiAttributeSB.append(getInventoryEquippedPanel(getCharacterToRender()));
 				
@@ -1265,7 +1304,7 @@ public enum RenderingEngine {
 			
 			int count = 0;
 			if(Main.game.isInNewWorld()) {
-				for(Entry<AbstractWeapon, Integer> entry : Main.game.getPlayerCell().getInventory().getMapOfDuplicateWeapons().entrySet()) {
+				for(Entry<AbstractWeapon, Integer> entry : Main.game.getPlayerCell().getInventory().getAllWeaponsInInventory().entrySet()) {
 					if(count%2==0) {
 						uiAttributeSB.append(
 								"<div class='event-log-entry' style='background:"+getEntryBackgroundColour(false)+";'>"
@@ -1281,7 +1320,7 @@ public enum RenderingEngine {
 					}
 					count++;
 				}
-				for(Entry<AbstractClothing, Integer> entry : Main.game.getPlayerCell().getInventory().getMapOfDuplicateClothing().entrySet()) {
+				for(Entry<AbstractClothing, Integer> entry : Main.game.getPlayerCell().getInventory().getAllClothingInInventory().entrySet()) {
 					if(count%2==0) {
 						uiAttributeSB.append(
 								"<div class='event-log-entry' style='background:"+getEntryBackgroundColour(false)+";'>"
@@ -1297,7 +1336,7 @@ public enum RenderingEngine {
 					}
 					count++;
 				}
-				for(Entry<AbstractItem, Integer> entry : Main.game.getPlayerCell().getInventory().getMapOfDuplicateItems().entrySet()) {
+				for(Entry<AbstractItem, Integer> entry : Main.game.getPlayerCell().getInventory().getAllItemsInInventory().entrySet()) {
 					if(count%2==0) {
 						uiAttributeSB.append(
 								"<div class='event-log-entry' style='background:"+getEntryBackgroundColour(false)+";'>"
@@ -1482,7 +1521,7 @@ public enum RenderingEngine {
 								);
 
 					if(withNPCIcons) {
-						appendNPCIcon(Main.game.getWorlds().get(world), j, i);
+						appendNPCIcon(Main.game.getWorlds().get(world), j, i, width);
 					}
 //					appendNotVisitedLayer(Main.game.getWorlds().get(world), j, i);
 					
@@ -1693,7 +1732,7 @@ public enum RenderingEngine {
 								mapSB.append("<b class='hotkey-icon" + (Main.game.getActiveWorld().getCell(x, y).getPlace().isDangerous() ? " dangerous" : "") + "'>"
 										+ (Main.getProperties().hotkeyMapPrimary.get(KeyboardAction.MOVE_NORTH) == null ? "" : Main.getProperties().hotkeyMapPrimary.get(KeyboardAction.MOVE_NORTH).getFullName()) + "</b>");
 								
-								appendNPCIcon(Main.game.getActiveWorld(), x, y);
+								appendNPCIcon(Main.game.getActiveWorld(), x, y, unit);
 								appendItemsInAreaIcon(x, y);
 								appendNotVisitedLayer(Main.game.getActiveWorld(), x, y);
 								
@@ -1722,7 +1761,7 @@ public enum RenderingEngine {
 								mapSB.append("<b class='hotkey-icon" + (Main.game.getActiveWorld().getCell(x, y).getPlace().isDangerous() ? " dangerous" : "") + "'>"
 										+ (Main.getProperties().hotkeyMapPrimary.get(KeyboardAction.MOVE_SOUTH) == null ? "" : Main.getProperties().hotkeyMapPrimary.get(KeyboardAction.MOVE_SOUTH).getFullName()) + "</b>");
 
-								appendNPCIcon(Main.game.getActiveWorld(), x, y);
+								appendNPCIcon(Main.game.getActiveWorld(), x, y, unit);
 								appendItemsInAreaIcon(x, y);
 								appendNotVisitedLayer(Main.game.getActiveWorld(), x, y);
 								
@@ -1751,7 +1790,7 @@ public enum RenderingEngine {
 								mapSB.append("<b class='hotkey-icon" + (Main.game.getActiveWorld().getCell(x, y).getPlace().isDangerous() ? " dangerous" : "") + "'>"
 										+ (Main.getProperties().hotkeyMapPrimary.get(KeyboardAction.MOVE_WEST) == null ? "" : Main.getProperties().hotkeyMapPrimary.get(KeyboardAction.MOVE_WEST).getFullName()) + "</b>");
 
-								appendNPCIcon(Main.game.getActiveWorld(), x, y);
+								appendNPCIcon(Main.game.getActiveWorld(), x, y, unit);
 								appendItemsInAreaIcon(x, y);
 								appendNotVisitedLayer(Main.game.getActiveWorld(), x, y);
 								
@@ -1780,7 +1819,7 @@ public enum RenderingEngine {
 								mapSB.append("<b class='hotkey-icon" + (Main.game.getActiveWorld().getCell(x, y).getPlace().isDangerous() ? " dangerous" : "") + "'>"
 										+ (Main.getProperties().hotkeyMapPrimary.get(KeyboardAction.MOVE_EAST) == null ? "" : Main.getProperties().hotkeyMapPrimary.get(KeyboardAction.MOVE_EAST).getFullName()) + "</b>");
 
-								appendNPCIcon(Main.game.getActiveWorld(), x, y);
+								appendNPCIcon(Main.game.getActiveWorld(), x, y, unit);
 								appendItemsInAreaIcon(x, y);
 								appendNotVisitedLayer(Main.game.getActiveWorld(), x, y);
 								
@@ -1823,7 +1862,7 @@ public enum RenderingEngine {
 									}
 								}
 								
-								appendNPCIcon(Main.game.getActiveWorld(), x, y);
+								appendNPCIcon(Main.game.getActiveWorld(), x, y, unit);
 								appendItemsInAreaIcon(x, y);
 								appendNotVisitedLayer(Main.game.getActiveWorld(), x, y);
 
@@ -1862,24 +1901,29 @@ public enum RenderingEngine {
 		return mapSB.toString();
 	}
 	
-	private void appendNPCIcon(World world, int x, int y) {
+	private void appendNPCIcon(World world, int x, int y, float tileWidth) {
 		
 		List<String> mapIcons = new ArrayList<>();
 		List<NPC> charactersPresent = Main.game.getCharactersPresent(world.getCell(x, y));
-
-		for(NPC gc : charactersPresent) {
-			mapIcons.add(gc.getMapIcon());
-		}
-		
 		List<NPC> charactersHome = Main.game.getCharactersTreatingCellAsHome(world.getCell(x, y));
-		for(NPC gc : charactersHome) {
-			if(!charactersPresent.contains(gc) && (charactersHome.size()==1 || (x!=0 && y!=0))) {// && ((gc.isSlave() && gc.getOwner().isPlayer()) || Main.game.getPlayer().getFriendlyOccupants().contains(gc.getId()))) {
-				mapIcons.add(gc.getHomeMapIcon());
+
+		if(!charactersPresent.isEmpty() || !charactersHome.isEmpty()) {
+			for(NPC gc : charactersPresent) {
+				mapIcons.add(gc.getMapIcon());
 			}
-		}
-		
-		for(int i = mapIcons.size() ; i>0 ; i--) {
-			mapSB.append("<div class='npc-icon' style='left:"+(((i-1)*6)+2)+"px;'>"+mapIcons.get(i-1)+"</div>");
+			
+			for(NPC gc : charactersHome) {
+				if(!charactersPresent.contains(gc) && (charactersHome.size()==1 || (x!=0 && y!=0))) {
+					mapIcons.add(gc.getHomeMapIcon());
+				}
+			}
+			
+			if(!mapIcons.isEmpty()) {
+				float increment = Math.min(20, 75/mapIcons.size());
+				for(int i = mapIcons.size() ; i>0 ; i--) {
+					mapSB.append("<div class='npc-icon' style='left:"+(5+((i-1)*increment))+"%;'>"+mapIcons.get(i-1)+"</div>");
+				}
+			}
 		}
 	}
 	
@@ -2030,7 +2074,13 @@ public enum RenderingEngine {
 		
 		panelSB.append(
 				"<div class='attribute-container' style='"
-						+ (Main.game.isInCombat()&&Combat.getTargetedCombatant(Main.game.getPlayer()).equals(character)?"border:2px solid "+Colour.GENERIC_COMBAT.toWebHexString()+";":"border:1px solid "+Colour.TEXT_GREY_DARK.toWebHexString()+";")
+						+ (Main.game.isInCombat()
+								?(Combat.getTargetedCombatant(Main.game.getPlayer()).equals(character)
+										?"border:2px solid "+Colour.GENERIC_COMBAT.toWebHexString()+";"
+										:(Combat.getTargetedAlliedCombatant(Main.game.getPlayer()).equals(character)
+												?"border:2px solid "+Colour.GENERIC_MINOR_GOOD.toWebHexString()+";"
+												:"border:1px solid "+Colour.TEXT_GREY_DARK.toWebHexString()+";"))
+								:"border:1px solid "+Colour.TEXT_GREY_DARK.toWebHexString()+";")
 							+ "'>"
 					+ "<div class='full-width-container' style='margin-bottom:4px;'>"
 						+ "<div class='icon' style='width:12%'>"
@@ -2065,29 +2115,30 @@ public enum RenderingEngine {
 								+"</div>"
 								:"")
 					+"</div>");
-		
-		panelSB.append("<hr style='border:1px solid "+Colour.TEXT_GREY_DARK.toWebHexString()+"; margin: 2px 0;'/>");
-		
 
-		panelSB.append(
-				getAttributeBarThird(PhysiqueLevel.getPhysiqueLevelFromValue(character.getAttributeValue(Attribute.MAJOR_PHYSIQUE)).getRelatedStatusEffect().getSVGString(character),
-						Attribute.MAJOR_PHYSIQUE.getColour(),
-						character.getAttributeValue(Attribute.MAJOR_PHYSIQUE),
-						100,
-						idPrefix + Attribute.MAJOR_PHYSIQUE.getName())
-				
-				+getAttributeBarThird(IntelligenceLevel.getIntelligenceLevelFromValue(character.getAttributeValue(Attribute.MAJOR_ARCANE)).getRelatedStatusEffect().getSVGString(character),
-						Attribute.MAJOR_ARCANE.getColour(),
-						character.getAttributeValue(Attribute.MAJOR_ARCANE),
-						100,
-						idPrefix + Attribute.MAJOR_ARCANE.getName())
+		if(!Main.game.isInCombat()) {
+			panelSB.append("<hr style='border:1px solid "+Colour.TEXT_GREY_DARK.toWebHexString()+"; margin: 2px 0;'/>");
 			
-				+getAttributeBarThird(CorruptionLevel.getCorruptionLevelFromValue(character.getAttributeValue(Attribute.MAJOR_CORRUPTION)).getRelatedStatusEffect().getSVGString(character),
-						Attribute.MAJOR_CORRUPTION.getColour(),
-						character.getAttributeValue(Attribute.MAJOR_CORRUPTION),
-						100,
-						idPrefix + Attribute.MAJOR_CORRUPTION.getName())
-				);
+			panelSB.append(
+					getAttributeBarThird(PhysiqueLevel.getPhysiqueLevelFromValue(character.getAttributeValue(Attribute.MAJOR_PHYSIQUE)).getRelatedStatusEffect().getSVGString(character),
+							Attribute.MAJOR_PHYSIQUE.getColour(),
+							character.getAttributeValue(Attribute.MAJOR_PHYSIQUE),
+							100,
+							idPrefix + Attribute.MAJOR_PHYSIQUE.getName())
+					
+					+getAttributeBarThird(IntelligenceLevel.getIntelligenceLevelFromValue(character.getAttributeValue(Attribute.MAJOR_ARCANE)).getRelatedStatusEffect().getSVGString(character),
+							Attribute.MAJOR_ARCANE.getColour(),
+							character.getAttributeValue(Attribute.MAJOR_ARCANE),
+							100,
+							idPrefix + Attribute.MAJOR_ARCANE.getName())
+				
+					+getAttributeBarThird(CorruptionLevel.getCorruptionLevelFromValue(character.getAttributeValue(Attribute.MAJOR_CORRUPTION)).getRelatedStatusEffect().getSVGString(character),
+							Attribute.MAJOR_CORRUPTION.getColour(),
+							character.getAttributeValue(Attribute.MAJOR_CORRUPTION),
+							100,
+							idPrefix + Attribute.MAJOR_CORRUPTION.getName())
+					);
+		}
 		
 		panelSB.append("<hr style='border:1px solid "+Colour.TEXT_GREY_DARK.toWebHexString()+"; margin: 2px 0;'/>");
 		
@@ -2188,7 +2239,7 @@ public enum RenderingEngine {
 			}
 			
 			if(!character.isPlayer()) {
-				for (Fetish f : character.getFetishes()) {
+				for (Fetish f : character.getFetishes(true)) {
 					panelSB.append(
 						"<div class='icon effect'>"
 							+ "<div class='icon-content'>"
@@ -2238,8 +2289,8 @@ public enum RenderingEngine {
 				}
 			}
 			
-			for (SpecialAttack sa : character.getSpecialAttacks()) {
-				int cooldown = Combat.getCooldown(character, sa);
+			for (CombatMove combatMove : character.getEquippedMoves()) {
+				int cooldown = character.getMoveCooldown(combatMove.getIdentifier());
 				if (cooldown > 0) {
 					int timerHeight = (int) ((Math.min(5, cooldown)/5f)*100);
 
@@ -2258,10 +2309,10 @@ public enum RenderingEngine {
 							"<div class='icon effect' style='border:1px solid "+Colour.SPECIAL_ATTACK.toWebHexString()+"'>"
 									+ "<div class='timer-background' style='width:"+timerHeight+"%; background:"+ timerColour.toWebHexString() + ";'></div>"
 									+ "<div class='icon-content'>"
-										+ sa.getSVGString()
+										+ combatMove.getSVGString()
 									+ "</div>"
 									+ "<div style='width:100%;height:100%;position:absolute;right:0; top:0;'>"+SVGImages.SVG_IMAGE_PROVIDER.getStopwatch()+"</div>"
-									+ "<div class='overlay' id='SA_" + idPrefix + sa + "'></div>"
+									+ "<div class='overlay' id='CM_" + idPrefix + combatMove.getIdentifier() + "'></div>"
 							+ "</div>");
 					
 				}
@@ -2444,7 +2495,7 @@ public enum RenderingEngine {
 			}
 			
 			if(!character.isPlayer()) {
-				for (Fetish f : character.getFetishes()) {
+				for (Fetish f : character.getFetishes(true)) {
 					panelSB.append(
 						"<div class='icon effect'>"
 							+ "<div class='icon-content'>"
@@ -2472,7 +2523,7 @@ public enum RenderingEngine {
 	public static void setPage(GameCharacter charactersInventoryToRender, AbstractCoreItem item) {
 		int uniqueItemCount = 0;
 		
-		for(Entry<AbstractWeapon, Integer> entry : charactersInventoryToRender.getMapOfDuplicateWeapons().entrySet()) {
+		for(Entry<AbstractWeapon, Integer> entry : charactersInventoryToRender.getAllWeaponsInInventory().entrySet()) {
 			if(entry.getKey().getRarity()!=Rarity.QUEST || !charactersInventoryToRender.isPlayer()) {
 				uniqueItemCount++;
 				if(entry.getKey().equals(item)) {
@@ -2487,7 +2538,7 @@ public enum RenderingEngine {
 			}
 		}
 		
-		for(Entry<AbstractClothing, Integer> entry : charactersInventoryToRender.getMapOfDuplicateClothing().entrySet()) {
+		for(Entry<AbstractClothing, Integer> entry : charactersInventoryToRender.getAllClothingInInventory().entrySet()) {
 			if(entry.getKey().getRarity()!=Rarity.QUEST || !charactersInventoryToRender.isPlayer()) {
 				uniqueItemCount++;
 				if(entry.getKey().equals(item)) {
@@ -2502,7 +2553,7 @@ public enum RenderingEngine {
 			}
 		}
 		
-		for(Entry<AbstractItem, Integer> entry : charactersInventoryToRender.getMapOfDuplicateItems().entrySet()) {
+		for(Entry<AbstractItem, Integer> entry : charactersInventoryToRender.getAllItemsInInventory().entrySet()) {
 			if(entry.getKey().getRarity()!=Rarity.QUEST || !charactersInventoryToRender.isPlayer()) {
 				uniqueItemCount++;
 				if(entry.getKey().equals(item)) {

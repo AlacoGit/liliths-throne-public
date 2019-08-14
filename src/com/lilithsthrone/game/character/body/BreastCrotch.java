@@ -48,13 +48,13 @@ public class BreastCrotch implements BodyPartInterface {
 		this.size = size;
 		this.milkStorage = milkStorage;
 		milkStored = milkStorage;
-		milkRegeneration = FluidRegeneration.ONE_AVERAGE.getValue();
+		milkRegeneration = FluidRegeneration.ONE_AVERAGE.getMedianRegenerationValuePerDay();
 		this.rows = rows;
 		this.nippleCountPerBreast = nippleCountPerBreast;
 		
 		nipples = new Nipples(type.getNippleType(), nippleSize, nippleShape, areolaeSize, Lactation.getLactationFromInt(milkStorage).getAssociatedWetness().getValue(), capacity, elasticity, plasticity, virgin, true);
 		
-		milk = new FluidMilk(type.getFluidType());
+		milk = new FluidMilk(type.getFluidType(), true);
 	}
 	
 	@Override
@@ -170,7 +170,7 @@ public class BreastCrotch implements BodyPartInterface {
 			return "";
 		}
 		
-		if(owner.getLegConfiguration().isBipedalPositionedCrotchBoobs() && Main.getProperties().udders==1) {
+		if(owner.getLegConfiguration().isBipedalPositionedCrotchBoobs() && Main.getProperties().udders==1 && type!=BreastType.NONE) {
 			return UtilText.parse(owner, "<p style='text-align:center;'>As [npc.nameIsFull] not a taur, [style.colourBad([npc.she] cannot grow crotch-boobs)], and so nothing happens..."
 					+ "<br/>[style.colourDisabled(This is due to your 'crotch-boob' content option being set to 'taur only'.)]</p>");
 		}
@@ -369,11 +369,11 @@ public class BreastCrotch implements BodyPartInterface {
 	}
 
 	/**
-	 * Sets the milkRegeneration. Value is bound to >=0 && <=FluidRegeneration.FOUR_MAXIMUM.getMaximumValue()
+	 * Sets the milkRegeneration. Value is bound to >=0 && <=FluidRegeneration.FOUR_VERY_RAPID.getMaximumRegenerationValuePerDay()
 	 */
 	public String setLactationRegeneration(GameCharacter owner, int milkRegeneration) {
 		int oldRegeneration = this.milkRegeneration;
-		this.milkRegeneration = Math.max(0, Math.min(milkRegeneration, FluidRegeneration.FOUR_MAXIMUM.getValue()));
+		this.milkRegeneration = Math.max(0, Math.min(milkRegeneration, FluidRegeneration.FOUR_VERY_RAPID.getMaximumRegenerationValuePerDay()));
 		int regenerationChange = this.milkRegeneration - oldRegeneration;
 		
 		if(owner==null) {

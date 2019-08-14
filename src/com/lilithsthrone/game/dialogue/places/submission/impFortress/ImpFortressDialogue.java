@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import com.lilithsthrone.game.PropertyValue;
 import com.lilithsthrone.game.character.CharacterUtils;
+import com.lilithsthrone.game.character.EquipClothingSetting;
 import com.lilithsthrone.game.character.GameCharacter;
 import com.lilithsthrone.game.character.body.CoverableArea;
 import com.lilithsthrone.game.character.body.valueEnums.HipSize;
@@ -292,7 +294,7 @@ public class ImpFortressDialogue {
 				
 				for(GameCharacter impCharacter : impGroup) {
 					impCharacter.setLocation(WorldType.IMP_FORTRESS_ALPHA, PlaceType.FORTRESS_ALPHA_KEEP, true);
-					((NPC)impCharacter).equipClothing(true, true, true, true);
+					((NPC)impCharacter).equipClothing(EquipClothingSetting.getAllClothingSettings());
 				}
 	
 			} catch (Exception e) {
@@ -301,7 +303,7 @@ public class ImpFortressDialogue {
 			
 			// Move boss back to fortress:
 			Main.game.getNpc(FortressAlphaLeader.class).setLocation(WorldType.IMP_FORTRESS_ALPHA, PlaceType.FORTRESS_ALPHA_KEEP);
-			Main.game.getNpc(FortressAlphaLeader.class).equipClothing(true, true, false, true);
+			Main.game.getNpc(FortressAlphaLeader.class).equipClothing(Util.newArrayListOfValues(EquipClothingSetting.REPLACE_CLOTHING, EquipClothingSetting.ADD_WEAPONS, EquipClothingSetting.ADD_ACCESSORIES));
 			
 			// Move NPCs into hiding:
 			Cell[][] cells = Main.game.getWorlds().get(WorldType.SUBMISSION).getCellGrid();
@@ -359,7 +361,7 @@ public class ImpFortressDialogue {
 				
 				for(GameCharacter impCharacter : impGroup) {
 					impCharacter.setLocation(WorldType.IMP_FORTRESS_FEMALES, PlaceType.FORTRESS_FEMALES_KEEP, true);
-					((NPC)impCharacter).equipClothing(true, true, true, true);
+					((NPC)impCharacter).equipClothing(EquipClothingSetting.getAllClothingSettings());
 				}
 	
 			} catch (Exception e) {
@@ -368,7 +370,7 @@ public class ImpFortressDialogue {
 			
 			// Move boss back to fortress:
 			Main.game.getNpc(FortressFemalesLeader.class).setLocation(WorldType.IMP_FORTRESS_FEMALES, PlaceType.FORTRESS_FEMALES_KEEP);
-			Main.game.getNpc(FortressFemalesLeader.class).equipClothing(true, true, false, true);
+			Main.game.getNpc(FortressFemalesLeader.class).equipClothing(Util.newArrayListOfValues(EquipClothingSetting.REPLACE_CLOTHING, EquipClothingSetting.ADD_WEAPONS, EquipClothingSetting.ADD_ACCESSORIES));
 			
 			// Move NPCs into hiding:
 			Cell[][] cells = Main.game.getWorlds().get(WorldType.SUBMISSION).getCellGrid();
@@ -427,7 +429,7 @@ public class ImpFortressDialogue {
 				
 				for(GameCharacter impCharacter : impGroup) {
 					impCharacter.setLocation(WorldType.IMP_FORTRESS_MALES, PlaceType.FORTRESS_MALES_KEEP, true);
-					((NPC)impCharacter).equipClothing(true, true, true, true);
+					((NPC)impCharacter).equipClothing(EquipClothingSetting.getAllClothingSettings());
 				}
 	
 			} catch (Exception e) {
@@ -436,7 +438,7 @@ public class ImpFortressDialogue {
 			
 			// Move boss back to fortress:
 			Main.game.getNpc(FortressMalesLeader.class).setLocation(WorldType.IMP_FORTRESS_MALES, PlaceType.FORTRESS_MALES_KEEP);
-			Main.game.getNpc(FortressMalesLeader.class).equipClothing(true, true, false, true);
+			Main.game.getNpc(FortressMalesLeader.class).equipClothing(Util.newArrayListOfValues(EquipClothingSetting.REPLACE_CLOTHING, EquipClothingSetting.ADD_WEAPONS, EquipClothingSetting.ADD_ACCESSORIES));
 			
 			// Move NPCs into hiding:
 			Cell[][] cells = Main.game.getWorlds().get(WorldType.SUBMISSION).getCellGrid();
@@ -529,7 +531,6 @@ public class ImpFortressDialogue {
 	}
 	
 	public static GameCharacter getBoss(WorldType fortress) {
-
 		if(fortress==WorldType.IMP_FORTRESS_ALPHA) {
 			return Main.game.getNpc(FortressAlphaLeader.class);
 
@@ -624,7 +625,7 @@ public class ImpFortressDialogue {
 				
 				for(GameCharacter impCharacter : impGroup) {
 					impCharacter.setLocation(WorldType.IMP_FORTRESS_ALPHA, PlaceType.FORTRESS_ALPHA_ENTRANCE, true);
-					((NPC)impCharacter).equipClothing(true, true, true, true);
+					((NPC)impCharacter).equipClothing(EquipClothingSetting.getAllClothingSettings());
 				}
 	
 			} catch (Exception e) {
@@ -651,7 +652,7 @@ public class ImpFortressDialogue {
 				
 				for(GameCharacter impCharacter : impGroup) {
 					impCharacter.setLocation(WorldType.IMP_FORTRESS_FEMALES, PlaceType.FORTRESS_FEMALES_ENTRANCE, true);
-					((NPC)impCharacter).equipClothing(true, true, true, true);
+					((NPC)impCharacter).equipClothing(EquipClothingSetting.getAllClothingSettings());
 				}
 	
 			} catch (Exception e) {
@@ -682,7 +683,7 @@ public class ImpFortressDialogue {
 				
 				for(GameCharacter impCharacter : impGroup) {
 					impCharacter.setLocation(WorldType.IMP_FORTRESS_MALES, PlaceType.FORTRESS_MALES_ENTRANCE, true);
-					((NPC)impCharacter).equipClothing(true, true, true, true);
+					((NPC)impCharacter).equipClothing(EquipClothingSetting.getAllClothingSettings());
 				}
 	
 			} catch (Exception e) {
@@ -855,6 +856,7 @@ public class ImpFortressDialogue {
 									case PREFER_ORAL:
 									case PREFER_MISSIONARY:
 									case PREFER_DOGGY:
+									case PREFER_COW_GIRL:
 										break;
 								}
 							}
@@ -896,6 +898,7 @@ public class ImpFortressDialogue {
 									case PREFER_ORAL:
 									case PREFER_MISSIONARY:
 									case PREFER_DOGGY:
+									case PREFER_COW_GIRL:
 										break;
 								}
 							}
@@ -989,6 +992,7 @@ public class ImpFortressDialogue {
 								case PREFER_ORAL:
 								case PREFER_MISSIONARY:
 								case PREFER_DOGGY:
+								case PREFER_COW_GIRL:
 									break;
 							}
 						}
@@ -1026,20 +1030,20 @@ public class ImpFortressDialogue {
 				}
 				
 			} else if(isGuardsPacifiedBySex()) {
-				if(Main.game.getPlayer().getSubspecies()==Subspecies.DEMON) {
+				if(Objects.equals(Main.game.getPlayer().getSubspeciesOverride(), Subspecies.DEMON)) {
 					UtilText.nodeContentSB.append(UtilText.parseFromXMLFile("places/submission/fortressImpGuards"+getGuardsDialogueEncounterId(), "ENTRANCE_PACIFIED_BY_SEX_DEMON", getAllCharacters()));
 				} else {
 					UtilText.nodeContentSB.append(UtilText.parseFromXMLFile("places/submission/fortressImpGuards"+getGuardsDialogueEncounterId(), "ENTRANCE_PACIFIED_BY_SEX", getAllCharacters()));
 				}
 				
 			} else if(isGuardsPacified()) {
-				if(Main.game.getPlayer().getSubspecies()==Subspecies.DEMON) {
+				if(Objects.equals(Main.game.getPlayer().getSubspeciesOverride(), Subspecies.DEMON)) {
 					UtilText.nodeContentSB.append(UtilText.parseFromXMLFile("places/submission/fortressImpGuards"+getGuardsDialogueEncounterId(), "ENTRANCE_PACIFIED_DEMON", getAllCharacters()));
 				} else {
 					UtilText.nodeContentSB.append(UtilText.parseFromXMLFile("places/submission/fortressImpGuards"+getGuardsDialogueEncounterId(), "ENTRANCE_PACIFIED", getAllCharacters()));
 				}
 				
-			} else if(Main.game.getPlayer().getSubspecies()==Subspecies.DEMON) {
+			} else if(Objects.equals(Main.game.getPlayer().getSubspeciesOverride(), Subspecies.DEMON)) {
 				UtilText.nodeContentSB.append(UtilText.parseFromXMLFile("places/submission/fortressImpGuards"+getGuardsDialogueEncounterId(), "ENTRANCE_DEMON", getAllCharacters()));
 				
 			} else if(Main.game.getPlayer().isElementalSummoned()) {
@@ -1130,7 +1134,7 @@ public class ImpFortressDialogue {
 				
 			} else {
 				if (index == 1) {
-					if(Main.game.getPlayer().getSubspecies()==Subspecies.DEMON) {
+					if(Objects.equals(Main.game.getPlayer().getSubspeciesOverride(), Subspecies.DEMON)) {
 						return new Response("Command",
 								"The imps seem incredibly nervous at the prospect of being confronted by a demon. Use this to your advantage and order them to step aside.",
 								ENTRANCE_DEMONIC_COMMAND) {
@@ -2113,11 +2117,12 @@ public class ImpFortressDialogue {
 
 				if (index == 1) {
 					if(isAlphaFortress()) {
-						if(Main.game.getPlayer().hasTraitActivated(Perk.BRAWLER)) {
-							return new Response("Brawler",
+						if(Main.game.getPlayer().hasTraitActivated(Perk.UNARMED_TRAINING)) {
+							return new Response(Util.capitaliseSentence(Perk.UNARMED_TRAINING.getName(Main.game.getPlayer())),
 									UtilText.parse(getBoss(),
 											"Seize this fleeting opportunity to provoke [npc.name] into trying to punch you,"
-													+ " relying on your skill as a <b style='color:"+Colour.TRAIT.toWebHexString()+";'>Brawler</b> to humiliate [npc.herHim] in front of [npc.her] imp followers."),
+													+ " relying on your skill as a <b style='color:"+Colour.TRAIT.toWebHexString()+";'>"+Perk.UNARMED_TRAINING.getName(Main.game.getPlayer())+"</b>"
+															+ " to humiliate [npc.herHim] in front of [npc.her] imp followers."),
 									KEEP_ALPHA_BRAWLER) {
 								@Override
 								public void effects() {
@@ -2139,8 +2144,10 @@ public class ImpFortressDialogue {
 							};
 							
 						} else {
-							return new Response("Brawler",
-									UtilText.parse(getBoss(), "You're not competent enough at brawling to try and humiliate [npc.name] in front of [npc.her] gang...</br>(Requires 'Brawler' trait.)"),
+							return new Response(Util.capitaliseSentence(Perk.UNARMED_TRAINING.getName(Main.game.getPlayer())),
+									UtilText.parse(getBoss(),
+											"You're not competent enough at fighting to try and humiliate [npc.name] in front of [npc.her] gang...</br>"
+													+ "(Requires '"+Perk.UNARMED_TRAINING.getName(Main.game.getPlayer())+"' trait.)"),
 									null);
 						}
 						
@@ -2169,7 +2176,7 @@ public class ImpFortressDialogue {
 							
 						} else {
 							return new Response("True nympho",
-									UtilText.parse(getBoss(), "You're not as sex-crazed as [npc.name], so can't undermine [npc.her] authority in front of [npc.her] imps...</br>(Requires 'Nymphomaniac' trait.)"),
+									UtilText.parse(getBoss(), "You're not as sex-crazed as [npc.name], so you can't undermine [npc.her] authority in front of [npc.her] imps...</br>(Requires 'Nymphomaniac' trait.)"),
 									null);
 						}
 						

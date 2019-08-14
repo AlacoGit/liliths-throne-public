@@ -2,7 +2,7 @@ package com.lilithsthrone.game.dialogue;
 
 /**
  * @since 0.1.89
- * @version 0.3.1
+ * @version 0.3.3.10
  * @author Innoxia
  */
 public enum DialogueFlagValue {
@@ -24,6 +24,12 @@ public enum DialogueFlagValue {
 	visitedSubmission,
 	mommyFound,
 	
+	daddyFound,
+	rudeToDaddy,
+	flirtingWithDaddy,
+	talkedWithDaddy,
+	daddySendingReward,
+	
 	// Gym:
 	gymIntroduced,
 	gymHadTour,
@@ -40,6 +46,7 @@ public enum DialogueFlagValue {
 	nyanIntroduced,
 	kateIntroduced,
 	vickyIntroduced,
+	vanessaIntroduced,
 
 	roxyIntroduced,
 	axelIntroduced,
@@ -49,6 +56,16 @@ public enum DialogueFlagValue {
 	
 	// Red-light district:
 	prostitutionLicenseObtained,
+
+	
+	// City hall:
+	vanessaHelped,
+	vanessaDailyHelped,
+	vanessaDailyMassage,
+	vanessaMassaged,
+	vanessaFucked,
+	vanessaAskedAboutCatalogue,
+	vanessaAskedAboutSolitary,
 	
 	
 	// Shopping arcade:
@@ -143,6 +160,7 @@ public enum DialogueFlagValue {
 	slimeGuardsDefeated,
 	slimeRoyalGuardIntroduced,
 	slimeRoyalGuardDefeated,
+	slimeRoyalGuardDefeatReacted,
 	slimeQueenHelped,
 	slimeQueenConvinced,
 	slimeQueenForced,

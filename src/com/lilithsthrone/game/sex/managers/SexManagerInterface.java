@@ -3,8 +3,11 @@ package com.lilithsthrone.game.sex.managers;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import com.lilithsthrone.game.PropertyValue;
 import com.lilithsthrone.game.character.GameCharacter;
@@ -33,7 +36,7 @@ import com.lilithsthrone.world.places.Population;
 
 /**
  * @since 0.1.0
- * @version 0.3.1
+ * @version 0.3.2
  * @author Innoxia
  */
 public interface SexManagerInterface {
@@ -58,6 +61,10 @@ public interface SexManagerInterface {
 		return null;
 	}
 	
+	public default Set<GameCharacter> getCharactersSealed() {
+		return new HashSet<>();
+	}
+	
 	public default boolean isPlayerDom() {
 		return getDominants().containsKey(Main.game.getPlayer());
 	}
@@ -71,10 +78,6 @@ public interface SexManagerInterface {
 	
 	public default String getStartSexDescription() {
 		return "";
-	}
-
-	public default boolean isPlayerAbleToSwapPositions() {
-		return true;
 	}
 	
 	public default SexType getForeplayPreference(NPC character, GameCharacter targetedCharacter) {
@@ -112,6 +115,10 @@ public interface SexManagerInterface {
 	public default boolean isSelfTransformDisabled(GameCharacter character) {
 		return false;
 	}
+
+	public default boolean isSwapPositionAllowed(GameCharacter character, GameCharacter target) {
+		return character.isPlayer() && isPositionChangingAllowed(character);
+	}
 	
 	/**
 	 * @return true by default. If returns false, no position-changing actions at all are available for the character passed in to the method.
@@ -130,9 +137,15 @@ public interface SexManagerInterface {
 		boolean subsResisting = true;
 		boolean subsDenied = true;
 		
+		// Do not skip orgasms at end of sex:
 		if(Sex.getLastUsedPlayerAction().getActionType().isOrgasmOption()
 				|| Sex.getLastUsedPlayerAction().getActionType()==SexActionType.PREPARE_FOR_PARTNER_ORGASM) {
-			return false; // Do not skip orgasms at end of sex.
+			return false; 
+		}
+		
+		// Do not allow player-owned slaves to end sex if the player is also a dom and is not a spectator:
+		if(Sex.isDom(Main.game.getPlayer()) && !Sex.isSpectator(Main.game.getPlayer()) && Sex.getInitialSexManager().isPlayerAbleToStopSex() && partner.isSlave() && partner.getOwner().isPlayer()) {
+			return false;
 		}
 		
 		for(GameCharacter character : Sex.getDominantParticipants(false).keySet()) {
@@ -154,6 +167,9 @@ public interface SexManagerInterface {
 		}
 		
 		if(Sex.isDom(partner) && (!Sex.isConsensual() || subsResisting || !Sex.isSubHasEqualControl() || (partner.getFetishDesire(Fetish.FETISH_DENIAL).isPositive() && subsDenied))) {
+			if(Sex.getNumberOfOrgasms(partner)>partner.getOrgasmsBeforeSatisfied()*2) {
+				return true;
+			}
 			return domsSatisfied;
 			
 		} else if(Sex.getSexControl(partner)!=SexControl.FULL) {
@@ -165,18 +181,18 @@ public interface SexManagerInterface {
 	}
 	
 	public default void initStartingLustAndArousal(GameCharacter character) {
-		character.setLust(50);
+		character.setLustNoText(50);
 		character.setArousal(0);
 		if(Sex.isDom(character)) {
 			if(character.hasFetish(Fetish.FETISH_DOMINANT)) {
-				character.setLust(85);
+				character.setLustNoText(85);
 				character.setArousal(10);
 			} else if(character.hasFetish(Fetish.FETISH_SUBMISSIVE)) {
-				character.setLust(10);
+				character.setLustNoText(10);
 			}
 		} else {
 			if(character.hasFetish(Fetish.FETISH_SUBMISSIVE)) {
-				character.setLust(85);
+				character.setLustNoText(85);
 				character.setArousal(10);
 			}
 		}
@@ -193,9 +209,9 @@ public interface SexManagerInterface {
 					}
 				}
 				if(attracted==0) {
-					character.setLust(0); // If they aren't attracted to anyone, start resisting
+					character.setLustNoText(0); // If they aren't attracted to anyone, start resisting
 				} else if(unattracted>0) {
-					character.setLust(character.getLust()/2); // If they are attracted to some, but not all, halve starting lust
+					character.setLustNoText(character.getLust()/2); // If they are attracted to some, but not all, halve starting lust
 				}
 			}
 		}
@@ -215,29 +231,51 @@ public interface SexManagerInterface {
 	 * @return true if this character is able to remove other people's clothing in sex.
 	 */
 	public default boolean isAbleToRemoveOthersClothing(GameCharacter character, AbstractClothing clothing) {
-		if(clothing!=null
-				&& !Sex.isDom(character)
-				&& clothing.getClothingType().isSexToy()) {
-			return false;
-		}
+		// Is now handled in SexManager as of v0.3.3.8
+//		if(clothing!=null
+//				&& !Sex.isDom(character)
+//				&& clothing.getClothingType().isSexToy()) {
+//			return false;
+//		}
 		
-		if(character.isPlayer()) {
-			return true;
-		}
+//		if(character.isPlayer()) {
+//			return true;
+//		}
+//		
+//		return Sex.getSexControl(character)==SexControl.FULL;
 		
-		return Sex.getSexControl(character)==SexControl.FULL;
+		// The only thing that should limit this is overridden special conditions:
+		return true;
 	}
 	
 	public default boolean isItemUseAvailable() {
 		return true;
 	}
 	
-	public default boolean isPlayerStartNaked() {
+	public default boolean isCharacterStartNaked(GameCharacter character) {
 		return false;
 	}
-
-	public default boolean isPartnerStartNaked() {
-		return false;
+	
+	/**
+	 * @return A mapping of characters to the areas which they should have exposed at the start of sex.
+	 *  The initial Boolean is to determine if clothing is to be removed (true), or displaced (false).
+	 *  The inner map's key is which area is to be exposed, while the value (a list of InventorySlots) corresponds to what slots should not be touched while exposing this area.
+	 *  To see how it's used, reference GameCharacter's displaceClothingForAccess() method.
+	 */
+	public default Map<Boolean, Map<GameCharacter, Map<CoverableArea, List<InventorySlot>>>> exposeAtStartOfSexMapExtendedInformation() {
+		Map<Boolean, Map<GameCharacter, Map<CoverableArea, List<InventorySlot>>>> map = new HashMap<>();
+		
+		map.put(false, new HashMap<>());
+		
+		for(Entry<GameCharacter, List<CoverableArea>> e : this.exposeAtStartOfSexMap().entrySet()) {
+			map.get(false).put(e.getKey(), new HashMap<>());
+			
+			for(CoverableArea c : e.getValue()) {
+				map.get(false).get(e.getKey()).put(c, null);
+			}
+		}
+			
+		return map;
 	}
 	
 	public default Map<GameCharacter, List<CoverableArea>> exposeAtStartOfSexMap() {

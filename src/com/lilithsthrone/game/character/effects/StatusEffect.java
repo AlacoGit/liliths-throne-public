@@ -11,6 +11,7 @@ import java.util.Set;
 
 import com.lilithsthrone.game.PropertyValue;
 import com.lilithsthrone.game.character.GameCharacter;
+import com.lilithsthrone.game.character.PlayerCharacter;
 import com.lilithsthrone.game.character.attributes.AlcoholLevel;
 import com.lilithsthrone.game.character.attributes.ArousalLevel;
 import com.lilithsthrone.game.character.attributes.Attribute;
@@ -36,7 +37,9 @@ import com.lilithsthrone.game.character.persona.SexualOrientation;
 import com.lilithsthrone.game.character.quests.QuestLine;
 import com.lilithsthrone.game.character.race.Race;
 import com.lilithsthrone.game.character.race.RaceStage;
+import com.lilithsthrone.game.character.race.Subspecies;
 import com.lilithsthrone.game.combat.Combat;
+import com.lilithsthrone.game.combat.DamageType;
 import com.lilithsthrone.game.combat.Spell;
 import com.lilithsthrone.game.combat.SpellSchool;
 import com.lilithsthrone.game.combat.SpellUpgrade;
@@ -186,8 +189,7 @@ public enum StatusEffect {
 			true,
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.DAMAGE_PHYSICAL, 10f),
-					new Value<Attribute, Float>(Attribute.CRITICAL_DAMAGE, 20f),
-					new Value<Attribute, Float>(Attribute.HEALTH_MAXIMUM, 10f)),
+					new Value<Attribute, Float>(Attribute.CRITICAL_DAMAGE, 20f)),
 			null) {
 		
 		@Override
@@ -221,8 +223,7 @@ public enum StatusEffect {
 			true,
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.DAMAGE_PHYSICAL, 15f),
-					new Value<Attribute, Float>(Attribute.CRITICAL_DAMAGE, 30f),
-					new Value<Attribute, Float>(Attribute.HEALTH_MAXIMUM, 25f)),
+					new Value<Attribute, Float>(Attribute.CRITICAL_DAMAGE, 30f)),
 			null) {
 		
 		@Override
@@ -256,8 +257,7 @@ public enum StatusEffect {
 			true,
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.DAMAGE_PHYSICAL, 20f),
-					new Value<Attribute, Float>(Attribute.CRITICAL_DAMAGE, 50f),
-					new Value<Attribute, Float>(Attribute.HEALTH_MAXIMUM, 50f)),
+					new Value<Attribute, Float>(Attribute.CRITICAL_DAMAGE, 50f)),
 			null) {
 		
 		@Override
@@ -320,6 +320,7 @@ public enum StatusEffect {
 					new Value<Attribute, Float>(Attribute.SPELL_COST_MODIFIER, -75f)),
 			Util.newArrayListOfValues(
 					"<b style='color: " + Colour.GENERIC_TERRIBLE.toWebHexString() + "'>Surrender in combat at maximum lust</b>",
+					"[style.boldMana(Maximum "+Attribute.MANA_MAXIMUM.getName()+")] [style.boldBad(limited to 5)]",
 					"<b style='color: " + Colour.GENERIC_ARCANE.toWebHexString() + "'>Vulnerable to arcane storms</b>")) {
 		
 		@Override
@@ -355,6 +356,7 @@ public enum StatusEffect {
 			null,
 			Util.newArrayListOfValues(
 					"<b style='color: " + Colour.GENERIC_TERRIBLE.toWebHexString() + "'>Surrender in combat at maximum lust</b>",
+					"[style.boldMana(Maximum "+Attribute.MANA_MAXIMUM.getName()+")] [style.boldBad(limited to 5)]",
 					"<b style='color: " + Colour.GENERIC_ARCANE.toWebHexString() + "'>Vulnerable to arcane storms</b>")) {
 		
 		@Override
@@ -427,8 +429,7 @@ public enum StatusEffect {
 					new Value<Attribute, Float>(Attribute.SPELL_COST_MODIFIER, 10f),
 					new Value<Attribute, Float>(Attribute.DAMAGE_FIRE, 5f),
 					new Value<Attribute, Float>(Attribute.DAMAGE_ICE, 5f),
-					new Value<Attribute, Float>(Attribute.DAMAGE_POISON, 5f),
-					new Value<Attribute, Float>(Attribute.MANA_MAXIMUM, 10f)),
+					new Value<Attribute, Float>(Attribute.DAMAGE_POISON, 5f)),
 			null) {
 		
 		@Override
@@ -466,8 +467,7 @@ public enum StatusEffect {
 					new Value<Attribute, Float>(Attribute.SPELL_COST_MODIFIER, 15f),
 					new Value<Attribute, Float>(Attribute.DAMAGE_FIRE, 10f),
 					new Value<Attribute, Float>(Attribute.DAMAGE_ICE, 10f),
-					new Value<Attribute, Float>(Attribute.DAMAGE_POISON, 10f),
-					new Value<Attribute, Float>(Attribute.MANA_MAXIMUM, 25f)),
+					new Value<Attribute, Float>(Attribute.DAMAGE_POISON, 10f)),
 			null) {
 		
 		@Override
@@ -506,8 +506,7 @@ public enum StatusEffect {
 					new Value<Attribute, Float>(Attribute.SPELL_COST_MODIFIER, 20f),
 					new Value<Attribute, Float>(Attribute.DAMAGE_FIRE, 15f),
 					new Value<Attribute, Float>(Attribute.DAMAGE_ICE, 15f),
-					new Value<Attribute, Float>(Attribute.DAMAGE_POISON, 15f),
-					new Value<Attribute, Float>(Attribute.MANA_MAXIMUM, 50f)),
+					new Value<Attribute, Float>(Attribute.DAMAGE_POISON, 15f)),
 			null) {
 		
 		@Override
@@ -542,7 +541,7 @@ public enum StatusEffect {
 			Colour.CORRUPTION_STAGE_ZERO,
 			true,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, 25f)),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, 5f)),
 			null) {
 
 		@Override
@@ -577,8 +576,7 @@ public enum StatusEffect {
 			Colour.CORRUPTION_STAGE_ONE,
 			false,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, 15f),
-					new Value<Attribute, Float>(Attribute.DAMAGE_LUST, 10f)),
+					new Value<Attribute, Float>(Attribute.DAMAGE_LUST, 5f)),
 			null) {
 
 		@Override
@@ -612,8 +610,8 @@ public enum StatusEffect {
 			"attCorruption2",
 			Colour.CORRUPTION_STAGE_TWO,
 			false,
-			Util.newHashMapOfValues(new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, 5f),
-					new Value<Attribute, Float>(Attribute.DAMAGE_LUST, 20f)),
+			Util.newHashMapOfValues(
+					new Value<Attribute, Float>(Attribute.DAMAGE_LUST, 15f)),
 			null) {
 
 		@Override
@@ -647,7 +645,8 @@ public enum StatusEffect {
 			"attCorruption3",
 			Colour.CORRUPTION_STAGE_THREE,
 			false,
-			Util.newHashMapOfValues(new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, -5f),
+			Util.newHashMapOfValues(
+					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, -5f),
 					new Value<Attribute, Float>(Attribute.DAMAGE_LUST, 30f),
 					new Value<Attribute, Float>(Attribute.FERTILITY, 25f),
 					new Value<Attribute, Float>(Attribute.VIRILITY, 25f)),
@@ -1245,10 +1244,10 @@ public enum StatusEffect {
 		@Override
 		public String getDescription(GameCharacter target) {
 			if(Main.game.isDayTime()) {
-				return "The sun shines down on you, and you let out a contented sigh as you look up at the clear blue sky."
+				return "The sun shines down from a perfectly clear blue sky."
 						+ " Although there's no sign of a storm at the moment, you can still feel the effects of the arcane manifesting in the form of an increased libido.";
 			} else {
-				return "The moon shines down through a clear night's sky, and you let out a contented sigh as you look up at the stars."
+				return "The moon and stars shine down from a perfectly clear night's sky."
 						+ " Although there's no sign of a storm at the moment, you can still feel the effects of the arcane manifesting in the form of an increased libido.";
 			}
 		}
@@ -1593,6 +1592,22 @@ public enum StatusEffect {
 				return SVGImages.SVG_IMAGE_PROVIDER.getWeatherNightStorm();
 			}
 		}
+
+		@Override
+		public List<String> getExtraEffects(GameCharacter target) {
+			if(Main.game.getPlayer().isSpellSchoolSpecialAbilityUnlocked(SpellSchool.ARCANE)) {
+				return Util.newArrayListOfValues(
+						"<b style='color: "+ Colour.GENERIC_ARCANE.toWebHexString()+ ";'>Enhanced libido</b>",
+						"[style.boldExcellent(Double)] all <b style='color: "+ Colour.GENERIC_ARCANE.toWebHexString()+ ";'>Essence gains</b> from sex & combat",
+						"Time until <b style='color: " + Colour.GENERIC_ARCANE.toWebHexString() + ";'>storm ends</b>:",
+						Main.game.getWeatherTimeRemainingAsTimeString());
+				
+			} else {
+				return Util.newArrayListOfValues(
+						"<b style='color: "+ Colour.GENERIC_ARCANE.toWebHexString()+ ";'>Enhanced libido</b>",
+						"[style.boldExcellent(Double)] all <b style='color: "+ Colour.GENERIC_ARCANE.toWebHexString()+ ";'>Essence gains</b> from sex & combat");
+			}
+		}
 	},
 	
 	WEATHER_STORM_VULNERABLE(100,
@@ -1600,7 +1615,7 @@ public enum StatusEffect {
 			"weatherDayStorm",
 			Colour.CLOTHING_WHITE,
 			false,
-			Util.newHashMapOfValues(new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, -75f)),
+			Util.newHashMapOfValues(new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, -100f)),
 			Util.newArrayListOfValues(
 					"<b style='color: "+ Colour.GENERIC_ARCANE.toWebHexString()+ ";'>Enhanced libido</b>",
 					"<b style='color: "+ Colour.GENERIC_ARCANE.toWebHexString()+ ";'>Overwhelming Lust</b>",
@@ -1647,6 +1662,24 @@ public enum StatusEffect {
 				return SVGImages.SVG_IMAGE_PROVIDER.getWeatherDayStorm();
 			} else {
 				return SVGImages.SVG_IMAGE_PROVIDER.getWeatherNightStorm();
+			}
+		}
+
+		@Override
+		public List<String> getExtraEffects(GameCharacter target) {
+			if(Main.game.getPlayer().isSpellSchoolSpecialAbilityUnlocked(SpellSchool.ARCANE)) {
+				return Util.newArrayListOfValues(
+						"<b style='color: "+ Colour.GENERIC_ARCANE.toWebHexString()+ ";'>Enhanced libido</b>",
+						"<b style='color: "+ Colour.GENERIC_ARCANE.toWebHexString()+ ";'>Overwhelming Lust</b>",
+						"[style.boldExcellent(Double)] <b style='color: "+ Colour.GENERIC_ARCANE.toWebHexString()+ ";'>Essence gains</b> from sex & combat",
+						"Time until <b style='color: " + Colour.GENERIC_ARCANE.toWebHexString() + ";'>storm ends</b>:",
+						Main.game.getWeatherTimeRemainingAsTimeString());
+				
+			} else {
+				return Util.newArrayListOfValues(
+						"<b style='color: "+ Colour.GENERIC_ARCANE.toWebHexString()+ ";'>Enhanced libido</b>",
+						"<b style='color: "+ Colour.GENERIC_ARCANE.toWebHexString()+ ";'>Overwhelming Lust</b>",
+						"[style.boldExcellent(Double)] <b style='color: "+ Colour.GENERIC_ARCANE.toWebHexString()+ ";'>Essence gains</b> from sex & combat");
 			}
 		}
 	},
@@ -1703,6 +1736,20 @@ public enum StatusEffect {
 				return SVGImages.SVG_IMAGE_PROVIDER.getWeatherNightStormProtected();
 			}
 		}
+
+		@Override
+		public List<String> getExtraEffects(GameCharacter target) {
+			if(Main.game.getPlayer().isSpellSchoolSpecialAbilityUnlocked(SpellSchool.ARCANE)) {
+				return Util.newArrayListOfValues(
+						"<b style='color: "+ Colour.GENERIC_ARCANE.toWebHexString()+ ";'>Enhanced libido</b>",
+						"Time until <b style='color: " + Colour.GENERIC_ARCANE.toWebHexString() + ";'>storm ends</b>:",
+						Main.game.getWeatherTimeRemainingAsTimeString());
+				
+			} else {
+				return Util.newArrayListOfValues(
+						"<b style='color: "+ Colour.GENERIC_ARCANE.toWebHexString()+ ";'>Enhanced libido</b>");
+			}
+		}
 	},
 	
 	// RACES:
@@ -1737,7 +1784,7 @@ public enum StatusEffect {
 		}
 	},
 	
-	SUBSPECIES_BONUS( //TODO
+	SUBSPECIES_BONUS(
 			1000,
 			"",
 			null,
@@ -1748,18 +1795,32 @@ public enum StatusEffect {
 
 		@Override
 		public String getName(GameCharacter target) {
+			if(target.isRaceConcealed()) {
+				return "Concealed subspecies bonus";
+			}
+			if(target.getSubspeciesOverride()!=null && target.getSubspeciesOverride().equals(Subspecies.DEMON) && target.getRaceStage()!=RaceStage.GREATER) {
+				return Subspecies.DEMON.getName(null)+" ("+target.getSubspecies().getName(target)+")";
+			}
 			return target.getSubspecies().getName(target);
 		}
 
 		@Override
 		public String getDescription(GameCharacter target) {
-			return target.getSubspecies().getStatusEffectDescription(target);
+			if(target.isRaceConcealed()) {
+				return UtilText.parse(target, "Although [npc.namePos] race is concealed, they're still benefiting from the attribute modifiers...");
+			}
+			if(target.getSubspeciesOverride()!=null && target.getSubspeciesOverride().equals(Subspecies.DEMON) && target.getRaceStage()!=RaceStage.GREATER) {
+				String subspeciesName = target.getSubspecies().getName(target);//target.getHalfDemonSubspecies().getName(target);
+				return Subspecies.DEMON.getStatusEffectDescription(target)
+						+UtilText.parse(target, " [style.italicsDemon([npc.NameHasFull] used [npc.her] transformative powers to appear as "+UtilText.generateSingularDeterminer(subspeciesName) + " " +subspeciesName+".)]");
+			} else {
+				return target.getSubspecies().getStatusEffectDescription(target);	
+			}
 		}
 
 		@Override
 		public boolean isConditionsMet(GameCharacter target) {
-			return Main.game.isInNewWorld()
-					&& !target.isRaceConcealed();
+			return Main.game.isInNewWorld();
 		}
 
 		@Override
@@ -1774,6 +1835,12 @@ public enum StatusEffect {
 		
 		@Override
 		public String getSVGString(GameCharacter owner) {
+			if(owner.isRaceConcealed()) {
+				return SVGImages.SVG_IMAGE_PROVIDER.getRaceUnknown();
+			}
+//			if(owner.getSubspeciesOverride()!=null && owner.getSubspeciesOverride().equals(Subspecies.DEMON)) {
+//				return Subspecies.DEMON.getSVGString(null);
+//			}
 			return owner.getSubspecies().getSVGString(owner);
 		}
 	},
@@ -1877,7 +1944,7 @@ public enum StatusEffect {
 			"clothingFemininity",
 			Colour.CLOTHING_PINK_LIGHT,
 			false,
-			Util.newHashMapOfValues(new Value<Attribute, Float>(Attribute.MAJOR_ARCANE, -5f)),
+			Util.newHashMapOfValues(new Value<Attribute, Float>(Attribute.DAMAGE_LUST, -15f)),
 			null) {
 
 		@Override
@@ -1888,7 +1955,7 @@ public enum StatusEffect {
 
 		@Override
 		public boolean isConditionsMet(GameCharacter target) {
-			if(target.hasFetish(Fetish.FETISH_CROSS_DRESSER)) {
+			if(target.hasFetish(Fetish.FETISH_CROSS_DRESSER) || target.hasPerkAnywhereInTree(Perk.SPECIAL_CLOTHING_FEMININITY_INDIFFERENCE)) {
 				return false;
 			}
 			
@@ -1907,7 +1974,7 @@ public enum StatusEffect {
 			"clothingMasculinity",
 			Colour.CLOTHING_BLUE,
 			false,
-			Util.newHashMapOfValues(new Value<Attribute, Float>(Attribute.MAJOR_ARCANE, -5f)),
+			Util.newHashMapOfValues(new Value<Attribute, Float>(Attribute.DAMAGE_LUST, -15f)),
 			null) {
 
 		@Override
@@ -1918,7 +1985,7 @@ public enum StatusEffect {
 
 		@Override
 		public boolean isConditionsMet(GameCharacter target) {
-			if(target.hasFetish(Fetish.FETISH_CROSS_DRESSER)) {
+			if(target.hasFetish(Fetish.FETISH_CROSS_DRESSER) || target.hasPerkAnywhereInTree(Perk.SPECIAL_CLOTHING_MASCULINITY_INDIFFERENCE)) {
 				return false;
 			}
 			
@@ -1954,6 +2021,13 @@ public enum StatusEffect {
 			else
 				return "Some of "+target.getName("the")+"'s clothes have been covered in cum, milk or other sexual fluids."
 						+ " [npc.sheIs] feeling incredibly embarrassed to be walking around in such filthy clothing.";
+		}
+
+		@Override
+		public String getAdditionalDescription(GameCharacter target) {
+			if(Main.game.isOpportunisticAttackersEnabled() && target.isPlayer())
+				return "<b style='color:" + Colour.BASE_GREY.toWebHexString() +";'>Opportunistic Attackers</b><br>Your smelly clothes seem to attract trouble.";
+			return super.getAdditionalDescription(target);
 		}
 
 		@Override
@@ -1998,6 +2072,13 @@ public enum StatusEffect {
 		}
 
 		@Override
+		public String getAdditionalDescription(GameCharacter target) {
+			if(Main.game.isOpportunisticAttackersEnabled() && target.isPlayer())
+				return "<b style='color:" + Colour.BASE_GREY.toWebHexString() +";'>Opportunistic Attackers</b><br>Your smelly clothes seem to attract trouble.";
+			return super.getAdditionalDescription(target);
+		}
+
+		@Override
 		public boolean isConditionsMet(GameCharacter target) {
 			if(isCumEffectPositive(target)) {
 				for (AbstractClothing c : target.getClothingCurrentlyEquipped()) {
@@ -2026,28 +2107,45 @@ public enum StatusEffect {
 		public String applyEffect(GameCharacter target, int secondsPassed) {
 			List<InventorySlot> slotsToClean = new ArrayList<>();
 			StringBuilder sb = new StringBuilder();
-			for(AbstractClothing clothing : target.getClothingCurrentlyEquipped()) {
-				if(target.getDirtySlots().contains(clothing.getClothingType().getSlot())) {
-					slotsToClean.add(clothing.getClothingType().getSlot());
-					if(!clothing.isDirty()) {
-						clothing.setDirty(true);
-						if(sb.length()>0) {
-							sb.append("<br/>");
+			for(AbstractClothing clothing : new ArrayList<>(target.getClothingCurrentlyEquipped())) {
+				if(target.getDirtySlots().contains(clothing.getSlotEquippedTo())) {
+					slotsToClean.add(clothing.getSlotEquippedTo());
+					
+					boolean seals =
+							clothing.getClothingType().getItemTags().contains(ItemTag.SEALS_ANUS)
+							|| clothing.getClothingType().getItemTags().contains(ItemTag.SEALS_VAGINA)
+							|| clothing.getClothingType().getItemTags().contains(ItemTag.SEALS_NIPPLES);
+					
+					if(clothing.getSlotEquippedTo()==InventorySlot.ANUS && (clothing.getClothingType().getItemTags().contains(ItemTag.SEALS_ANUS) || clothing.getClothingType().getItemTags().contains(ItemTag.PLUGS_ANUS))
+							|| clothing.getSlotEquippedTo()==InventorySlot.VAGINA && (clothing.getClothingType().getItemTags().contains(ItemTag.SEALS_VAGINA) || clothing.getClothingType().getItemTags().contains(ItemTag.PLUGS_VAGINA))
+							|| clothing.getSlotEquippedTo()==InventorySlot.NIPPLE && (clothing.getClothingType().getItemTags().contains(ItemTag.SEALS_NIPPLES) || clothing.getClothingType().getItemTags().contains(ItemTag.PLUGS_NIPPLES))) {
+						sb.append("You use your <b>"+clothing.getDisplayName(true)+"</b> to clean your "+clothing.getSlotEquippedTo().getName()
+								+(seals
+										?" as you equip "+(clothing.getClothingType().isPlural()?"them":"it")
+										:" as you insert "+(clothing.getClothingType().isPlural()?"them into your orifices":"it into your orifice"))
+								+".");
+						
+					} else {
+						if(!clothing.isDirty()) {
+							clothing.setDirty(target, true);
+							if(sb.length()>0) {
+								sb.append("<br/>");
+							}
+							sb.append("You use your <b>"+clothing.getDisplayName(true)+"</b> to clean your "+clothing.getSlotEquippedTo().getName()
+									+", <b style='color:"+Colour.CUM.toWebHexString()+";'>dirtying "+(clothing.getClothingType().isPlural()?"them":"it")+" in the process</b>.");
 						}
-						sb.append("You use your <b>"+clothing.getDisplayName(true)+"</b> to clean your "+clothing.getClothingType().getSlot().getName()
-								+", <b style='color:"+Colour.CUM.toWebHexString()+";'>dirtying "+(clothing.getClothingType().isPlural()?"them":"it")+" in the process</b>.");
 					}
 					
 				} else {
-					for(InventorySlot blockedSlot : clothing.getClothingType().getIncompatibleSlots(target)) {
+					for(InventorySlot blockedSlot : clothing.getClothingType().getIncompatibleSlots(target, clothing.getSlotEquippedTo())) {
 						if(target.getDirtySlots().contains(blockedSlot)) {
 							slotsToClean.add(blockedSlot);
 							if(!clothing.isDirty()) {
-								clothing.setDirty(true);
+								clothing.setDirty(target, true);
 								if(sb.length()>0) {
 									sb.append("<br/>");
 								}
-								sb.append("You use your <b>"+clothing.getDisplayName(true)+"</b> to clean your "+clothing.getClothingType().getSlot().getName()
+								sb.append("You use your <b>"+clothing.getDisplayName(true)+"</b> to clean your "+clothing.getSlotEquippedTo().getName()
 										+", <b style='color:"+Colour.CUM.toWebHexString()+";'>dirtying "+(clothing.getClothingType().isPlural()?"them":"it")+" in the process</b>.");
 							}
 						}
@@ -2074,6 +2172,12 @@ public enum StatusEffect {
 				return UtilText.parse(target, "Some parts of [npc.namePos] body have been covered in cum, milk or other sexual fluids."
 						+ " [npc.sheIs] feeling incredibly embarrassed to be walking around in such a filthy state.");
 			}
+		}
+		@Override
+		public String getAdditionalDescription(GameCharacter target) {
+			if(Main.game.isOpportunisticAttackersEnabled() && target.isPlayer())
+				return "<b style='color:" + Colour.BASE_GREY.toWebHexString() +";'>Opportunistic Attackers</b><br>Your smelly body seems to attract trouble.";
+			return super.getAdditionalDescription(target);
 		}
 
 		@Override
@@ -2108,21 +2212,126 @@ public enum StatusEffect {
 		}
 
 		@Override
+		public String getAdditionalDescription(GameCharacter target) {
+			if(Main.game.isOpportunisticAttackersEnabled() && target.isPlayer())
+				return "<b style='color:" + Colour.BASE_GREY.toWebHexString() +";'>Opportunistic Attackers</b><br>Your smelly body seems to attract trouble.";
+			return super.getAdditionalDescription(target);
+		}
+
+		@Override
 		public boolean isConditionsMet(GameCharacter target) {
 			return (isCumEffectPositive(target)) && !target.getDirtySlots().isEmpty();
+		}
+	},
+	
+
+	CLOTHING_ENCHANTMENT_OVER_LIMIT(
+			80,
+			"unstable enchantments",
+			"unstable_enchantment_1",
+			Colour.ATTRIBUTE_CORRUPTION,
+			false,
+			Util.newHashMapOfValues(
+					new Value<Attribute, Float>(Attribute.MAJOR_CORRUPTION, 25f)),
+			Util.newArrayListOfValues(
+					"[style.boldMinorBad(-10%)] [style.boldHealth(Maximum "+Attribute.HEALTH_MAXIMUM.getName()+")]",
+					"[style.boldMinorBad(-10%)] [style.boldMana(Maximum "+Attribute.MANA_MAXIMUM.getName()+")]")) {
+
+		@Override
+		public String getDescription(GameCharacter target) {
+			return UtilText.parse(target,
+					"[npc.NameIsFull] unable to handle the amount of attribute enchantments infused into [npc.her] weapons, clothing, and tattoos, and so [npc.is] suffering from some negative side-effects."
+							+ " If [npc.she] continues equipping enchanted items, this is sure to get much worse...");
+		}
+
+		@Override
+		public String applyEffect(GameCharacter target, int secondsPassed) {
+			return "";
+		}
+
+		@Override
+		public boolean isConditionsMet(GameCharacter target) {
+			int overBy = (int) (target.getEnchantmentPointsUsedTotal()-target.getAttributeValue(Attribute.ENCHANTMENT_LIMIT));
+			return Main.game.isEnchantmentCapacityEnabled() && overBy>0 && overBy<10;
+		}
+	},
+	
+	CLOTHING_ENCHANTMENT_OVER_LIMIT_2(
+			80,
+			"volatile enchantments",
+			"unstable_enchantment_2",
+			Colour.ATTRIBUTE_CORRUPTION,
+			false,
+			Util.newHashMapOfValues(
+					new Value<Attribute, Float>(Attribute.MAJOR_CORRUPTION, 50f)),
+			Util.newArrayListOfValues(
+					"[style.boldBad(-50%)] [style.boldHealth(Maximum "+Attribute.HEALTH_MAXIMUM.getName()+")]",
+					"[style.boldBad(-50%)] [style.boldMana(Maximum "+Attribute.MANA_MAXIMUM.getName()+")]")) {
+
+		@Override
+		public String getDescription(GameCharacter target) {
+			return UtilText.parse(target,
+					"[npc.NameIsFull] unable to handle the amount of attribute enchantments infused into [npc.her] weapons, clothing, and tattoos, and so [npc.is] suffering from some severe negative side-effects."
+							+ " If [npc.she] continues equipping enchanted items, this is sure to get much worse...");
+		}
+
+		@Override
+		public String applyEffect(GameCharacter target, int secondsPassed) {
+			return "";
+		}
+
+		@Override
+		public boolean isConditionsMet(GameCharacter target) {
+			int overBy = (int) (target.getEnchantmentPointsUsedTotal()-target.getAttributeValue(Attribute.ENCHANTMENT_LIMIT));
+			return Main.game.isEnchantmentCapacityEnabled() && overBy>=10 && overBy<20;
+		}
+	},
+	
+	CLOTHING_ENCHANTMENT_OVER_LIMIT_3(
+			80,
+			"shattered enchantments",
+			"unstable_enchantment_3",
+			Colour.ATTRIBUTE_CORRUPTION,
+			false,
+			Util.newHashMapOfValues(
+					new Value<Attribute, Float>(Attribute.MAJOR_CORRUPTION, 100f)),
+			Util.newArrayListOfValues(
+					"[style.boldHealth(Maximum "+Attribute.HEALTH_MAXIMUM.getName()+")] [style.boldTerrible(set to 1)]",
+					"[style.boldMana(Maximum "+Attribute.MANA_MAXIMUM.getName()+")] [style.boldTerrible(set to 1)]")) {
+
+		@Override
+		public String getDescription(GameCharacter target) {
+			return UtilText.parse(target,
+					"[npc.NameIsFull] unable to handle the amount of attribute enchantments infused into [npc.her] weapons, clothing, and tattoos, and so [npc.is] suffering from some extremely severe negative side-effects.");
+		}
+
+		@Override
+		public String applyEffect(GameCharacter target, int secondsPassed) {
+			return "";
+		}
+
+		@Override
+		public boolean isConditionsMet(GameCharacter target) {
+			int overBy = (int) (target.getEnchantmentPointsUsedTotal()-target.getAttributeValue(Attribute.ENCHANTMENT_LIMIT));
+			return Main.game.isEnchantmentCapacityEnabled() && overBy>=20;
 		}
 	},
 	
 	CLOTHING_JINXED(
 			80,
 			"jinxed clothing",
-			"arcaneDrain",
+			"jinxed_clothing",
 			Colour.ATTRIBUTE_CORRUPTION,
 			false,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, -2f),
-					new Value<Attribute, Float>(Attribute.MAJOR_ARCANE, -2f)),
+					new Value<Attribute, Float>(Attribute.MAJOR_CORRUPTION, 10f)),
 			null) {
+
+		@Override
+		public String getDescription(GameCharacter target) {
+			return UtilText.parse(target,
+					"The enchantment on [npc.namePos] jinxed clothing is highly corruptive in nature. [npc.She] can feel its power projecting lewd thoughts into [npc.her] mind, lowering [npc.her] inhibitions towards performing sexual acts...");
+		}
 
 		@Override
 		public String applyEffect(GameCharacter target, int secondsPassed) {
@@ -2130,13 +2339,13 @@ public enum StatusEffect {
 				if(!Main.game.getDialogueFlags().values.contains(DialogueFlagValue.jinxedClothingDiscovered)) {
 					Main.game.getDialogueFlags().values.add(DialogueFlagValue.jinxedClothingDiscovered);
 					AbstractClothing clothing = null;
-					for(AbstractClothing c : target.getClothingCurrentlyEquipped()) {
+					for(AbstractClothing c : new ArrayList<>(target.getClothingCurrentlyEquipped())) {
 						if(c.isSealed()) {
 							clothing = c;
 							break;
 						}
 					}
-					if(!Main.game.getPlayer().isQuestCompleted(QuestLine.SIDE_ENCHANTMENT_DISCOVERY)) {
+					if(target.isPlayer() && !((PlayerCharacter) target).isQuestCompleted(QuestLine.SIDE_ENCHANTMENT_DISCOVERY)) {
 						return "<p>"
 									+ "As you finish fitting the "+clothing.getName()+" in place, you start to feel a strange warmth radiating from "+(clothing.getClothingType().isPlural()?"their":"its")+" surface."
 									+ " Feeling a little uneasy about the manner of arcane enchantment that "+(clothing.getClothingType().isPlural()?"they":"it")+" must contain, you immediately try to take "
@@ -2156,7 +2365,9 @@ public enum StatusEffect {
 										+" <b style='color:"+Colour.RARITY_JINXED.toWebHexString()+";'>jinxed</b> "+clothing.getName()+"."
 									+ " Maybe she'll know a way to break the seal?"
 								+ "</p>"
-								+(!Main.game.getPlayer().hasQuest(QuestLine.SIDE_ENCHANTMENT_DISCOVERY)?Main.game.getPlayer().startQuest(QuestLine.SIDE_ENCHANTMENT_DISCOVERY):"");
+								+(!((PlayerCharacter) target).hasQuest(QuestLine.SIDE_ENCHANTMENT_DISCOVERY)
+										?((PlayerCharacter) target).startQuest(QuestLine.SIDE_ENCHANTMENT_DISCOVERY)
+										:"");
 					
 					} else {
 						return "<p>"
@@ -2174,8 +2385,10 @@ public enum StatusEffect {
 										+" around a little, and whenever it looks to be in danger of being removed, it moves back into its proper position with a mind of its own."
 								+ "</p>"
 								+ "<p>"
-									+ "Lilaya's warning about jinxed clothing suddenly shoots to the forefront of your mind, and you let out a groan as you realise that "+(clothing.getClothingType().isPlural()?"these ":"this ")+clothing.getName()
-										+" are <b style='color:"+Colour.RARITY_JINXED.toWebHexString()+";'>jinxed</b>."
+									+ "Lilaya's warning about jinxed clothing suddenly shoots to the forefront of your mind, and you let out a groan as you realise that "
+										+(clothing.getClothingType().isPlural()?"these ":"this ")+clothing.getName()
+										+(clothing.getClothingType().isPlural()?" are":" is")
+										+" <b style='color:"+Colour.RARITY_JINXED.toWebHexString()+";'>jinxed</b>."
 									+ " Remembering what Lilaya said, you should be able to remove the jinx if you focus some of your absorbed essences into it..."
 								+ "</p>";
 					}
@@ -2186,11 +2399,6 @@ public enum StatusEffect {
 			} else {
 				return "";
 			}
-		}
-
-		@Override
-		public String getDescription(GameCharacter target) {
-			return "The enchantment on your jinxed clothing seems to be vampyric in nature. You can feel it draining a little of your arcane aura as it uses your strength to power itself.";
 		}
 
 		@Override
@@ -2325,8 +2533,8 @@ public enum StatusEffect {
 			false,
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, -5f),
-					new Value<Attribute, Float>(Attribute.MAJOR_ARCANE, -50f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, -50f)),
+					new Value<Attribute, Float>(Attribute.MAJOR_ARCANE, -5f),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, -25f)),
 			Util.newArrayListOfValues("Open to <b style='color: " + Colour.PSYCHOACTIVE.toWebHexString() + ";'>Hypnotic Suggestion</b>")) {
 
 		@Override
@@ -2462,8 +2670,8 @@ public enum StatusEffect {
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, 2f),
 					new Value<Attribute, Float>(Attribute.MAJOR_ARCANE, -2f),
-					new Value<Attribute, Float>(Attribute.DAMAGE_LUST, 10f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, -5f)),
+					new Value<Attribute, Float>(Attribute.DAMAGE_LUST, 5f),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, -1f)),
 			null) {
 
 		@Override
@@ -2474,13 +2682,8 @@ public enum StatusEffect {
 
 		@Override
 		public String getDescription(GameCharacter target) {
-			if(target.isPlayer()) {
-				return ("After recently drinking an alcoholic liquid, you're feeling a little tipsy...<br/>"
-						+ "Intoxication: "+target.getIntoxicationPercentage()+"%");
-			} else {
-				return (UtilText.parse(target, "After recently drinking an alcoholic liquid, [npc.name] is feeling a little tipsy...<br/>"
-						+ "Intoxication: "+target.getIntoxicationPercentage()+"%"));
-			}
+			return (UtilText.parse(target, "After recently drinking an alcoholic liquid, [npc.nameIsFull] feeling a little tipsy...<br/>"
+					+ "Intoxication: "+Units.round(target.getIntoxicationPercentage(), 1)+"%"));
 		}
 		
 		@Override
@@ -2503,8 +2706,8 @@ public enum StatusEffect {
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, 5f),
 					new Value<Attribute, Float>(Attribute.MAJOR_ARCANE, -5f),
-					new Value<Attribute, Float>(Attribute.DAMAGE_LUST, 20f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, -10f)),
+					new Value<Attribute, Float>(Attribute.DAMAGE_LUST, 10f),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, -5f)),
 			null) {
 
 		@Override
@@ -2514,13 +2717,8 @@ public enum StatusEffect {
 
 		@Override
 		public String getDescription(GameCharacter target) {
-			if(target.isPlayer()) {
-				return ("After recently drinking an alcoholic liquid, you're feeling quite merry...<br/>"
-						+ "Intoxication: "+target.getIntoxicationPercentage()+"%");
-			} else {
-				return (UtilText.parse(target, "After recently drinking an alcoholic liquid, [npc.name] is feeling quite merry...<br/>"
-						+ "Intoxication: "+target.getIntoxicationPercentage()+"%"));
-			}
+			return (UtilText.parse(target, "After recently drinking an alcoholic liquid, [npc.nameIsFull] feeling quite merry...<br/>"
+					+ "Intoxication: "+Units.round(target.getIntoxicationPercentage(), 1)+"%"));
 		}
 
 		@Override
@@ -2543,7 +2741,7 @@ public enum StatusEffect {
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.MAJOR_ARCANE, -5f),
 					new Value<Attribute, Float>(Attribute.DAMAGE_LUST, 5f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, -20f)),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, -10f)),
 			null) {
 
 		@Override
@@ -2553,13 +2751,15 @@ public enum StatusEffect {
 
 		@Override
 		public String getDescription(GameCharacter target) {
-			if(target.isPlayer()) {
-				return ("After recently drinking an alcoholic liquid, you're feeling quite drunk...<br/>"
-						+ "Intoxication: "+target.getIntoxicationPercentage()+"%");
-			} else {
-				return (UtilText.parse(target, "After recently drinking an alcoholic liquid, [npc.name] is feeling quite drunk...<br/>"
-						+ "Intoxication: "+target.getIntoxicationPercentage()+"%"));
-			}
+			return (UtilText.parse(target, "After recently drinking an alcoholic liquid, [npc.nameIsFull] feeling quite drunk...<br/>"
+					+ "Intoxication: "+Units.round(target.getIntoxicationPercentage(), 1)+"%"));
+		}
+
+		@Override
+		public String getAdditionalDescription(GameCharacter target) {
+			if(Main.game.isOpportunisticAttackersEnabled() && target.isPlayer())
+				return "<b style='color:" + Colour.BASE_GREY.toWebHexString() +";'>Opportunistic Attackers</b><br>You're obviously drunk and some might think you're easy prey.";
+			return super.getAdditionalDescription(target);
 		}
 
 		@Override
@@ -2583,7 +2783,7 @@ public enum StatusEffect {
 					new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, -5f),
 					new Value<Attribute, Float>(Attribute.MAJOR_ARCANE, -10f),
 					new Value<Attribute, Float>(Attribute.DAMAGE_LUST, -5f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, -20f)),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, -15f)),
 			null) {
 
 		@Override
@@ -2593,13 +2793,15 @@ public enum StatusEffect {
 
 		@Override
 		public String getDescription(GameCharacter target) {
-			if(target.isPlayer()) {
-				return ("After recently drinking an alcoholic liquid, you're feeling pretty hammered...<br/>"
-						+ "Intoxication: "+target.getIntoxicationPercentage()+"%");
-			} else {
-				return (UtilText.parse(target, "After recently drinking an alcoholic liquid, [npc.name] is feeling pretty hammered...<br/>"
-						+ "Intoxication: "+target.getIntoxicationPercentage()+"%"));
-			}
+			return (UtilText.parse(target, "After recently drinking an alcoholic liquid, [npc.nameIsFull] feeling absolutely hammered...<br/>"
+					+ "Intoxication: "+Units.round(target.getIntoxicationPercentage(), 1)+"%"));
+		}
+
+		@Override
+		public String getAdditionalDescription(GameCharacter target) {
+			if(Main.game.isOpportunisticAttackersEnabled() && target.isPlayer())
+				return "<b style='color:" + Colour.BASE_GREY.toWebHexString() +";'>Opportunistic Attackers</b><br>You're obviously drunk and some might think you're easy prey.";
+			return super.getAdditionalDescription(target);
 		}
 
 		@Override
@@ -2623,7 +2825,7 @@ public enum StatusEffect {
 					new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, -10f),
 					new Value<Attribute, Float>(Attribute.MAJOR_ARCANE, -15f),
 					new Value<Attribute, Float>(Attribute.DAMAGE_LUST, -10f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, -25f)),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, -20f)),
 			null) {
 
 		@Override
@@ -2633,13 +2835,15 @@ public enum StatusEffect {
 
 		@Override
 		public String getDescription(GameCharacter target) {
-			if(target.isPlayer()) {
-				return ("After recently drinking an alcoholic liquid, you're feeling completely wasted...<br/>"
-						+ "Intoxication: "+target.getIntoxicationPercentage()+"%");
-			} else {
-				return (UtilText.parse(target, "After recently drinking an alcoholic liquid, [npc.name] is feeling completely wasted...<br/>"
-						+ "Intoxication: "+target.getIntoxicationPercentage()+"%"));
-			}
+			return (UtilText.parse(target, "After recently drinking an alcoholic liquid, [npc.nameIsFull] feeling completely wasted...<br/>"
+					+ "Intoxication: "+Units.round(target.getIntoxicationPercentage(), 1)+"%"));
+		}
+
+		@Override
+		public String getAdditionalDescription(GameCharacter target) {
+			if(Main.game.isOpportunisticAttackersEnabled() && target.isPlayer())
+				return "<b style='color:" + Colour.BASE_GREY.toWebHexString() +";'>Opportunistic Attackers</b><br>You're obviously drunk and some might think you're easy prey.";
+			return super.getAdditionalDescription(target);
 		}
 
 		@Override
@@ -2719,7 +2923,8 @@ public enum StatusEffect {
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.MAJOR_ARCANE, -2f),
 					new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, -2f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, -2f)),
+					new Value<Attribute, Float>(Attribute.HEALTH_MAXIMUM, -2f),
+					new Value<Attribute, Float>(Attribute.MANA_MAXIMUM, -2f)),
 			null) {
 
 		@Override
@@ -2784,7 +2989,8 @@ public enum StatusEffect {
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.MAJOR_ARCANE, -5f),
 					new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, -5f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, -5f)),
+					new Value<Attribute, Float>(Attribute.HEALTH_MAXIMUM, -5f),
+					new Value<Attribute, Float>(Attribute.MANA_MAXIMUM, -5f)),
 			null) {
 
 		@Override
@@ -2849,7 +3055,8 @@ public enum StatusEffect {
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.MAJOR_ARCANE, -10f),
 					new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, -10f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, -10f)),
+					new Value<Attribute, Float>(Attribute.HEALTH_MAXIMUM, -10f),
+					new Value<Attribute, Float>(Attribute.MANA_MAXIMUM, -10f)),
 			null) {
 
 		@Override
@@ -2914,7 +3121,8 @@ public enum StatusEffect {
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.MAJOR_ARCANE, -25f),
 					new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, -25f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, -25f)),
+					new Value<Attribute, Float>(Attribute.HEALTH_MAXIMUM, -25f),
+					new Value<Attribute, Float>(Attribute.MANA_MAXIMUM, -25f)),
 			null) {
 
 		@Override
@@ -2979,7 +3187,8 @@ public enum StatusEffect {
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.MAJOR_ARCANE, -50f),
 					new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, -50f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, -50f)),
+					new Value<Attribute, Float>(Attribute.HEALTH_MAXIMUM, -50f),
+					new Value<Attribute, Float>(Attribute.MANA_MAXIMUM, -50f)),
 			null) {
 
 		@Override
@@ -3029,6 +3238,37 @@ public enum StatusEffect {
 		}
 	},
 
+	MENOPAUSE(
+			80,
+			"Menopause",
+			"menopause",
+			Colour.BASE_CRIMSON,
+			false,
+			null,
+			Util.newArrayListOfValues(
+					"[style.colourBad(Total infertility)]")) {
+
+		@Override
+		public String applyEffect(GameCharacter target, int secondsPassed) {
+			return "";
+		}
+
+		@Override
+		public String getDescription(GameCharacter target) {
+			return UtilText.parse(target,
+					"Due to being over fifty-two years of age, [npc.nameHasFull] undergone menopause, and as [npc.sheIsFull] not a demon, [npc.sheHasFull] been rendered completely unable to bear children.");
+		}
+
+		@Override
+		public boolean isConditionsMet(GameCharacter target) {
+			return (Main.getProperties().hasValue(PropertyValue.ageContent) || target.isUnique())
+					&& target.hasVagina()
+					&& target.getAgeValue()>=52
+					&& (target.getSubspecies()==Subspecies.ANGEL || target.getSubspeciesOverride()==null) // Angels and demons are immune
+					&& !(target instanceof Elemental);
+		}
+	},
+	
 	PREGNANT_0(
 			80,
 			"risk of pregnancy",
@@ -3040,13 +3280,13 @@ public enum StatusEffect {
 
 		@Override
 		public String getDescription(GameCharacter target) {
-			if(target.isPlayer()) {
-				return "After recently having unprotected sex, there's a risk that you'll get pregnant!"
-					+ " Due to the fact that the arcane accelerates people's pregnancies, you'll know if you're pregnant within a matter of hours.";
+			if(Main.game.isInNewWorld()) {
+				return UtilText.parse(target,
+						"After recently having unprotected sex, there's a risk that [npc.name] will get pregnant!"
+							+ " Due to the fact that the arcane accelerates people's pregnancies, [npc.she]'ll know if [npc.sheIs] pregnant within a matter of hours...");
 			} else {
 				return UtilText.parse(target,
-						"After recently having unprotected sex, there's a risk that "+target.getName("the")+" will get pregnant!"
-							+ " Due to the fact that the arcane accelerates people's pregnancies, [npc.she]'ll know if [npc.sheIs] pregnant within a matter of hours.");
+						"After recently having unprotected sex, there's a risk that [npc.name] will get pregnant!");
 			}
 		}
 
@@ -3055,28 +3295,11 @@ public enum StatusEffect {
 			
 			StringBuilder sb = new StringBuilder();
 			
-			String inflationText = "";
 			
 			if (target.isPregnant()) {
-				// Remove cum inflation:
-				if(target.hasStatusEffect(StatusEffect.CUM_INFLATION_1)
-						|| target.hasStatusEffect(StatusEffect.CUM_INFLATION_2)
-						|| target.hasStatusEffect(StatusEffect.CUM_INFLATION_3)) {
-					if(target.getBodyMaterial()==BodyMaterial.SLIME) {
-						inflationText = "<p>"
-								+ "[style.italicsSex(The swelling of your pregnant bump forces your body to convert most of the cum that's inflating your belly into more slime.)]"
-							+ "</p>";
-						
-					} else {
-						inflationText = "<p>"
-									+ "[style.italicsSex(The swelling of your pregnant bump forces your body to expel most of the cum that's inflating your belly.)]"
-								+ "</p>";
-					}
-				}
-				
 				target.addStatusEffect(PREGNANT_1, 60 * 60 * (72 + Util.random.nextInt(13)));
 				
-				if (!Main.game.getPlayer().isQuestCompleted(QuestLine.SIDE_FIRST_TIME_PREGNANCY)) {
+				if (target.isPlayer() && !((PlayerCharacter) target).isQuestCompleted(QuestLine.SIDE_FIRST_TIME_PREGNANCY)) {
 					if(target.hasFetish(Fetish.FETISH_PREGNANCY)) {
 						sb.append("<p>"
 								+ "For the last few hours, your belly has been gradually swelling."
@@ -3186,6 +3409,29 @@ public enum StatusEffect {
 						+ "</p>");
 				}
 				
+				// Remove cum inflation:
+				float fluidAmount = target.getTotalFluidInArea(SexAreaOrifice.VAGINA);
+				float fluidAmountUrethra = target.getTotalFluidInArea(SexAreaOrifice.URETHRA_VAGINA);
+				target.drainTotalFluidsStored(SexAreaOrifice.VAGINA, -fluidAmount);
+				target.drainTotalFluidsStored(SexAreaOrifice.URETHRA_VAGINA, -fluidAmountUrethra);
+				
+				sb.append("<p>");
+				if(fluidAmount>0) {
+					if(target.getBodyMaterial()==BodyMaterial.SLIME) {
+						sb.append("[style.italicsSex(The swelling of your pregnant bump forces your body to convert all of the cum in your pussy"+(fluidAmountUrethra>0?" and its urethra":"")+" into more slime.)]");
+					} else {
+						sb.append("[style.italicsSex(The swelling of your pregnant bump forces your body to expel all of the cum in your pussy"+(fluidAmountUrethra>0?" and its urethra":"")+".)]");
+					}
+					
+				} else if(fluidAmountUrethra>0) {
+					if(target.getBodyMaterial()==BodyMaterial.SLIME) {
+						sb.append("[style.italicsSex(The swelling of your pregnant bump forces your body to convert all of the cum in your pussy's urethra into more slime.)]");
+					} else {
+						sb.append("[style.italicsSex(The swelling of your pregnant bump forces your body to expel all of the cum in your pussy's urethra.)]");
+					}
+				}
+				sb.append("</p>");
+				
 			} else {
 				target.endPregnancy(false);
 				sb.append("<p>"
@@ -3202,9 +3448,9 @@ public enum StatusEffect {
 							+ "<b style='color:" + Colour.GENERIC_SEX.toWebHexString() + ";'>You aren't pregnant!</b>"
 						+ "</p>");	
 			}
-			
+
 			if(target.isPlayer()) {
-				return sb.toString() + inflationText;
+				return sb.toString();
 			} else {
 				return "";
 			}
@@ -3213,7 +3459,7 @@ public enum StatusEffect {
 		@Override
 		public String applyPostRemovalStatusEffect(GameCharacter target) {
 			if(!target.isPregnant()) {
-				target.performImpregnationCheck();
+				target.performImpregnationCheck(false);
 			}
 			return "";
 		}
@@ -3229,7 +3475,7 @@ public enum StatusEffect {
 			"pregnancy1",
 			Colour.GENERIC_ARCANE,
 			true,
-			Util.newHashMapOfValues(new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, 5f)),
+			Util.newHashMapOfValues(new Value<Attribute, Float>(Attribute.ENERGY_SHIELDING, 2f)),
 			null) {
 
 		@Override
@@ -3268,7 +3514,7 @@ public enum StatusEffect {
 				}
 			}
 
-			if (!Main.game.getPlayer().isQuestCompleted(QuestLine.SIDE_FIRST_TIME_PREGNANCY)) {
+			if (target.isPlayer() && !((PlayerCharacter) target).isQuestCompleted(QuestLine.SIDE_FIRST_TIME_PREGNANCY)) {
 				return "<p>"
 							+ "Even though the change has been gradual, you're suddenly hit by the realisation that your belly has swollen massively."
 							+ " You can't resist rubbing your hands over the bump in your abdomen, and you wonder just how big it's going to get."
@@ -3326,7 +3572,7 @@ public enum StatusEffect {
 			"pregnancy2",
 			Colour.GENERIC_ARCANE,
 			true,
-			Util.newHashMapOfValues(new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, 10f)),
+			Util.newHashMapOfValues(new Value<Attribute, Float>(Attribute.ENERGY_SHIELDING, 4f)),
 			null) {
 
 		@Override
@@ -3365,7 +3611,7 @@ public enum StatusEffect {
 				}
 			}
 			
-			if (!Main.game.getPlayer().isQuestCompleted(QuestLine.SIDE_FIRST_TIME_PREGNANCY)) {
+			if (target.isPlayer() && !((PlayerCharacter) target).isQuestCompleted(QuestLine.SIDE_FIRST_TIME_PREGNANCY)) {
 				return "<p>"
 							+ "By now, your stomach has completely ballooned out in front of you, and you're having to arch your back and support yourself with one hand as you walk around."
 							+ (target.getBodyMaterial()==BodyMaterial.SLIME
@@ -3380,7 +3626,7 @@ public enum StatusEffect {
 										+ " You keep feeling another kick every now and then, and you know that you're ready to give birth."))
 						+ "</p>"
 						+ "<p>"
-							+ UtilText.parsePlayerThought("I really should go and see Lilaya...")
+							+ UtilText.parseThought("I really should go and see Lilaya...", Main.game.getPlayer())
 						+ "</p>"
 						+(lactationIncrease
 								? "<p><i>"
@@ -3405,7 +3651,7 @@ public enum StatusEffect {
 										+ " You keep feeling another kick every now and then, and you know that you're ready to give birth."))
 						+ "</p>"
 						+ "<p>"
-							+ UtilText.parsePlayerThought("I really should go and see Lilaya... Or maybe I'll stay like this for a little while!")
+							+ UtilText.parseThought("I really should go and see Lilaya... Or maybe I'll stay like this for a little while!", Main.game.getPlayer())
 						+ "</p>"
 						+(lactationIncrease
 								? "<p><i>"
@@ -3432,7 +3678,7 @@ public enum StatusEffect {
 			"pregnancy3",
 			Colour.GENERIC_ARCANE,
 			true,
-			Util.newHashMapOfValues(new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, 15f)),
+			Util.newHashMapOfValues(new Value<Attribute, Float>(Attribute.ENERGY_SHIELDING, 6f)),
 			null) {
 
 		@Override
@@ -3455,8 +3701,6 @@ public enum StatusEffect {
 		
 		@Override
 		public String extraRemovalEffects(GameCharacter target) {
-			target.resetAllPregnancyReactions();
-			
 			return "";
 		}
 
@@ -3535,13 +3779,13 @@ public enum StatusEffect {
 
 		@Override
 		public String applyEffect(GameCharacter target, int secondsPassed) {
-			target.incrementPenisStoredCum(secondsPassed * target.getPenisCumProductionRegeneration().getPercentageRegen() * target.getPenisRawCumStorageValue());
+			target.incrementPenisStoredCum(secondsPassed * target.getCumRegenerationPerSecond());
 			return "";
 		}
 
 		@Override
 		public String getDescription(GameCharacter target) {
-			float cumRegenRate = target.getPenisCumProductionRegeneration().getPercentageRegen() * target.getPenisRawCumStorageValue() * 60;
+			float cumRegenRate = target.getCumRegenerationPerSecond()*60;
 			
 			return UtilText.parse(target, "[npc.NamePos] balls are currently producing more [npc.cum], at a rate of "+Units.fluid(cumRegenRate)+"/minute."
 					+ " They have stored "+Units.fluid(target.getPenisRawStoredCumValue())+", out of a maximum of "+Units.fluid(target.getPenisRawCumStorageValue())+".");
@@ -3569,7 +3813,7 @@ public enum StatusEffect {
 			Colour.GENERIC_SEX,
 			true,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, -5f)),
+					new Value<Attribute, Float>(Attribute.DAMAGE_LUST, 5f)),
 			null) {
 
 		@Override
@@ -3579,7 +3823,7 @@ public enum StatusEffect {
 
 		@Override
 		public String getDescription(GameCharacter target) {
-			float cumRegenRate = target.getPenisCumProductionRegeneration().getPercentageRegen() * target.getPenisRawCumStorageValue() * 60;
+			float cumRegenRate = target.getCumRegenerationPerSecond()*60;
 			
 			return UtilText.parse(target, "[npc.NamePos] balls are completely filled with [npc.cum] ("+Units.fluid(target.getPenisRawCumStorageValue())+"),"
 					+ " and [npc.she] can't wait until the next time [npc.sheIs] able to empty them."
@@ -3612,16 +3856,17 @@ public enum StatusEffect {
 
 		@Override
 		public String applyEffect(GameCharacter target, int secondsPassed) {
-			target.incrementBreastStoredMilk(secondsPassed * target.getBreastLactationRegeneration().getPercentageRegen() * target.getBreastRawMilkStorageValue());
+			target.incrementBreastStoredMilk(secondsPassed * target.getLactationRegenerationPerSecond(true));
 			return "";
 		}
 
 		@Override
 		public String getDescription(GameCharacter target) {
-			float milkRegenRate = target.getBreastLactationRegeneration().getPercentageRegen() * target.getBreastRawMilkStorageValue() * 60;
+			float milkRegenRate = target.getLactationRegenerationPerSecond(false) * 60;
 
 			return UtilText.parse(target,
-					"[npc.NamePos] breasts are currently producing more [npc.milk], at a rate of "+Units.fluid(milkRegenRate)+"/minute."
+					"[npc.NamePos] breasts are producing [npc.milk] at an individual rate of "+Units.fluid(milkRegenRate)+"/minute,"
+							+ " totalling [style.colourGood("+Units.fluid(milkRegenRate * target.getBreastRows() * 2)+"/minute)] (as [npc.sheHasFull] [npc.totalBreasts] breasts)."
 					+ " They have stored "+Units.fluid(target.getBreastRawStoredMilkValue())+", out of a maximum of "+Units.fluid(target.getBreastRawMilkStorageValue())+".");
 		}
 
@@ -3642,8 +3887,7 @@ public enum StatusEffect {
 			"milkFull",
 			Colour.GENERIC_SEX,
 			true,
-			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, -5f)),
+			Util.newHashMapOfValues(),
 			null) {
 
 		@Override
@@ -3653,11 +3897,12 @@ public enum StatusEffect {
 
 		@Override
 		public String getDescription(GameCharacter target) {
-			float milkRegenRate = target.getBreastLactationRegeneration().getPercentageRegen() * target.getBreastRawMilkStorageValue() * 60;
+			float milkRegenRate = target.getLactationRegenerationPerSecond(false) * 60;
 		
 			return UtilText.parse(target,
-					"[npc.NamePos] [npc.breasts] are completely filled with [npc.milk] ("+Units.fluid(target.getBreastRawMilkStorageValue())+"), and [npc.her] engorged [npc.nipples] are just begging for some attention..."
-							+ " Once milked, they will produce more [npc.milk] at a rate of "+Units.fluid(milkRegenRate)+"/minute.");
+					"[npc.NamePos] [npc.breasts] are filled with "+Units.fluid(target.getBreastRawMilkStorageValue())+" of [npc.milk].<br/>"
+						+ "They produce more [npc.milk] at an individual rate of "+Units.fluid(milkRegenRate)+"/minute,"
+						+ " totalling [style.colourGood("+Units.fluid(milkRegenRate * target.getBreastRows() * 2)+"/minute)] (as [npc.sheHasFull] [npc.totalBreasts] breasts).");
 		}
 
 		@Override
@@ -3691,22 +3936,24 @@ public enum StatusEffect {
 		
 		@Override
 		public String applyEffect(GameCharacter target, int secondsPassed) {
-			target.incrementBreastCrotchStoredMilk((secondsPassed) * target.getBreastCrotchLactationRegeneration().getPercentageRegen() * target.getBreastCrotchRawMilkStorageValue());
+			target.incrementBreastCrotchStoredMilk((secondsPassed) * target.getCrotchLactationRegenerationPerSecond(true));
 			return "";
 		}
 
 		@Override
 		public String getDescription(GameCharacter target) {
-			float milkRegenRate = target.getBreastCrotchLactationRegeneration().getPercentageRegen() * target.getBreastCrotchRawMilkStorageValue() * 60;
+			float milkRegenRate = target.getCrotchLactationRegenerationPerSecond(false) * 60;
 			
 			return UtilText.parse(target,
-					"[npc.NamePos] [npc.crotchBoobs] are currently producing more [npc.crotchMilk], at a rate of "+Units.fluid(milkRegenRate)+"/minute."
+					"[npc.NamePos] [npc.crotchBoobs] are producing [npc.crotchMilk] at an individual rate of "+Units.fluid(milkRegenRate)+"/minute,"
+							+ " totalling [style.colourGood("+Units.fluid(milkRegenRate * target.getBreastCrotchRows() * 2)+"/minute)] (as [npc.sheHasFull] [npc.totalCrotchBoobs] [npc.crotchBoobs])."
 					+ " They have stored "+Units.fluid(target.getBreastCrotchRawStoredMilkValue())+", out of a maximum of "+Units.fluid(target.getBreastCrotchRawMilkStorageValue())+".");
 		}
 
 		@Override
 		public boolean isConditionsMet(GameCharacter target) {
 			return target.hasBreastsCrotch()
+					&& Main.getProperties().udders>0
 					&& target.getBreastCrotchRawMilkStorageValue()>0
 					&& target.getBreastCrotchRawStoredMilkValue()!=target.getBreastCrotchRawMilkStorageValue();
 		}
@@ -3723,8 +3970,7 @@ public enum StatusEffect {
 			"milkCrotchFull",
 			Colour.GENERIC_SEX,
 			true,
-			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, -5f)),
+			Util.newHashMapOfValues(),
 			null) {
 
 		@Override
@@ -3742,16 +3988,18 @@ public enum StatusEffect {
 
 		@Override
 		public String getDescription(GameCharacter target) {
-			float milkRegenRate = target.getBreastCrotchLactationRegeneration().getPercentageRegen() * target.getBreastCrotchRawMilkStorageValue() * 60;
+			float milkRegenRate = target.getCrotchLactationRegenerationPerSecond(false) * 60;
 		
 			return UtilText.parse(target,
-					"[npc.NamePos] [npc.crotchBoobs] are completely filled with [npc.crotchMilk] ("+Units.fluid(target.getBreastCrotchRawMilkStorageValue())+"), and [npc.her] engorged [npc.crotchNipples] are just begging for some attention..."
-							+ " Once milked, they will produce more [npc.crotchMilk] at a rate of "+Units.fluid(milkRegenRate)+"/minute.");
+					"[npc.NamePos] [npc.crotchBoobs] are filled with "+Units.fluid(target.getBreastCrotchRawMilkStorageValue())+" of [npc.crotchMilk].<br/>"
+							+ " They produce more [npc.crotchMilk] at an individual rate of "+Units.fluid(milkRegenRate)+"/minute,"
+							+ " totalling [style.colourGood("+Units.fluid(milkRegenRate * target.getBreastCrotchRows() * 2)+"/minute)] (as [npc.sheHasFull] [npc.totalCrotchBoobs] [npc.crotchBoobs]).");
 		}
 
 		@Override
 		public boolean isConditionsMet(GameCharacter target) {
 			return target.hasBreastsCrotch()
+					&& Main.getProperties().udders>0
 					&& target.getBreastCrotchRawMilkStorageValue()>0
 					&& target.getBreastCrotchRawStoredMilkValue()==target.getBreastCrotchRawMilkStorageValue();
 		}
@@ -3794,7 +4042,9 @@ public enum StatusEffect {
 				sb.append(" Nipples");
 				i++;
 			}
-			if (target.hasBreastsCrotch() && target.getNippleCrotchRawCapacityValue()!=target.getNippleCrotchStretchedCapacity()){
+			if (target.hasBreastsCrotch()
+					&& Main.getProperties().udders>0
+					&& target.getNippleCrotchRawCapacityValue()!=target.getNippleCrotchStretchedCapacity()){
 				sb.append(" Crotch Nipples");
 				i++;
 			}
@@ -3974,7 +4224,9 @@ public enum StatusEffect {
 			return ((target.hasVagina() && target.getVaginaRawCapacityValue()!=target.getVaginaStretchedCapacity())
 					|| (target.getAssRawCapacityValue()!=target.getAssStretchedCapacity())
 					|| (target.getNippleRawCapacityValue()!=target.getNippleStretchedCapacity())
-					|| (target.hasBreastsCrotch() && target.getNippleCrotchRawCapacityValue()!=target.getNippleCrotchStretchedCapacity())
+					|| (target.hasBreastsCrotch()
+							&& Main.getProperties().udders>0
+							&& target.getNippleCrotchRawCapacityValue()!=target.getNippleCrotchStretchedCapacity())
 					|| (target.hasPenis() && target.getPenisRawCapacityValue()!=target.getPenisStretchedCapacity())
 					|| (target.hasVagina() && target.getVaginaUrethraRawCapacityValue()!=target.getVaginaUrethraStretchedCapacity()));
 		}
@@ -4032,18 +4284,24 @@ public enum StatusEffect {
 			float cumLost = SexAreaOrifice.VAGINA.getCharactersCumLossPerSecond(target)*secondsPassed;
 			
 			StringBuilder sb = new StringBuilder();
+
+			AbstractClothing clothingBlocking = target.getLowestZLayerCoverableArea(CoverableArea.VAGINA);
+			boolean dirtyArea = clothingBlocking==null;
 			
-			if(target.getLowestZLayerCoverableArea(CoverableArea.VAGINA)!=null){
-				if(!target.getLowestZLayerCoverableArea(CoverableArea.VAGINA).isDirty()) {
-					target.getLowestZLayerCoverableArea(CoverableArea.VAGINA).setDirty(true);
+			if(clothingBlocking!=null && !clothingBlocking.getItemTags().contains(ItemTag.PLUGS_VAGINA) && !clothingBlocking.getItemTags().contains(ItemTag.SEALS_VAGINA)) {
+				if(!clothingBlocking.isDirty()) {
+					clothingBlocking.setDirty(target, true);
 					sb.append("<p>"
 								+ "The cum from your creampied pussy quickly </b><b style='color:"+Colour.CUM.toWebHexString()+";'>dirties</b> your "+target.getLowestZLayerCoverableArea(CoverableArea.VAGINA).getName()+"!"
 							+ "</p>");
 				}
+				dirtyArea = true;
 			}
 			
-			if(!target.getDirtySlots().contains(InventorySlot.VAGINA)) {
-				target.addDirtySlot(InventorySlot.VAGINA);
+			if(dirtyArea) {
+				if(!target.getDirtySlots().contains(InventorySlot.VAGINA)) {
+					target.addDirtySlot(InventorySlot.VAGINA);
+				}
 			}
 			
 			target.drainTotalFluidsStored(SexAreaOrifice.VAGINA, cumLost);
@@ -4057,26 +4315,28 @@ public enum StatusEffect {
 			float cumInArea = target.getTotalFluidInArea(SexAreaOrifice.VAGINA);
 			float absorption = SexAreaOrifice.VAGINA.getCumAbsorptionPerSecond() * 60;
 			
+			String pregnancyText = (target.isVisiblyPregnant()?" [style.italicsSex(Due to pregnancy, maximum storage is "+Units.fluid(250)+".)]":"");
+			
 			if(target.isOrificePlugged(SexAreaOrifice.VAGINA)) {
 				if(target.isPlayer()) {
-					return "As you walk, you can feel the cum trapped within your recently-used pussy.<br/>"
+					return "As you walk, you can feel the cum trapped within your recently-used pussy."+pregnancyText+"<br/>"
 							+ "Current creampie: [style.colourSex("+Units.fluid(cumInArea)+")]<br/>"
 							+ "[style.boldTerrible(Plugged Vagina:)] No cum is leaking out, although it is still being absorbed at a rate of -"+Units.fluid(absorption, ValueType.PRECISE)+"/minute!";
 				} else {
 					return UtilText.parse(target, 
-							"[npc.NamePos] [npc.pussy] has recently been filled with cum, before being plugged.<br/>"
+							"[npc.NamePos] [npc.pussy] has recently been filled with cum, before being plugged."+pregnancyText+"<br/>"
 							+ "Current creampie: [style.colourSex("+Units.fluid(cumInArea)+")]<br/>"
 							+ "[style.boldTerrible(Plugged Vagina:)] No cum is leaking out, although it is still being absorbed at a rate of -"+Units.fluid(absorption, ValueType.PRECISE)+"/minute!");
 				}
 				
 			} else {
 				if(target.isPlayer()) {
-					return "As you walk, you can feel cum drooling out of your recently-used pussy.<br/>"
+					return "As you walk, you can feel cum drooling out of your recently-used pussy."+pregnancyText+"<br/>"
 							+ "Current creampie: [style.colourSex("+Units.fluid(cumInArea)+")]<br/>"
 							+ "(-"+Units.fluid(cumLost, ValueType.PRECISE)+"/minute)";
 				} else {
 					return UtilText.parse(target, 
-							"[npc.NamePos] [npc.pussy] has recently been filled with cum.<br/>"
+							"[npc.NamePos] [npc.pussy] has recently been filled with cum."+pregnancyText+"<br/>"
 							+ "Current creampie: [style.colourSex("+Units.fluid(cumInArea)+")]<br/>"
 							+ "(-"+Units.fluid(cumLost, ValueType.PRECISE)+"/minute)");
 				}
@@ -4144,18 +4404,24 @@ public enum StatusEffect {
 			float cumLost = SexAreaOrifice.URETHRA_VAGINA.getCharactersCumLossPerSecond(target) * secondsPassed;
 			
 			StringBuilder sb = new StringBuilder();
+
+			AbstractClothing clothingBlocking = target.getLowestZLayerCoverableArea(CoverableArea.VAGINA);
+			boolean dirtyArea = clothingBlocking==null;
 			
-			if(target.getLowestZLayerCoverableArea(CoverableArea.VAGINA)!=null){
-				if(!target.getLowestZLayerCoverableArea(CoverableArea.VAGINA).isDirty()) {
-					target.getLowestZLayerCoverableArea(CoverableArea.VAGINA).setDirty(true);
+			if(clothingBlocking!=null && !clothingBlocking.getItemTags().contains(ItemTag.SEALS_VAGINA)) {
+				if(!clothingBlocking.isDirty()) {
+					clothingBlocking.setDirty(target, true);
 					sb.append("<p>"
 								+ "Cum leaks out of your pussy's creampied urethra, quickly </b><b style='color:"+Colour.CUM.toWebHexString()+";'>dirtying</b> your "+target.getLowestZLayerCoverableArea(CoverableArea.VAGINA).getName()+"!"
 							+ "</p>");
 				}
+				dirtyArea = true;
 			}
 			
-			if(!target.getDirtySlots().contains(InventorySlot.VAGINA)) {
-				target.addDirtySlot(InventorySlot.VAGINA);
+			if(dirtyArea) {
+				if(!target.getDirtySlots().contains(InventorySlot.VAGINA)) {
+					target.addDirtySlot(InventorySlot.VAGINA);
+				}
 			}
 			
 			target.drainTotalFluidsStored(SexAreaOrifice.URETHRA_VAGINA, cumLost);
@@ -4168,27 +4434,29 @@ public enum StatusEffect {
 			float cumLost = SexAreaOrifice.URETHRA_VAGINA.getCharactersCumLossPerSecond(target) * 60;
 			float cumInArea = target.getTotalFluidInArea(SexAreaOrifice.URETHRA_VAGINA);
 			float absorption = SexAreaOrifice.URETHRA_VAGINA.getCumAbsorptionPerSecond() * 60;
+
+			String pregnancyText = (target.isVisiblyPregnant()?" [style.italicsSex(Due to pregnancy, maximum storage is "+Units.fluid(250)+".)]":"");
 			
 			if(target.isOrificePlugged(SexAreaOrifice.URETHRA_VAGINA)) {
 				if(target.isPlayer()) {
-					return "As you walk, you can feel the cum trapped within your pussy's urethra.<br/>"
+					return "As you walk, you can feel the cum trapped within your pussy's urethra."+pregnancyText+"<br/>"
 							+ "Current creampie: [style.colourSex("+Units.fluid(cumInArea)+")]<br/>"
 							+ "[style.boldTerrible(Plugged Urethra:)] No cum is leaking out, although it is still being absorbed at a rate of -"+Units.fluid(absorption, ValueType.PRECISE)+"/minute!";
 				} else {
 					return UtilText.parse(target, 
-							"[npc.NamePos] vaginal urethra has recently been filled with cum, before being plugged.<br/>"
+							"[npc.NamePos] vaginal urethra has recently been filled with cum, before being plugged."+pregnancyText+"<br/>"
 							+ "Current creampie: [style.colourSex("+Units.fluid(cumInArea)+")]<br/>"
 							+ "[style.boldTerrible(Plugged Urethra:)] No cum is leaking out, although it is still being absorbed at a rate of -"+Units.fluid(absorption, ValueType.PRECISE)+"/minute!");
 				}
 				
 			} else {
 				if(target.isPlayer()) {
-					return "As you walk, you can feel cum drooling out of your pussy's urethra.<br/>"
+					return "As you walk, you can feel cum drooling out of your pussy's urethra."+pregnancyText+"<br/>"
 							+ "Current creampie: [style.colourSex("+Units.fluid(cumInArea)+")]<br/>"
 							+ "(-"+Units.fluid(cumLost, ValueType.PRECISE)+"/minute)";
 				} else {
 					return UtilText.parse(target, 
-							"[npc.NamePos] vaginal urethra has recently been filled with cum.<br/>"
+							"[npc.NamePos] vaginal urethra has recently been filled with cum."+pregnancyText+"<br/>"
 							+ "Current creampie: [style.colourSex("+Units.fluid(cumInArea)+")]<br/>"
 							+ "(-"+Units.fluid(cumLost, ValueType.PRECISE)+"/minute)");
 				}
@@ -4259,7 +4527,7 @@ public enum StatusEffect {
 			
 			if(target.getLowestZLayerCoverableArea(CoverableArea.PENIS)!=null){
 				if(!target.getLowestZLayerCoverableArea(CoverableArea.PENIS).isDirty()) {
-					target.getLowestZLayerCoverableArea(CoverableArea.PENIS).setDirty(true);
+					target.getLowestZLayerCoverableArea(CoverableArea.PENIS).setDirty(target, true);
 					sb.append("<p>"
 								+ "Cum leaks out of your cock's creampied urethra, quickly </b><b style='color:"+Colour.CUM.toWebHexString()+";'>dirtying</b> your "+target.getLowestZLayerCoverableArea(CoverableArea.PENIS).getName()+"!"
 							+ "</p>");
@@ -4369,17 +4637,23 @@ public enum StatusEffect {
 			
 			StringBuilder sb = new StringBuilder();
 			
-			if(target.getLowestZLayerCoverableArea(CoverableArea.ANUS)!=null){
-				if(!target.getLowestZLayerCoverableArea(CoverableArea.ANUS).isDirty()) {
-					target.getLowestZLayerCoverableArea(CoverableArea.ANUS).setDirty(true);
+			AbstractClothing clothingBlocking = target.getLowestZLayerCoverableArea(CoverableArea.ANUS);
+			boolean dirtyArea = clothingBlocking==null;
+			
+			if(clothingBlocking!=null && !clothingBlocking.getItemTags().contains(ItemTag.PLUGS_ANUS) && !clothingBlocking.getItemTags().contains(ItemTag.SEALS_ANUS)) {
+				if(!clothingBlocking.isDirty()) {
+					clothingBlocking.setDirty(target, true);
 					sb.append("<p>"
 								+ "The cum from your creampied asshole quickly </b><b style='color:"+Colour.CUM.toWebHexString()+";'>dirties</b> your "+target.getLowestZLayerCoverableArea(CoverableArea.ANUS).getName()+"!"
 							+ "</p>");
 				}
+				dirtyArea = true;
 			}
 			
-			if(!target.getDirtySlots().contains(InventorySlot.ANUS)) {
-				target.addDirtySlot(InventorySlot.ANUS);
+			if(dirtyArea) {
+				if(!target.getDirtySlots().contains(InventorySlot.ANUS)) {
+					target.addDirtySlot(InventorySlot.ANUS);
+				}
 			}
 			
 			target.drainTotalFluidsStored(SexAreaOrifice.ANUS, cumLost);
@@ -4480,18 +4754,24 @@ public enum StatusEffect {
 			float cumLost = SexAreaOrifice.NIPPLE.getCharactersCumLossPerSecond(target) * secondsPassed;
 			
 			StringBuilder sb = new StringBuilder();
+
+			AbstractClothing clothingBlocking = target.getLowestZLayerCoverableArea(CoverableArea.NIPPLES);
+			boolean dirtyArea = clothingBlocking==null;
 			
-			if(target.getLowestZLayerCoverableArea(CoverableArea.NIPPLES)!=null){
-				if(!target.getLowestZLayerCoverableArea(CoverableArea.NIPPLES).isDirty()) {
-					target.getLowestZLayerCoverableArea(CoverableArea.NIPPLES).setDirty(true);
+			if(clothingBlocking!=null && !clothingBlocking.getItemTags().contains(ItemTag.PLUGS_NIPPLES) && !clothingBlocking.getItemTags().contains(ItemTag.SEALS_NIPPLES)) {
+				if(!clothingBlocking.isDirty()) {
+					clothingBlocking.setDirty(target, true);
 					sb.append("<p>"
 								+ "The cum from your creampied nipples quickly </b><b style='color:"+Colour.CUM.toWebHexString()+";'>dirties</b> your "+target.getLowestZLayerCoverableArea(CoverableArea.NIPPLES).getName()+"!"
 							+ "</p>");
 				}
+				dirtyArea = true;
 			}
 			
-			if(!target.getDirtySlots().contains(InventorySlot.NIPPLE)) {
-				target.addDirtySlot(InventorySlot.NIPPLE);
+			if(dirtyArea) {
+				if(!target.getDirtySlots().contains(InventorySlot.NIPPLE)) {
+					target.addDirtySlot(InventorySlot.NIPPLE);
+				}
 			}
 			
 			target.drainTotalFluidsStored(SexAreaOrifice.NIPPLE, cumLost);
@@ -4604,7 +4884,7 @@ public enum StatusEffect {
 			
 			if(target.getLowestZLayerCoverableArea(CoverableArea.NIPPLES_CROTCH)!=null){
 				if(!target.getLowestZLayerCoverableArea(CoverableArea.NIPPLES_CROTCH).isDirty()) {
-					target.getLowestZLayerCoverableArea(CoverableArea.NIPPLES_CROTCH).setDirty(true);
+					target.getLowestZLayerCoverableArea(CoverableArea.NIPPLES_CROTCH).setDirty(target, true);
 					sb.append("<p>"
 								+ "The cum from your creampied nipples quickly </b><b style='color:"+Colour.CUM.toWebHexString()+";'>dirties</b> your "+target.getLowestZLayerCoverableArea(CoverableArea.NIPPLES_CROTCH).getName()+"!"
 							+ "</p>");
@@ -5007,8 +5287,7 @@ public enum StatusEffect {
 			Colour.GENERIC_BAD,
 			false,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, -50f),
-					new Value<Attribute, Float>(Attribute.DAMAGE_SPELLS, -10f)),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, -15f)),
 			null) {
 
 		@Override
@@ -5041,7 +5320,7 @@ public enum StatusEffect {
 			"frustrated",
 			Colour.GENERIC_ARCANE,
 			false,
-			Util.newHashMapOfValues(new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, -50f)),
+			Util.newHashMapOfValues(new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, -15f)),
 			null) {
 
 		@Override
@@ -5067,7 +5346,7 @@ public enum StatusEffect {
 			Colour.GENERIC_ARCANE,
 			false,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, 25f)),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, 5f)),
 			null) {
 
 		@Override
@@ -5101,9 +5380,8 @@ public enum StatusEffect {
 			Colour.GENERIC_BAD,
 			false,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.CRITICAL_CHANCE, -25f),
-					new Value<Attribute, Float>(Attribute.DAMAGE_PHYSICAL, -10f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, -10f)),
+					new Value<Attribute, Float>(Attribute.DAMAGE_LUST, 10f),
+					new Value<Attribute, Float>(Attribute.CRITICAL_DAMAGE, -5f)),
 			null) {
 		@Override
 		public String getDescription(GameCharacter target) {
@@ -5111,6 +5389,12 @@ public enum StatusEffect {
 				return "";
 			}
 			return UtilText.parse(target, "[npc.NamePos] clothing doesn't conceal [npc.her] "+getExposedPartsNamesList(target)+", and [npc.she] [npc.verb(feel)] highly embarrassed to be walking around in such an exposed fashion.");
+		}
+		@Override
+		public String getAdditionalDescription(GameCharacter target) {
+			if(Main.game.isOpportunisticAttackersEnabled() && target.isPlayer())
+				return "<b style='color:" + Colour.BASE_GREY.toWebHexString() +";'>Opportunistic Attackers</b><br>Your exposed body parts attract all kind of lewd gazes.";
+			return super.getAdditionalDescription(target);
 		}
 		@Override
 		public boolean isConditionsMet(GameCharacter target) {
@@ -5148,10 +5432,12 @@ public enum StatusEffect {
 			return !target.hasFetish(Fetish.FETISH_EXHIBITIONIST)
 					&& target.getLegConfiguration()!=LegConfiguration.BIPEDAL
 					&& !((target.hasBreasts() || target.isFeminine()) && target.isCoverableAreaVisible(CoverableArea.NIPPLES))
-					&& ((target.hasBreastsCrotch() && target.isCoverableAreaVisible(CoverableArea.NIPPLES_CROTCH))
-							|| target.isCoverableAreaVisible(CoverableArea.ANUS)
-							|| (target.isCoverableAreaVisible(CoverableArea.PENIS) && target.hasPenis())
-							|| (target.isCoverableAreaVisible(CoverableArea.VAGINA) && target.hasVagina()));
+					&& ((target.hasBreastsCrotch()
+							&& Main.getProperties().udders>0
+							&& target.isCoverableAreaVisible(CoverableArea.NIPPLES_CROTCH))
+						|| target.isCoverableAreaVisible(CoverableArea.ANUS)
+						|| (target.isCoverableAreaVisible(CoverableArea.PENIS) && target.hasPenis())
+						|| (target.isCoverableAreaVisible(CoverableArea.VAGINA) && target.hasVagina()));
 		}
 
 		@Override
@@ -5169,9 +5455,8 @@ public enum StatusEffect {
 			Colour.GENERIC_BAD,
 			false,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.CRITICAL_CHANCE, -10f),
-					new Value<Attribute, Float>(Attribute.DAMAGE_PHYSICAL, -5f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, -5f)),
+					new Value<Attribute, Float>(Attribute.DAMAGE_LUST, 5f),
+					new Value<Attribute, Float>(Attribute.CRITICAL_DAMAGE, -2f)),
 			null) {
 		@Override
 		public String getName(GameCharacter target) {
@@ -5187,6 +5472,12 @@ public enum StatusEffect {
 				return "";
 			}
 			return UtilText.parse(target, "[npc.NamePos] clothing doesn't conceal [npc.her] "+getExposedPartsNamesList(target)+", and [npc.she] [npc.verb(feel)] highly embarrassed to be walking around in such an exposed fashion.");
+		}
+		@Override
+		public String getAdditionalDescription(GameCharacter target) {
+			if(Main.game.isOpportunisticAttackersEnabled() && target.isPlayer())
+				return "<b style='color:" + Colour.BASE_GREY.toWebHexString() +";'>Opportunistic Attackers</b><br>Your exposed body parts attract all kind of lewd gazes.";
+			return super.getAdditionalDescription(target);
 		}
 		@Override
 		public boolean isConditionsMet(GameCharacter target) {
@@ -5209,9 +5500,8 @@ public enum StatusEffect {
 			Colour.GENERIC_BAD,
 			false,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.CRITICAL_CHANCE, -60f),
-					new Value<Attribute, Float>(Attribute.DAMAGE_PHYSICAL, -20f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, -20f)),
+					new Value<Attribute, Float>(Attribute.DAMAGE_LUST, 20f),
+					new Value<Attribute, Float>(Attribute.CRITICAL_DAMAGE, -10f)),
 			null) {
 
 		@Override
@@ -5220,6 +5510,12 @@ public enum StatusEffect {
 				return "";
 			}
 			return UtilText.parse(target, "[npc.NamePos] clothing doesn't conceal [npc.her] "+getExposedPartsNamesList(target)+", and [npc.she] [npc.verb(feel)] highly embarrassed to be walking around in such an exposed fashion.");
+		}
+		@Override
+		public String getAdditionalDescription(GameCharacter target) {
+			if(Main.game.isOpportunisticAttackersEnabled() && target.isPlayer())
+				return "<b style='color:" + Colour.BASE_GREY.toWebHexString() +";'>Opportunistic Attackers</b><br>Your exposed body parts attract all kind of lewd gazes.";
+			return super.getAdditionalDescription(target);
 		}
 
 		@Override
@@ -5244,8 +5540,7 @@ public enum StatusEffect {
 			Colour.BASE_PINK_DEEP,
 			false,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.CRITICAL_CHANCE, 10f),
-					new Value<Attribute, Float>(Attribute.DAMAGE_LUST, 10f)),
+					new Value<Attribute, Float>(Attribute.DAMAGE_LUST, 25f)),
 			null) {
 
 		@Override
@@ -5254,6 +5549,12 @@ public enum StatusEffect {
 				return "";
 			}
 			return UtilText.parse(target, "[npc.NamePos] clothing doesn't conceal [npc.her] "+getExposedPartsNamesList(target)+", and [npc.she] [npc.verb(feel)] incredibly sexy and empowered to be walking around in such an exposed fashion.");
+		}
+		@Override
+		public String getAdditionalDescription(GameCharacter target) {
+			if(Main.game.isOpportunisticAttackersEnabled() && target.isPlayer())
+				return "<b style='color:" + Colour.BASE_GREY.toWebHexString() +";'>Opportunistic Attackers</b><br>Your exposed body parts attract all kind of lewd gazes.";
+			return super.getAdditionalDescription(target);
 		}
 
 		@Override
@@ -5277,8 +5578,7 @@ public enum StatusEffect {
 			Colour.BASE_PINK_DEEP,
 			false,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.CRITICAL_CHANCE, 5f),
-					new Value<Attribute, Float>(Attribute.DAMAGE_LUST, 5f)),
+					new Value<Attribute, Float>(Attribute.DAMAGE_LUST, 10f)),
 			null) {
 
 		@Override
@@ -5287,6 +5587,12 @@ public enum StatusEffect {
 				return "";
 			}
 			return UtilText.parse(target, "[npc.NamePos] clothing doesn't conceal [npc.her] "+getExposedPartsNamesList(target)+", and [npc.she] [npc.verb(feel)] incredibly sexy and empowered to be walking around in such an exposed fashion.");
+		}
+		@Override
+		public String getAdditionalDescription(GameCharacter target) {
+			if(Main.game.isOpportunisticAttackersEnabled() && target.isPlayer())
+				return "<b style='color:" + Colour.BASE_GREY.toWebHexString() +";'>Opportunistic Attackers</b><br>Your exposed body parts attract all kind of lewd gazes.";
+			return super.getAdditionalDescription(target);
 		}
 
 		@Override
@@ -5310,7 +5616,6 @@ public enum StatusEffect {
 			Colour.BASE_PINK_DEEP,
 			false,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.CRITICAL_CHANCE, 30f),
 					new Value<Attribute, Float>(Attribute.DAMAGE_LUST, 30f)),
 			null) {
 
@@ -5320,6 +5625,12 @@ public enum StatusEffect {
 				return "";
 			}
 			return UtilText.parse(target, "[npc.NamePos] clothing doesn't conceal [npc.her] "+getExposedPartsNamesList(target)+", and [npc.she] [npc.verb(feel)] incredibly sexy and empowered to be walking around in such an exposed fashion.");
+		}
+		@Override
+		public String getAdditionalDescription(GameCharacter target) {
+			if(Main.game.isOpportunisticAttackersEnabled() && target.isPlayer())
+				return "<b style='color:" + Colour.BASE_GREY.toWebHexString() +";'>Opportunistic Attackers</b><br>Your exposed body parts attract all kind of lewd gazes.";
+			return super.getAdditionalDescription(target);
 		}
 
 		@Override
@@ -5340,7 +5651,8 @@ public enum StatusEffect {
 			"virginPure",
 			Colour.GENERIC_EXCELLENT,
 			true,
-			Util.newHashMapOfValues(new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, 50f), new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, 25f), new Value<Attribute, Float>(Attribute.DAMAGE_PHYSICAL, 25f)),
+			Util.newHashMapOfValues(
+					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, 15f)),
 			null) {
 
 		@Override
@@ -5370,10 +5682,8 @@ public enum StatusEffect {
 			Colour.GENERIC_EXCELLENT,
 			true,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.DAMAGE_LUST, 50f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, 50f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, 25f),
-					new Value<Attribute, Float>(Attribute.DAMAGE_PHYSICAL, 25f)),
+					new Value<Attribute, Float>(Attribute.DAMAGE_LUST, 10f),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, 10f)),
 			null) {
 
 		@Override
@@ -5404,8 +5714,9 @@ public enum StatusEffect {
 			"virginBroken",
 			Colour.GENERIC_TERRIBLE,
 			false,
-			Util.newHashMapOfValues(new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, -50f),
-					new Value<Attribute, Float>(Attribute.MAJOR_CORRUPTION, 50f), new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, -25f)),
+			Util.newHashMapOfValues(
+					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, -50f),
+					new Value<Attribute, Float>(Attribute.MAJOR_CORRUPTION, 50f)),
 			null) {
 
 		@Override
@@ -5437,10 +5748,9 @@ public enum StatusEffect {
 			Colour.GENERIC_TERRIBLE,
 			false,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.DAMAGE_LUST, -50f),
+					new Value<Attribute, Float>(Attribute.DAMAGE_LUST, -25f),
 					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, -50f),
-					new Value<Attribute, Float>(Attribute.MAJOR_CORRUPTION, 50f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, -25f)),
+					new Value<Attribute, Float>(Attribute.MAJOR_CORRUPTION, 50f)),
 			null) {
 
 		@Override
@@ -5482,13 +5792,8 @@ public enum StatusEffect {
 		@Override
 		public String getDescription(GameCharacter target) {
 			if(target!=null) {
-				if(target.isPlayer()) {
-					return "By wearing the entire Maid's outfit, you are filled with the energy you need in order to be a sexy hard-working maid.";
+				return UtilText.parse(target, "By wearing the entire Maid's outfit, [npc.nameIsFUll] filled with the energy [npc.she] [npc.verb(need)] in order to be a sexy hard-working maid.");
 					
-				} else {
-					return UtilText.parse(target, "By wearing the entire Maid's outfit, [npc.name] is filled with the energy [npc.she] needs in order to be a sexy hard-working maid.");
-					
-				}
 			} else {
 				return "";
 			}
@@ -5509,21 +5814,16 @@ public enum StatusEffect {
 			true,
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, 25f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, 25f),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, 5f),
 					new Value<Attribute, Float>(Attribute.DAMAGE_LUST, 25f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, 25f)),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, 5f)),
 			null) {
 
 		@Override
 		public String getDescription(GameCharacter target) {
 			if(target!=null) {
-				if(target.isPlayer()) {
-					return "By wearing the entire Maid's outfit, you are reminded of your true profession; that of an exceptionally talented maid!";
-					
-				} else {
-					return UtilText.parse(target, "By wearing the entire Maid's outfit, [npc.name] is reminded of [npc.her] true profession; that of an exceptionally talented maid!");
-					
-				}
+				return UtilText.parse(target, "By wearing the entire Maid's outfit, [npc.nameIsFUll] reminded of [npc.her] true profession; that of an exceptionally talented (and sexy) maid!");
+				
 			} else {
 				return "";
 			}
@@ -5576,9 +5876,9 @@ public enum StatusEffect {
 			true,
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, 25f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, 25f),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, 5f),
 					new Value<Attribute, Float>(Attribute.DAMAGE_PHYSICAL, 25f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, 25f)),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, 5f)),
 			null) {
 
 		@Override
@@ -5643,9 +5943,9 @@ public enum StatusEffect {
 			true,
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.MAJOR_ARCANE, 5f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_FIRE, 5f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_POISON, 5f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_ICE, 5f)),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_FIRE, 2f),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_POISON, 2f),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_ICE, 2f)),
 			null) {
 
 		@Override
@@ -5681,11 +5981,7 @@ public enum StatusEffect {
 		@Override
 		public String getDescription(GameCharacter target) {
 			if(target!=null) {
-				if(target.isPlayer()) {
-					return "By wearing the entire Milk Maid's outfit, you're filled with the energy you need in order to perform all of your milking duties!";
-				} else {
-					return UtilText.parse(target, "By wearing the entire Milk Maid'full ofnpc.name] is filled with the energy [npc.she] needs in order to perform all of [npc.her] milking duties.");
-				}
+				return UtilText.parse(target, "By wearing the entire Milk Maid's outfit, [npc.nameIsFull] filled with the energy [npc.she] [npc.verb(need)] in order to perform all of [npc.her] milking duties.");
 				
 			} else {
 				return "";
@@ -5704,7 +6000,10 @@ public enum StatusEffect {
 			"set_enforcer",
 			Colour.CLOTHING_WHITE,
 			true,
-			Util.newHashMapOfValues(new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, 10f), new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, 15f)), null) {
+			Util.newHashMapOfValues(
+					new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, 10f),
+					new Value<Attribute, Float>(Attribute.HEALTH_MAXIMUM, 25f)),
+			null) {
 
 		@Override
 		public String getDescription(GameCharacter target) {
@@ -5780,13 +6079,13 @@ public enum StatusEffect {
 			Colour.CLOTHING_OLIVE,
 			true,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, 10f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, 10f)),
+					new Value<Attribute, Float>(Attribute.HEALTH_MAXIMUM, 25f),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, 5f)),
 			null) {
 
 		@Override
 		public String getDescription(GameCharacter target) {//British Auxiliary Territorial Service
-			return "While wearing the uniform of Lyssieth's guard, [npc.name] [npc.verb(feel)] as though [npc.sheIs] more easily able to keep [npc.her] composure.";
+			return UtilText.parse(target, "While wearing the uniform of Lyssieth's guard, [npc.name] [npc.verb(feel)] as though [npc.sheIs] more easily able to keep [npc.her] composure.");
 		}
 
 		@Override
@@ -5864,7 +6163,7 @@ public enum StatusEffect {
 			true,
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.MAJOR_ARCANE, 5f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_ICE, 10f)),
+					new Value<Attribute, Float>(Attribute.DAMAGE_ICE, 15f)),
 			null) {
 
 		@Override
@@ -5872,7 +6171,7 @@ public enum StatusEffect {
 			if(target==null) {
 				return "";
 			}
-			return UtilText.parse(target, "By donning the complete set of specially enchanted snowflake jewellery, [npc.nameIs] more easily able to withstand ice attacks!");
+			return UtilText.parse(target, "By donning the complete set of specially enchanted snowflake jewellery, both [npc.namePos] arcane power and ice attacks have become much more potent!");
 		}
 
 		@Override
@@ -5889,7 +6188,7 @@ public enum StatusEffect {
 			true,
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.MAJOR_ARCANE, 5f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_FIRE, 10f)),
+					new Value<Attribute, Float>(Attribute.DAMAGE_FIRE, 15f)),
 			null) {
 
 		@Override
@@ -5897,7 +6196,7 @@ public enum StatusEffect {
 			if(target==null) {
 				return "";
 			}
-			return UtilText.parse(target, "By donning jewels that sparkle like the sun, [npc.nameIsFull] confident that no fire will harm [npc.herHim]!");
+			return UtilText.parse(target, "By donning jewels that sparkle like the sun, [npc.nameIsFull] confident that [npc.her] spells and fire attacks will incinerate [npc.her] foes!");
 		}
 
 		@Override
@@ -5999,9 +6298,9 @@ public enum StatusEffect {
 			Colour.BASE_BLACK,
 			false,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.MAJOR_ARCANE, 25f),
-					new Value<Attribute, Float>(Attribute.DAMAGE_PHYSICAL, 25f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, 10f)),
+					new Value<Attribute, Float>(Attribute.MAJOR_ARCANE, 15f),
+					new Value<Attribute, Float>(Attribute.DAMAGE_ICE, 15f),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_ICE, 5f)),
 			null) {
 
 		@Override
@@ -6126,18 +6425,13 @@ public enum StatusEffect {
 			true,
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.MAJOR_ARCANE, 2f),
-					new Value<Attribute, Float>(Attribute.DAMAGE_ANGEL, 25f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_ANGEL, 25f)),
+					new Value<Attribute, Float>(Attribute.DAMAGE_ANGEL, 25f)),
 			null) {		@Override
 		public String getDescription(GameCharacter target) {
 			if(target == null) {
 				return "";
 			}
-			if (target.isPlayer()) {
-				return "After absorbing a specially-enchanted arcane essence, you find that you're able to accurately predict how angels will behave.";
-			} else {
-				return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.name] is able to accurately predict how angels will behave.");
-			}
+			return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.nameIsFull] able to accurately predict how angels will behave.");
 		}
 		
 	},
@@ -6150,18 +6444,13 @@ public enum StatusEffect {
 			true,
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, 2f),
-					new Value<Attribute, Float>(Attribute.DAMAGE_CAT_MORPH, 25f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_CAT_MORPH, 25f)),
+					new Value<Attribute, Float>(Attribute.DAMAGE_CAT_MORPH, 25f)),
 			null) {		@Override
 		public String getDescription(GameCharacter target) {
 			if(target == null) {
 				return "";
 			}
-			if (target.isPlayer()) {
-				return "After absorbing a specially-enchanted arcane essence, you find that you're able to accurately predict how cat-morphs will behave.";
-			} else {
-				return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.name] is able to accurately predict how cat-morphs will behave.");
-			}
+			return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.nameIsFull] able to accurately predict how cat-morphs will behave.");
 		}
 		
 	},
@@ -6174,18 +6463,13 @@ public enum StatusEffect {
 			true,
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, 2f),
-					new Value<Attribute, Float>(Attribute.DAMAGE_COW_MORPH, 25f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_COW_MORPH, 25f)),
+					new Value<Attribute, Float>(Attribute.DAMAGE_COW_MORPH, 25f)),
 			null) {		@Override
 		public String getDescription(GameCharacter target) {
 			if(target == null) {
 				return "";
 			}
-			if (target.isPlayer()) {
-				return "After absorbing a specially-enchanted arcane essence, you find that you're able to accurately predict how cow-morphs will behave.";
-			} else {
-				return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.name] is able to accurately predict how cow-morphs will behave.");
-			}
+			return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.nameIsFull] able to accurately predict how cow-morphs will behave.");
 		}
 		
 	},
@@ -6197,19 +6481,14 @@ public enum StatusEffect {
 			Colour.RACE_DEMON,
 			true,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, 2f),
-					new Value<Attribute, Float>(Attribute.DAMAGE_DEMON, 25f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_DEMON, 25f)),
+					new Value<Attribute, Float>(Attribute.MAJOR_ARCANE, 2f),
+					new Value<Attribute, Float>(Attribute.DAMAGE_DEMON, 25f)),
 			null) {		@Override
 		public String getDescription(GameCharacter target) {
 			if(target == null) {
 				return "";
 			}
-			if (target.isPlayer()) {
-				return "After absorbing a specially-enchanted arcane essence, you find that you're able to accurately predict how demons will behave.";
-			} else {
-				return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.name] is able to accurately predict how demons will behave.");
-			}
+			return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.nameIsFull] able to accurately predict how demons will behave.");
 		}
 		
 	},
@@ -6221,19 +6500,14 @@ public enum StatusEffect {
 			Colour.RACE_DEMON,
 			true,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, 2f),
-					new Value<Attribute, Float>(Attribute.DAMAGE_IMP, 25f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_IMP, 25f)),
+					new Value<Attribute, Float>(Attribute.DAMAGE_LUST, 5f),
+					new Value<Attribute, Float>(Attribute.DAMAGE_IMP, 25f)),
 			null) {		@Override
 		public String getDescription(GameCharacter target) {
 			if(target == null) {
 				return "";
 			}
-			if (target.isPlayer()) {
-				return "After absorbing a specially-enchanted arcane essence, you find that you're able to accurately predict how imps will behave.";
-			} else {
-				return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.name] is able to accurately predict how imps will behave.");
-			}
+			return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.nameIsFull] able to accurately predict how imps will behave.");
 		}
 		
 	},
@@ -6246,18 +6520,13 @@ public enum StatusEffect {
 			true,
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, 2f),
-					new Value<Attribute, Float>(Attribute.DAMAGE_DOG_MORPH, 25f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_DOG_MORPH, 25f)),
+					new Value<Attribute, Float>(Attribute.DAMAGE_DOG_MORPH, 25f)),
 			null) {		@Override
 		public String getDescription(GameCharacter target) {
 			if(target == null) {
 				return "";
 			}
-			if (target.isPlayer()) {
-				return "After absorbing a specially-enchanted arcane essence, you find that you're able to accurately predict how dog-morphs will behave.";
-			} else {
-				return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.name] is able to accurately predict how dog-morphs will behave.");
-			}
+			return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.nameIsFull] able to accurately predict how dog-morphs will behave.");
 		}
 		
 	},
@@ -6269,19 +6538,14 @@ public enum StatusEffect {
 			Colour.RACE_HARPY,
 			true,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, 2f),
-					new Value<Attribute, Float>(Attribute.DAMAGE_HARPY, 25f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_HARPY, 25f)),
+					new Value<Attribute, Float>(Attribute.DAMAGE_LUST, 5f),
+					new Value<Attribute, Float>(Attribute.DAMAGE_HARPY, 25f)),
 			null) {		@Override
 		public String getDescription(GameCharacter target) {
 			if(target == null) {
 				return "";
 			}
-			if (target.isPlayer()) {
-				return "After absorbing a specially-enchanted arcane essence, you find that you're able to accurately predict how harpies will behave.";
-			} else {
-				return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.name] is able to accurately predict how harpies will behave.");
-			}
+			return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.nameIsFull] able to accurately predict how harpies will behave.");
 		}
 		
 	},
@@ -6294,18 +6558,13 @@ public enum StatusEffect {
 			true,
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, 2f),
-					new Value<Attribute, Float>(Attribute.DAMAGE_HORSE_MORPH, 25f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_HORSE_MORPH, 25f)),
+					new Value<Attribute, Float>(Attribute.DAMAGE_HORSE_MORPH, 25f)),
 			null) {		@Override
 		public String getDescription(GameCharacter target) {
 			if(target == null) {
 				return "";
 			}
-			if (target.isPlayer()) {
-				return "After absorbing a specially-enchanted arcane essence, you find that you're able to accurately predict how horse-morphs will behave.";
-			} else {
-				return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.name] is able to accurately predict how horse-morphs will behave.");
-			}
+			return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.nameIsFull] able to accurately predict how horse-morphs will behave.");
 		}
 		
 	},
@@ -6318,18 +6577,13 @@ public enum StatusEffect {
 			true,
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, 2f),
-					new Value<Attribute, Float>(Attribute.DAMAGE_REINDEER_MORPH, 25f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_REINDEER_MORPH, 25f)),
+					new Value<Attribute, Float>(Attribute.DAMAGE_REINDEER_MORPH, 25f)),
 			null) {		@Override
 		public String getDescription(GameCharacter target) {
 			if(target == null) {
 				return "";
 			}
-			if (target.isPlayer()) {
-				return "After absorbing a specially-enchanted arcane essence, you find that you're able to accurately predict how reindeer-morphs will behave.";
-			} else {
-				return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.name] is able to accurately predict how reindeer-morphs will behave.");
-			}
+			return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.nameIsFull] able to accurately predict how reindeer-morphs will behave.");
 		}
 		
 	},
@@ -6341,19 +6595,14 @@ public enum StatusEffect {
 			Colour.RACE_HUMAN,
 			true,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.MAJOR_ARCANE, 2f),
-					new Value<Attribute, Float>(Attribute.DAMAGE_HUMAN, 25f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_HUMAN, 25f)),
+					new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, 2f),
+					new Value<Attribute, Float>(Attribute.DAMAGE_HUMAN, 25f)),
 			null) {		@Override
 		public String getDescription(GameCharacter target) {
 			if(target == null) {
 				return "";
 			}
-			if (target.isPlayer()) {
-				return "After absorbing a specially-enchanted arcane essence, you find that you're able to accurately predict how humans will behave.";
-			} else {
-				return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.name] is able to accurately predict how humans will behave.");
-			}
+			return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.nameIsFull] able to accurately predict how humans will behave.");
 		}
 		
 	},
@@ -6366,18 +6615,13 @@ public enum StatusEffect {
 			true,
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, 2f),
-					new Value<Attribute, Float>(Attribute.DAMAGE_SQUIRREL_MORPH, 25f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_SQUIRREL_MORPH, 25f)),
+					new Value<Attribute, Float>(Attribute.DAMAGE_SQUIRREL_MORPH, 25f)),
 			null) {		@Override
 		public String getDescription(GameCharacter target) {
 			if(target == null) {
 				return "";
 			}
-			if (target.isPlayer()) {
-				return "After absorbing a specially-enchanted arcane essence, you find that you're able to accurately predict how squirrel-morphs will behave.";
-			} else {
-				return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.name] is able to accurately predict how squirrel-morphs will behave.");
-			}
+			return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.nameIsFull] able to accurately predict how squirrel-morphs will behave.");
 		}
 		
 	},
@@ -6390,18 +6634,13 @@ public enum StatusEffect {
 			true,
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, 2f),
-					new Value<Attribute, Float>(Attribute.DAMAGE_RAT_MORPH, 25f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_RAT_MORPH, 25f)),
+					new Value<Attribute, Float>(Attribute.DAMAGE_RAT_MORPH, 25f)),
 			null) {		@Override
 		public String getDescription(GameCharacter target) {
 			if(target == null) {
 				return "";
 			}
-			if (target.isPlayer()) {
-				return "After absorbing a specially-enchanted arcane essence, you find that you're able to accurately predict how rat-morphs will behave.";
-			} else {
-				return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.name] is able to accurately predict how rat-morphs will behave.");
-			}
+			return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.nameIsFull] able to accurately predict how rat-morphs will behave.");
 		}
 		
 	},
@@ -6414,18 +6653,13 @@ public enum StatusEffect {
 			true,
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.DAMAGE_LUST, 5f),
-					new Value<Attribute, Float>(Attribute.DAMAGE_RABBIT_MORPH, 25f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_RABBIT_MORPH, 25f)),
+					new Value<Attribute, Float>(Attribute.DAMAGE_RABBIT_MORPH, 25f)),
 			null) {		@Override
 		public String getDescription(GameCharacter target) {
 			if(target == null) {
 				return "";
 			}
-			if (target.isPlayer()) {
-				return "After absorbing a specially-enchanted arcane essence, you find that you're able to accurately predict how rabbit-morphs will behave.";
-			} else {
-				return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.name] is able to accurately predict how rabbit-morphs will behave.");
-			}
+			return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.nameIsFull] able to accurately predict how rabbit-morphs will behave.");
 		}
 		
 	},
@@ -6437,19 +6671,14 @@ public enum StatusEffect {
 			Colour.RACE_BAT_MORPH,
 			true,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.MAJOR_ARCANE, 2f),
-					new Value<Attribute, Float>(Attribute.DAMAGE_BAT_MORPH, 25f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_BAT_MORPH, 25f)),
+					new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, 2f),
+					new Value<Attribute, Float>(Attribute.DAMAGE_BAT_MORPH, 25f)),
 			null) {		@Override
 		public String getDescription(GameCharacter target) {
 			if(target == null) {
 				return "";
 			}
-			if (target.isPlayer()) {
-				return "After absorbing a specially-enchanted arcane essence, you find that you're able to accurately predict how bat-morphs will behave.";
-			} else {
-				return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.name] is able to accurately predict how bat-morphs will behave.");
-			}
+			return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.nameIsFull] able to accurately predict how bat-morphs will behave.");
 		}
 		
 	},
@@ -6462,18 +6691,13 @@ public enum StatusEffect {
 			true,
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, 2f),
-					new Value<Attribute, Float>(Attribute.DAMAGE_ALLIGATOR_MORPH, 25f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_ALLIGATOR_MORPH, 25f)),
+					new Value<Attribute, Float>(Attribute.DAMAGE_ALLIGATOR_MORPH, 25f)),
 			null) {		@Override
 		public String getDescription(GameCharacter target) {
 			if(target == null) {
 				return "";
 			}
-			if (target.isPlayer()) {
-				return "After absorbing a specially-enchanted arcane essence, you find that you're able to accurately predict how alligator-morphs will behave.";
-			} else {
-				return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.name] is able to accurately predict how alligator-morphs will behave.");
-			}
+			return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.nameIsFull] able to accurately predict how alligator-morphs will behave.");
 		}
 		
 	},
@@ -6486,18 +6710,13 @@ public enum StatusEffect {
 			true,
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, 2f),
-					new Value<Attribute, Float>(Attribute.DAMAGE_WOLF_MORPH, 25f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_WOLF_MORPH, 25f)),
+					new Value<Attribute, Float>(Attribute.DAMAGE_WOLF_MORPH, 25f)),
 			null) {		@Override
 		public String getDescription(GameCharacter target) {
 			if(target == null) {
 				return "";
 			}
-			if (target.isPlayer()) {
-				return "After absorbing a specially-enchanted arcane essence, you find that you're able to accurately predict how wolf-morphs will behave.";
-			} else {
-				return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.name] is able to accurately predict how wolf-morphs will behave.");
-			}
+			return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.nameIsFull] able to accurately predict how wolf-morphs will behave.");
 		}
 	},
 	
@@ -6509,18 +6728,13 @@ public enum StatusEffect {
 			true,
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, 2f),
-					new Value<Attribute, Float>(Attribute.DAMAGE_FOX_MORPH, 25f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_FOX_MORPH, 25f)),
+					new Value<Attribute, Float>(Attribute.DAMAGE_FOX_MORPH, 25f)),
 			null) {		@Override
 		public String getDescription(GameCharacter target) {
 			if(target == null) {
 				return "";
 			}
-			if (target.isPlayer()) {
-				return "After absorbing a specially-enchanted arcane essence, you find that you're able to accurately predict how fox-morphs will behave.";
-			} else {
-				return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.name] is able to accurately predict how fox-morphs will behave.");
-			}
+			return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.nameIsFull] able to accurately predict how fox-morphs will behave.");
 		}
 	},
 	
@@ -6531,19 +6745,14 @@ public enum StatusEffect {
 			Colour.RACE_SLIME,
 			true,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.MAJOR_PHYSIQUE, 2f),
-					new Value<Attribute, Float>(Attribute.DAMAGE_SLIME, 25f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_SLIME, 25f)),
+					new Value<Attribute, Float>(Attribute.DAMAGE_LUST, 5f),
+					new Value<Attribute, Float>(Attribute.DAMAGE_SLIME, 25f)),
 			null) {		@Override
 		public String getDescription(GameCharacter target) {
 			if(target == null) {
 				return "";
 			}
-			if (target.isPlayer()) {
-				return "After absorbing a specially-enchanted arcane essence, you find that you're able to accurately predict how slimes will behave.";
-			} else {
-				return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.name] is able to accurately predict how slimes will behave.");
-			}
+			return UtilText.parse(target, "After absorbing a specially-enchanted arcane essence, [npc.nameIsFull] able to accurately predict how slimes will behave.");
 		}
 		
 	},
@@ -6586,7 +6795,7 @@ public enum StatusEffect {
 					"Incoming <b style='color:"+Colour.ATTRIBUTE_LUST.toWebHexString()+";'>Lust damage</b> dealt as"
 							+ " <b style='color:"+Colour.ATTRIBUTE_HEALTH.toWebHexString()+";'>2*Energy damage</b>"
 							+ " and <b style='color:"+Colour.ATTRIBUTE_MANA.toWebHexString()+";'>1*Aura damage</b>",
-					"<b style='color: " + Colour.GENERIC_TERRIBLE.toWebHexString() + "'>Incoming damage ignores all resistances</b>")) {
+					"<b style='color: " + Colour.GENERIC_TERRIBLE.toWebHexString() + "'>Incoming damage ignores all shielding</b>")) {
 
 		@Override
 		public String getDescription(GameCharacter target) {
@@ -6613,23 +6822,17 @@ public enum StatusEffect {
 			Colour.GENERIC_ARCANE,
 			false,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, -10f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, -10f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_FIRE, -10f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_ICE, -10f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_POISON, -10f)),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, -2f),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, -2f),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_FIRE, -2f),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_ICE, -2f),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_POISON, -2f)),
 			null) {
 		
 		@Override
 		public String getDescription(GameCharacter target) {
-			if (target.isPlayer())
-				return "Your head is spinning and you're struggling to stay upright.";
-			else
-				return UtilText.parse(target,
-						target.getName("The") + "'s head is spinning and [npc.sheIs] struggling to stay upright..");
+			return UtilText.parse(target, "[npc.namePos] head is spinning and [npc.sheIs] struggling to stay upright..");
 		}
-
-		
 		
 		@Override
 		public boolean isCombatEffect() {
@@ -6637,26 +6840,21 @@ public enum StatusEffect {
 		}
 	},
 	
-	DAZED(
-			10,
+	DAZED(10,
 			"dazed",
 			"negativeCombatEffect",
 			Colour.DAMAGE_TYPE_PHYSICAL,
 			false,
-			Util.newHashMapOfValues(new Value<Attribute, Float>(Attribute.DAMAGE_PHYSICAL, -25f), new Value<Attribute, Float>(Attribute.CRITICAL_CHANCE, -25f)),
+			Util.newHashMapOfValues(
+					new Value<Attribute, Float>(Attribute.DAMAGE_PHYSICAL, -25f),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, -2f)),
 			null) {
 		
 		@Override
 		public String getDescription(GameCharacter target) {
-			if (target.isPlayer())
-				return "Your head is spinning and you're struggling to stay upright. You're finding it incredibly difficult to land a hit on your opponent or dodge one of their attacks.";
-			else
-				return UtilText.parse(target,
-						target.getName("The") + "'s head is spinning and [npc.sheIs] struggling to stay upright. [npc.sheIs] finding it incredibly difficult to land a hit on you or dodge one of your attacks.");
+				return UtilText.parse(target, "[npc.NamePos] head is spinning and [npc.sheIs] struggling to stay upright. [npc.SheIs] finding it incredibly difficult to land a hit or dodge any incoming attacks.");
 		}
 
-		
-		
 		@Override
 		public boolean isCombatEffect() {
 			return true;
@@ -6694,15 +6892,12 @@ public enum StatusEffect {
 			"negativeCombatEffect",
 			Colour.DAMAGE_TYPE_PHYSICAL,
 			false,
-			Util.newHashMapOfValues(new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, -15f)),
+			Util.newHashMapOfValues(new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, -2f)),
 			null) {
 		
 		@Override
 		public String getDescription(GameCharacter target) {
-			if (target.isPlayer())
-				return "You're feeling particularly vulnerable, and aren't able to defend yourself to the best of your ability.";
-			else
-				return UtilText.parse(target, "[npc.Name] is feeling particularly vulnerable, and [npc.she] isn't able to defend [npc.herself] to the best of [npc.her] ability.");
+			return UtilText.parse(target, "[npc.NameIsFull] feeling particularly vulnerable, and [npc.she] [npc.is]n't able to defend [npc.herself] to the best of [npc.her] ability.");
 		}
 
 		
@@ -6807,18 +7002,9 @@ public enum StatusEffect {
 		
 		@Override
 		public String applyEffect(GameCharacter target, int secondsPassed) {
-			int damage = (int) Math.round(25 * (1-(Util.getModifiedDropoffValue(target.getAttributeValue(Attribute.RESISTANCE_POISON), 100)/100f)));
-			if (damage < 1) {
-				damage = 1;
-			}
-			target.incrementHealth(-damage);
+			int damage = DamageType.POISON.damageTarget(null, target, 25);
 
-			if (target.isPlayer()) {
-				return "You take <b>" + damage + "</b> "+Attribute.DAMAGE_POISON.getColouredName("b")+"!";
-				
-			} else {
-				return "[npc.Name] takes <b>" + damage + "</b> "+Attribute.DAMAGE_POISON.getColouredName("b")+"!";
-			}
+			return UtilText.parse(target, "[npc.Name] [npc.verb(take)] <b>" + damage + "</b> "+Attribute.DAMAGE_POISON.getColouredName("b")+"!");
 		}
 
 		@Override
@@ -6838,22 +7024,20 @@ public enum StatusEffect {
 		}
 	},
 
-	MELEE_FIRE(10,
-			"Fire Strikes",
+	FIRE_MANA_BURN(10,
+			"Aura Burn",
 			"melee_fire",
 			Colour.DAMAGE_TYPE_FIRE,
 			true,
 			null,
-			Util.newArrayListOfValues("<b>+2</b> [style.boldFire(Fire Damage)] on each melee attack</b>")) {
+			Util.newArrayListOfValues(
+					"[style.boldFire(Fire Spells)] can be cast at a cost of "+Attribute.HEALTH_MAXIMUM.getName()+" when out of aura",
+					"[style.boldGood(Will not reduce "+Attribute.HEALTH_MAXIMUM.getName()+" below 1)]")) {
 		
 		@Override
 		public String getDescription(GameCharacter target) {
-			if (target.isPlayer()) {
-				return "Thanks to your affinity with the school of Fire, you are able to effortlessly enchant your melee strikes to deal extra fire damage.";
-			} else {
-				return UtilText.parse(target,
-						"Thanks to [npc.her] affinity with the school of Fire, [npc.name] is able to effortlessly enchant [npc.her] melee strikes to deal extra fire damage.");
-			}
+			return UtilText.parse(target,
+					"Thanks to [npc.her] affinity with the school of Fire, [npc.nameIsFull] able to sacrifice a portion of [npc.her] "+Attribute.HEALTH_MAXIMUM.getName()+" in order to cast fire spells when [npc.sheIs] out of aura.");
 		}
 
 		@Override
@@ -6878,18 +7062,9 @@ public enum StatusEffect {
 		
 		@Override
 		public String applyEffect(GameCharacter target, int secondsPassed) {
-			int damage = (int) Math.round(5 * (1-(Util.getModifiedDropoffValue(target.getAttributeValue(Attribute.RESISTANCE_FIRE), 100)/100f)));
-			if (damage < 1) {
-				damage = 1;
-			}
-			target.incrementHealth(-damage);
+			int damage = DamageType.FIRE.damageTarget(null, target, 5);
 
-			if (target.isPlayer()) {
-				return "You take <b>" + damage + "</b> [style.boldFire(Fire Damage)]!";
-				
-			} else {
-				return "[npc.Name] takes <b>" + damage + "</b> [style.boldFire(Fire Damage)]!";
-			}
+			return UtilText.parse(target, "[npc.Name] [npc.verb(take)] <b>" + damage + "</b> [style.boldFire(fire damage)]!");
 		}
 
 		@Override
@@ -6956,32 +7131,32 @@ public enum StatusEffect {
 			return true;
 		}
 	},
-	
+
 	CLOAK_OF_FLAMES(10,
 			"Cloak of Flames",
 			null,
 			Colour.DAMAGE_TYPE_FIRE,
 			true,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.RESISTANCE_FIRE, 10f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_ICE, 50f)),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_FIRE, 5f),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_ICE, 10f)),
 			null) {
-		
+
 		@Override
 		public String getDescription(GameCharacter target) {
 			if (target.isPlayer()) {
-				return "You have been shrouded in a cloak of arcane flames, granting you significant bonuses to your ice and fire resistances.";
+				return "You have been shrouded in a cloak of arcane flames that improve your unarmed attacks at a cost of burning your aura proportionally.";
 			} else {
 				return UtilText.parse(target,
-						"[npc.Name] has been shrouded in a cloak of arcane flames, granting [npc.herHim] significant bonuses to [npc.her] ice and fire resistances.");
+						"[npc.Name] has been shrouded in a cloak of arcane flames that improve [npc.her] unarmed attacks at a cost of burning [npc.her] aura proportionally.");
 			}
 		}
-		
+
 		@Override
 		public String getSVGString(GameCharacter owner) {
-			return Spell.CLOAK_OF_FLAMES.getSVGString();
+			return SpellUpgrade.CLOAK_OF_FLAMES_1.getSVGString();
 		}
-		
+
 		@Override
 		public boolean isCombatEffect() {
 			return true;
@@ -6994,17 +7169,20 @@ public enum StatusEffect {
 			Colour.DAMAGE_TYPE_FIRE,
 			true,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.RESISTANCE_FIRE, 10f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_ICE, 50f)),
-			Util.newArrayListOfValues("Attacks deal <b>5</b> [style.boldFire(Fire Damage)]")) {
+					new Value<Attribute, Float>(Attribute.RESISTANCE_FIRE, 5f),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_ICE, 10f)),
+			Util.newArrayListOfValues(
+					"Unarmed attacks deal +1 damage per caster level",
+					"Unarmed attacks deal [style.boldFire(Fire Damage)]")) {
+
 		
 		@Override
 		public String getDescription(GameCharacter target) {
 			if (target.isPlayer()) {
-				return "You have been shrouded in a cloak of arcane flames, granting you significant bonuses to your ice and fire resistances. You are also dealing extra fire damage each time you attack.";
+				return "You have been shrouded in a cloak of arcane flames that improve your unarmed attacks at a cost of burning your aura proportionally.";
 			} else {
 				return UtilText.parse(target,
-						"[npc.Name] has been shrouded in a cloak of arcane flames, granting [npc.herHim] significant bonuses to [npc.her] ice and fire resistances. [npc.She] is also dealing extra fire damage each time [npc.she] attacks.");
+						"[npc.Name] has been shrouded in a cloak of arcane flames that improve [npc.her] unarmed attacks at a cost of burning [npc.her] aura proportionally.");
 			}
 		}
 		
@@ -7026,9 +7204,11 @@ public enum StatusEffect {
 			true,
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.DAMAGE_FIRE, 25f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_FIRE, 10f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_ICE, 50f)),
-			Util.newArrayListOfValues("Attacks deal <b>5</b> [style.boldFire(Fire Damage)]")) {
+					new Value<Attribute, Float>(Attribute.RESISTANCE_FIRE, 5f),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_ICE, 10f)),
+			Util.newArrayListOfValues(
+					"Unarmed attacks deal +1 damage per caster level",
+					"Unarmed attacks deal [style.boldFire(Fire Damage)]")) {
 		
 		@Override
 		public String getDescription(GameCharacter target) {
@@ -7061,9 +7241,10 @@ public enum StatusEffect {
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.DAMAGE_FIRE, 25f),
 					new Value<Attribute, Float>(Attribute.RESISTANCE_FIRE, 10f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_ICE, 50f)),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_ICE, 20f)),
 			Util.newArrayListOfValues(
-					"Attacks deal <b>5</b> [style.boldFire(Fire Damage)]",
+					"Unarmed attacks deal +1 damage per caster level",
+					"Unarmed attacks deal [style.boldFire(Fire Damage)]",
 					"Attackers take <b>5</b> [style.colourFire(Fire Damage)]")) {
 		
 		@Override
@@ -7171,7 +7352,7 @@ public enum StatusEffect {
 		@Override
 		public boolean isConditionsMet(GameCharacter target) {
 			if(Main.game.isInCombat()) {
-				List<GameCharacter> enemies = new ArrayList<>(Combat.getEnemies().contains(target)?Combat.getAllies():Combat.getEnemies());
+				List<GameCharacter> enemies = Combat.getEnemies(target);
 				
 				for(GameCharacter combatant : enemies) {
 					if(combatant instanceof Elemental
@@ -7197,7 +7378,7 @@ public enum StatusEffect {
 			false,
 			null,
 			Util.newArrayListOfValues(
-					"-50% [style.colourHealth(maximum energy)]")) {
+					"-50% [style.colourHealth(maximum "+Attribute.HEALTH_MAXIMUM.getName()+")]")) {
 		
 		@Override
 		public String getDescription(GameCharacter target) {
@@ -7262,7 +7443,7 @@ public enum StatusEffect {
 			true,
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.DAMAGE_FIRE, 25f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_FIRE, 25f)),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_FIRE, 10f)),
 			null) {
 		
 		@Override
@@ -7436,19 +7617,14 @@ public enum StatusEffect {
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.SPELL_COST_MODIFIER, -25f),
 					new Value<Attribute, Float>(Attribute.RESISTANCE_ICE, -25f),
-					new Value<Attribute, Float>(Attribute.MISS_CHANCE, 15f)),
+					new Value<Attribute, Float>(Attribute.ENERGY_SHIELDING, -5f)),
 			null) {
 		
 		@Override
 		public String getDescription(GameCharacter target) {
-			if (target.isPlayer()) {
-				return "An arcane-infused rain cloud is hovering above your head."
-							+ " The freezing, heavy rain is sapping your ability to effectively cast spells, as well as reducing your resistance to the cold, and increasing your miss chance.";
-			} else {
-				return UtilText.parse(target,
-						"An arcane-infused rain cloud is hovering above [npc.namePos] head."
-								+ " The freezing, heavy rain is sapping [npc.her] ability to effectively cast spells, as well as reducing [npc.her] resistance to the cold, and increasing [npc.her] miss chance.");
-			}
+			return UtilText.parse(target,
+					"An arcane-infused rain cloud is hovering above [npc.namePos] head."
+							+ " The freezing downpour is sapping [npc.her] ability to effectively cast spells, as well as reducing [npc.her] resistance to the cold, and making it harder to defend [npc.herself].");
 		}
 
 		@Override
@@ -7471,19 +7647,14 @@ public enum StatusEffect {
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.SPELL_COST_MODIFIER, -25f),
 					new Value<Attribute, Float>(Attribute.RESISTANCE_ICE, -25f),
-					new Value<Attribute, Float>(Attribute.MISS_CHANCE, 15f)),
+					new Value<Attribute, Float>(Attribute.ENERGY_SHIELDING, -5f)),
 			null) {
 		
 		@Override
 		public String getDescription(GameCharacter target) {
-			if (target.isPlayer()) {
-				return "An arcane-infused rain cloud is hovering above your head."
-							+ " The freezing, heavy rain is sapping your ability to effectively cast spells, as well as reducing your resistance to the cold, and increasing your miss chance.";
-			} else {
-				return UtilText.parse(target,
-						"An arcane-infused rain cloud is hovering above [npc.namePos] head."
-								+ " The freezing, heavy rain is sapping [npc.her] ability to effectively cast spells, as well as reducing [npc.her] resistance to the cold, and increasing [npc.her] miss chance.");
-			}
+			return UtilText.parse(target,
+					"An arcane-infused rain cloud is hovering above [npc.namePos] head."
+							+ " The freezing downpour is sapping [npc.her] ability to effectively cast spells, as well as reducing [npc.her] resistance to the cold, and making it harder to defend [npc.herself].");
 		}
 
 		@Override
@@ -7506,19 +7677,14 @@ public enum StatusEffect {
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.SPELL_COST_MODIFIER, -50f),
 					new Value<Attribute, Float>(Attribute.RESISTANCE_ICE, -25f),
-					new Value<Attribute, Float>(Attribute.MISS_CHANCE, 15f)),
+					new Value<Attribute, Float>(Attribute.ENERGY_SHIELDING, -5f)),
 			null) {
 		
 		@Override
 		public String getDescription(GameCharacter target) {
-			if (target.isPlayer()) {
-				return "A huge, arcane-infused rain cloud is hovering above your head."
-							+ " The freezing, torrential rain is draining your ability to effectively cast spells, as well as reducing your resistance to the cold, and increasing your miss chance.";
-			} else {
-				return UtilText.parse(target,
-						"A huge, arcane-infused rain cloud is hovering above [npc.namePos] head."
-								+ " The freezing, torrential rain is draining [npc.her] ability to effectively cast spells, as well as reducing [npc.her] resistance to the cold, and increasing [npc.her] miss chance.");
-			}
+			return UtilText.parse(target,
+					"An arcane-infused rain cloud is hovering above [npc.namePos] head."
+							+ " The torrential, freezing downpour is draining [npc.her] ability to effectively cast spells, as well as reducing [npc.her] resistance to the cold, and making it harder to defend [npc.herself].");
 		}
 
 		@Override
@@ -7594,7 +7760,7 @@ public enum StatusEffect {
 			Colour.DAMAGE_TYPE_COLD,
 			true,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, 15f)),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, 5f)),
 			null) {
 		
 		@Override
@@ -7655,7 +7821,7 @@ public enum StatusEffect {
 			false,
 			null,
 			Util.newArrayListOfValues(
-					"-50% [style.colourHealth(maximum energy)]")) {
+					"-50% [style.colourHealth(maximum "+Attribute.HEALTH_MAXIMUM.getName()+")]")) {
 		
 		@Override
 		public String getDescription(GameCharacter target) {
@@ -7720,7 +7886,7 @@ public enum StatusEffect {
 			true,
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.DAMAGE_ICE, 25f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_ICE, 25f)),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_ICE, 10f)),
 			null) {
 		
 		@Override
@@ -7760,18 +7926,9 @@ public enum StatusEffect {
 		
 		@Override
 		public String applyEffect(GameCharacter target, int secondsPassed) {
-			int damage = (int) Math.round(10 * (1-(Util.getModifiedDropoffValue(target.getAttributeValue(Attribute.RESISTANCE_POISON), 100)/100f)));
-			if (damage < 1) {
-				damage = 1;
-			}
-			target.incrementHealth(-damage);
+			int damage = DamageType.POISON.damageTarget(null, target, 10);
 
-			if (target.isPlayer()) {
-				return "You take <b>" + damage + "</b> "+Attribute.DAMAGE_POISON.getColouredName("b")+"!";
-				
-			} else {
-				return "[npc.Name] takes <b>" + damage + "</b> "+Attribute.DAMAGE_POISON.getColouredName("b")+"!";
-			}
+			return UtilText.parse(target, "[npc.Name] [npc.verb(take)] <b>" + damage + "</b> "+Attribute.DAMAGE_POISON.getColouredName("b")+"!");
 		}
 
 		@Override
@@ -7802,23 +7959,14 @@ public enum StatusEffect {
 			Colour.DAMAGE_TYPE_POISON,
 			false,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.MISS_CHANCE, 10f)),
+					new Value<Attribute, Float>(Attribute.ENERGY_SHIELDING, -5f)),
 			Util.newArrayListOfValues("<b>10</b> "+Attribute.DAMAGE_POISON.getColouredName("b")+" per turn</b>")) {
 				
 		@Override
 		public String applyEffect(GameCharacter target, int secondsPassed) {
-			int damage = (int) Math.round(10 * (1-(Util.getModifiedDropoffValue(target.getAttributeValue(Attribute.RESISTANCE_POISON), 100)/100f)));
-			if (damage < 1) {
-				damage = 1;
-			}
-			target.incrementHealth(-damage);
+			int damage = DamageType.POISON.damageTarget(null, target, 10);
 
-			if (target.isPlayer()) {
-				return "You take <b>" + damage + "</b> "+Attribute.DAMAGE_POISON.getColouredName("b")+"!";
-				
-			} else {
-				return "[npc.Name] takes <b>" + damage + "</b> "+Attribute.DAMAGE_POISON.getColouredName("b")+"!";
-			}
+			return UtilText.parse(target, "[npc.Name] [npc.verb(take)] <b>" + damage + "</b> "+Attribute.DAMAGE_POISON.getColouredName("b")+"!");
 		}
 
 		@Override
@@ -7849,28 +7997,19 @@ public enum StatusEffect {
 			Colour.DAMAGE_TYPE_POISON,
 			false,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.MISS_CHANCE, 10f)),
+					new Value<Attribute, Float>(Attribute.ENERGY_SHIELDING, -5f)),
 			Util.newArrayListOfValues(
 					"<b>10</b> "+Attribute.DAMAGE_POISON.getColouredName("b")+" per turn</b>",
 					"<b>10</b> "+Attribute.MANA_MAXIMUM.getColouredName("b")+" [style.boldTerrible(drained)] per turn</b>")) {
 				
 		@Override
 		public String applyEffect(GameCharacter target, int secondsPassed) {
-			int damage = (int) Math.round(10 * (1-(Util.getModifiedDropoffValue(target.getAttributeValue(Attribute.RESISTANCE_POISON), 100)/100f)));
-			if (damage < 1) {
-				damage = 1;
-			}
-			target.incrementHealth(-damage);
-			
+			int damage = DamageType.POISON.damageTarget(null, target, 10);
+
 			int lustDamage = 10;
 			target.incrementMana(-lustDamage);
-
-			if (target.isPlayer()) {
-				return "You take <b>" + damage + "</b> "+Attribute.DAMAGE_POISON.getColouredName("b")+" and lose <b>" + lustDamage + "</b> "+Attribute.MANA_MAXIMUM.getColouredName("b")+"!";
-				
-			} else {
-				return "[npc.Name] takes <b>" + damage + "</b> "+Attribute.DAMAGE_POISON.getColouredName("b")+" and loses <b>" + lustDamage + "</b> "+Attribute.MANA_MAXIMUM.getColouredName("b")+"!";
-			}
+			
+			return UtilText.parse(target, "[npc.Name] [npc.verb(take)] <b>" + damage + "</b> "+Attribute.DAMAGE_POISON.getColouredName("b")+" and [npc.verb(lose)] <b>" + lustDamage + "</b> "+Attribute.MANA_MAXIMUM.getColouredName("b")+"!");
 		}
 
 		@Override
@@ -7901,7 +8040,7 @@ public enum StatusEffect {
 			Colour.DAMAGE_TYPE_POISON,
 			false,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.MISS_CHANCE, 10f),
+					new Value<Attribute, Float>(Attribute.ENERGY_SHIELDING, -5f),
 					new Value<Attribute, Float>(Attribute.DAMAGE_PHYSICAL, -15f),
 					new Value<Attribute, Float>(Attribute.CRITICAL_DAMAGE, -25f)),
 			Util.newArrayListOfValues(
@@ -7910,21 +8049,12 @@ public enum StatusEffect {
 				
 		@Override
 		public String applyEffect(GameCharacter target, int secondsPassed) {
-			int damage = (int) Math.round(10 * (1-(Util.getModifiedDropoffValue(target.getAttributeValue(Attribute.RESISTANCE_POISON), 100)/100f)));
-			if (damage < 1) {
-				damage = 1;
-			}
-			target.incrementHealth(-damage);
-			
+			int damage = DamageType.POISON.damageTarget(null, target, 10);
+
 			int lustDamage = 10;
 			target.incrementMana(-lustDamage);
 			
-			if (target.isPlayer()) {
-				return "You take <b>" + damage + "</b> "+Attribute.DAMAGE_POISON.getColouredName("b")+" and lose <b>" + lustDamage + "</b> "+Attribute.MANA_MAXIMUM.getColouredName("b")+"!";
-				
-			} else {
-				return "[npc.Name] takes <b>" + damage + "</b> "+Attribute.DAMAGE_POISON.getColouredName("b")+" and loses <b>" + lustDamage + "</b> "+Attribute.MANA_MAXIMUM.getColouredName("b")+"!";
-			}
+			return UtilText.parse(target, "[npc.Name] [npc.verb(take)] <b>" + damage + "</b> "+Attribute.DAMAGE_POISON.getColouredName("b")+" and [npc.verb(lose)] <b>" + lustDamage + "</b> "+Attribute.MANA_MAXIMUM.getColouredName("b")+"!");
 		}
 
 		@Override
@@ -7955,7 +8085,7 @@ public enum StatusEffect {
 			Colour.DAMAGE_TYPE_PHYSICAL,
 			false,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.MISS_CHANCE, 10f)),
+					new Value<Attribute, Float>(Attribute.ENERGY_SHIELDING, -10f)),
 			null) {
 		
 		@Override
@@ -7986,8 +8116,8 @@ public enum StatusEffect {
 			Colour.DAMAGE_TYPE_PHYSICAL,
 			false,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.MISS_CHANCE, 20f),
-					new Value<Attribute, Float>(Attribute.CRITICAL_CHANCE, -15f)),
+					new Value<Attribute, Float>(Attribute.ENERGY_SHIELDING, -20f),
+					new Value<Attribute, Float>(Attribute.CRITICAL_DAMAGE, -25f)),
 			null) {
 		
 		@Override
@@ -8020,8 +8150,8 @@ public enum StatusEffect {
 			Colour.DAMAGE_TYPE_PHYSICAL,
 			false,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.MISS_CHANCE, 20f),
-					new Value<Attribute, Float>(Attribute.CRITICAL_CHANCE, -15f)),
+					new Value<Attribute, Float>(Attribute.ENERGY_SHIELDING, -20f),
+					new Value<Attribute, Float>(Attribute.CRITICAL_DAMAGE, -25f)),
 			Util.newArrayListOfValues(
 					"<b>10%</b> chance per turn of [style.boldExcellent(stripping)] clothing")) {
 		
@@ -8029,9 +8159,9 @@ public enum StatusEffect {
 		public String applyEffect(GameCharacter target, int secondsPassed) {
 			if(Math.random()<(target.isPlayer()?0.1f:0.166f)) { // I purposefully boost the chance in secret to make the player feel better about the RNG
 				List<AbstractClothing> suitableClothing = new ArrayList<>();
-				for(AbstractClothing c : target.getClothingCurrentlyEquipped()) {
+				for(AbstractClothing c : new ArrayList<>(target.getClothingCurrentlyEquipped())) {
 					if(target.isAbleToUnequip(c, false, target)
-							&& !c.getClothingType().getSlot().isJewellery()) {
+							&& !c.getSlotEquippedTo().isJewellery()) {
 						suitableClothing.add(c);
 					}
 				}
@@ -8078,8 +8208,8 @@ public enum StatusEffect {
 			Colour.DAMAGE_TYPE_PHYSICAL,
 			false,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.MISS_CHANCE, 20f),
-					new Value<Attribute, Float>(Attribute.CRITICAL_CHANCE, -15f)),
+					new Value<Attribute, Float>(Attribute.ENERGY_SHIELDING, -20f),
+					new Value<Attribute, Float>(Attribute.CRITICAL_DAMAGE, -25f)),
 			Util.newArrayListOfValues(
 					"<b>25%</b> chance per turn of [style.boldExcellent(stripping)] clothing")) {
 		
@@ -8087,9 +8217,9 @@ public enum StatusEffect {
 		public String applyEffect(GameCharacter target, int secondsPassed) {
 			if(Math.random()<(target.isPlayer()?0.25f:0.33f)) { // I purposefully boost the chance in secret to make the player feel better about the RNG
 				List<AbstractClothing> suitableClothing = new ArrayList<>();
-				for(AbstractClothing c : target.getClothingCurrentlyEquipped()) {
+				for(AbstractClothing c : new ArrayList<>(target.getClothingCurrentlyEquipped())) {
 					if(target.isAbleToUnequip(c, false, target)
-							&& !c.getClothingType().getSlot().isJewellery()) {
+							&& !c.getSlotEquippedTo().isJewellery()) {
 						suitableClothing.add(c);
 					}
 				}
@@ -8136,8 +8266,8 @@ public enum StatusEffect {
 			Colour.DAMAGE_TYPE_PHYSICAL,
 			true,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.RESISTANCE_POISON, 25f),
-					new Value<Attribute, Float>(Attribute.DODGE_CHANCE, 10f)),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_POISON, 5f),
+					new Value<Attribute, Float>(Attribute.ENERGY_SHIELDING, 1f)),
 			null) {
 		
 		@Override
@@ -8164,9 +8294,9 @@ public enum StatusEffect {
 			Colour.DAMAGE_TYPE_PHYSICAL,
 			true,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.RESISTANCE_POISON, 25f),
-					new Value<Attribute, Float>(Attribute.DODGE_CHANCE, 15f),
-					new Value<Attribute, Float>(Attribute.CRITICAL_CHANCE, 10f)),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_POISON, 5f),
+					new Value<Attribute, Float>(Attribute.ENERGY_SHIELDING, 2f),
+					new Value<Attribute, Float>(Attribute.DAMAGE_PHYSICAL, 10f)),
 			null) {
 		
 		@Override
@@ -8194,9 +8324,9 @@ public enum StatusEffect {
 			Colour.DAMAGE_TYPE_PHYSICAL,
 			true,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.RESISTANCE_POISON, 25f),
-					new Value<Attribute, Float>(Attribute.DODGE_CHANCE, 15f),
-					new Value<Attribute, Float>(Attribute.CRITICAL_CHANCE, 10f),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_POISON, 5f),
+					new Value<Attribute, Float>(Attribute.ENERGY_SHIELDING, 3f),
+					new Value<Attribute, Float>(Attribute.DAMAGE_PHYSICAL, 10f),
 					new Value<Attribute, Float>(Attribute.CRITICAL_DAMAGE, 25f)),
 			null) {
 		
@@ -8226,7 +8356,7 @@ public enum StatusEffect {
 			Colour.DAMAGE_TYPE_PHYSICAL,
 			false,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.MISS_CHANCE, 5f)),
+					new Value<Attribute, Float>(Attribute.ENERGY_SHIELDING, -5f)),
 			null) {
 		
 		@Override
@@ -8247,7 +8377,7 @@ public enum StatusEffect {
 		@Override
 		public boolean isConditionsMet(GameCharacter target) {
 			if(Main.game.isInCombat()) {
-				List<GameCharacter> enemies = new ArrayList<>(Combat.getEnemies().contains(target)?Combat.getAllies():Combat.getEnemies());
+				List<GameCharacter> enemies = Combat.getEnemies(target);
 				
 				for(GameCharacter combatant : enemies) {
 					if(combatant instanceof Elemental
@@ -8272,8 +8402,8 @@ public enum StatusEffect {
 			Colour.DAMAGE_TYPE_PHYSICAL,
 			true,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.DODGE_CHANCE, 5f),
-					new Value<Attribute, Float>(Attribute.CRITICAL_CHANCE, 10f)),
+					new Value<Attribute, Float>(Attribute.ENERGY_SHIELDING, 5f),
+					new Value<Attribute, Float>(Attribute.DAMAGE_PHYSICAL, 10f)),
 			null) {
 		
 		@Override
@@ -8330,7 +8460,7 @@ public enum StatusEffect {
 			false,
 			null,
 			Util.newArrayListOfValues(
-					"-50% [style.colourHealth(maximum energy)]")) {
+					"-50% [style.colourHealth(maximum "+Attribute.HEALTH_MAXIMUM.getName()+")]")) {
 		
 		@Override
 		public String getDescription(GameCharacter target) {
@@ -8395,7 +8525,7 @@ public enum StatusEffect {
 			true,
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.DAMAGE_POISON, 25f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_POISON, 25f)),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_POISON, 10f)),
 			null) {
 		
 		@Override
@@ -8429,7 +8559,7 @@ public enum StatusEffect {
 			Colour.DAMAGE_TYPE_PHYSICAL,
 			false,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.MISS_CHANCE, 10f)),
+					new Value<Attribute, Float>(Attribute.ENERGY_SHIELDING, -10f)),
 			null) {
 		
 		@Override
@@ -8460,7 +8590,7 @@ public enum StatusEffect {
 			Colour.DAMAGE_TYPE_PHYSICAL,
 			false,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.MISS_CHANCE, 10f)),
+					new Value<Attribute, Float>(Attribute.ENERGY_SHIELDING, -10f)),
 			null) {
 		
 		@Override
@@ -8475,20 +8605,11 @@ public enum StatusEffect {
 		
 		@Override
 		protected String extraRemovalEffects(GameCharacter target){
-			int damage = (int) Math.round(5 * (1-(Util.getModifiedDropoffValue(target.getAttributeValue(Attribute.RESISTANCE_PHYSICAL), 100)/100f)));
-			if (damage < 1) {
-				damage = 1;
-			}
-			target.incrementHealth(-damage);
+			int damage = DamageType.PHYSICAL.damageTarget(null, target, 5);
 
-			if (target.isPlayer()) {
-				return "You take <b>" + damage + "</b> "+Attribute.DAMAGE_PHYSICAL.getColouredName("b")+" as the Aftershock hits!";
-				
-			} else {
-				return "[npc.Name] takes <b>" + damage + "</b> "+Attribute.DAMAGE_PHYSICAL.getColouredName("b")+" as the Aftershock hits!";
-			}
+			return UtilText.parse(target, "[npc.Name] [npc.verb(take)] <b>" + damage + "</b> "+Attribute.DAMAGE_PHYSICAL.getColouredName("b")+"!");
 		}
-
+		
 		@Override
 		public String getSVGString(GameCharacter owner) {
 			return SpellUpgrade.SLAM_2.getSVGString();
@@ -8511,18 +8632,9 @@ public enum StatusEffect {
 		
 		@Override
 		public String applyEffect(GameCharacter target, int secondsPassed) {
-			int damage = (int) Math.round(10 * (1-(Util.getModifiedDropoffValue(target.getAttributeValue(Attribute.RESISTANCE_PHYSICAL), 100)/100f)));
-			if (damage < 1) {
-				damage = 1;
-			}
-			target.incrementHealth(-damage);
+			int damage = DamageType.PHYSICAL.damageTarget(null, target, 10);
 
-			if (target.isPlayer()) {
-				return "You take <b>" + damage + "</b> "+Attribute.DAMAGE_PHYSICAL.getColouredName("b")+"!";
-				
-			} else {
-				return "[npc.Name] takes <b>" + damage + "</b> "+Attribute.DAMAGE_PHYSICAL.getColouredName("b")+"!";
-			}
+			return UtilText.parse(target, "[npc.Name] [npc.verb(take)] <b>" + damage + "</b> "+Attribute.DAMAGE_PHYSICAL.getColouredName("b")+"!");
 		}
 		
 		@Override
@@ -8558,18 +8670,9 @@ public enum StatusEffect {
 		
 		@Override
 		public String applyEffect(GameCharacter target, int secondsPassed) {
-			int damage = (int) Math.round(10 * (1-(Util.getModifiedDropoffValue(target.getAttributeValue(Attribute.RESISTANCE_PHYSICAL), 100)/100f)));
-			if (damage < 1) {
-				damage = 1;
-			}
-			target.incrementHealth(-damage);
+			int damage = DamageType.PHYSICAL.damageTarget(null, target, 10);
 
-			if (target.isPlayer()) {
-				return "You take <b>" + damage + "</b> "+Attribute.DAMAGE_PHYSICAL.getColouredName("b")+"!";
-				
-			} else {
-				return "[npc.Name] takes <b>" + damage + "</b> "+Attribute.DAMAGE_PHYSICAL.getColouredName("b")+"!";
-			}
+			return UtilText.parse(target, "[npc.Name] [npc.verb(take)] <b>" + damage + "</b> "+Attribute.DAMAGE_PHYSICAL.getColouredName("b")+"!");
 		}
 		
 		@Override
@@ -8605,18 +8708,9 @@ public enum StatusEffect {
 		
 		@Override
 		public String applyEffect(GameCharacter target, int secondsPassed) {
-			int damage = (int) Math.round(20 * (1-(Util.getModifiedDropoffValue(target.getAttributeValue(Attribute.RESISTANCE_PHYSICAL), 100)/100f)));
-			if (damage < 1) {
-				damage = 1;
-			}
-			target.incrementHealth(-damage);
-			
-			if (target.isPlayer()) {
-				return "You take <b>" + damage + "</b> "+Attribute.DAMAGE_PHYSICAL.getColouredName("b")+"!";
-				
-			} else {
-				return "[npc.Name] takes <b>" + damage + "</b> "+Attribute.DAMAGE_PHYSICAL.getColouredName("b")+"!";
-			}
+			int damage = DamageType.PHYSICAL.damageTarget(null, target, 20);
+
+			return UtilText.parse(target, "[npc.Name] [npc.verb(take)] <b>" + damage + "</b> "+Attribute.DAMAGE_PHYSICAL.getColouredName("b")+"!");
 		}
 		
 		@Override
@@ -8647,7 +8741,7 @@ public enum StatusEffect {
 			Colour.DAMAGE_TYPE_PHYSICAL,
 			true,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, 25f)),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, 5f)),
 			null) {
 		
 		@Override
@@ -8678,8 +8772,8 @@ public enum StatusEffect {
 			Colour.DAMAGE_TYPE_PHYSICAL,
 			true,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, 25f),
-					new Value<Attribute, Float>(Attribute.DODGE_CHANCE, 10f)),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, 5f),
+					new Value<Attribute, Float>(Attribute.ENERGY_SHIELDING, 2f)),
 			null) {
 		
 		@Override
@@ -8712,8 +8806,8 @@ public enum StatusEffect {
 			Colour.DAMAGE_TYPE_PHYSICAL,
 			true,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, 50f),
-					new Value<Attribute, Float>(Attribute.DODGE_CHANCE, 10f)),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, 10f),
+					new Value<Attribute, Float>(Attribute.ENERGY_SHIELDING, 2f)),
 			null) {
 		
 		@Override
@@ -8746,8 +8840,8 @@ public enum StatusEffect {
 			Colour.DAMAGE_TYPE_PHYSICAL,
 			true,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, 50f),
-					new Value<Attribute, Float>(Attribute.DODGE_CHANCE, 10f)),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, 10f),
+					new Value<Attribute, Float>(Attribute.ENERGY_SHIELDING, 2f)),
 			Util.newArrayListOfValues("[style.colourExcellent(All enemies)] take <b>10</b> "+Attribute.DAMAGE_PHYSICAL.getColouredName("b")+" when Stone Shell ends")) {
 		
 		@Override
@@ -8766,32 +8860,11 @@ public enum StatusEffect {
 		protected String extraRemovalEffects(GameCharacter target){
 			StringBuilder sb = new StringBuilder();
 			
-			if(Combat.getEnemies().contains(target)) {
-				int damage = (int) Math.round(10 * (1-(Util.getModifiedDropoffValue(Main.game.getPlayer().getAttributeValue(Attribute.RESISTANCE_PHYSICAL), 100)/100f)));
-				if (damage < 1) {
-					damage = 1;
-				}
-				Main.game.getPlayer().incrementHealth(-damage);
-				sb.append("You take <b>" + damage + "</b> "+Attribute.DAMAGE_PHYSICAL.getColouredName("b")+" as the Stone Shell explodes!");
-				for(NPC combatant : Combat.getAllies()) {
-					damage = (int) Math.round(10 * (1-(Util.getModifiedDropoffValue(combatant.getAttributeValue(Attribute.RESISTANCE_PHYSICAL), 100)/100f)));
-					if (damage < 1) {
-						damage = 1;
-					}
-					combatant.incrementHealth(-damage);
-					sb.append(UtilText.parse(combatant, "<br/>[npc.Name] takes <b>" + damage + "</b> "+Attribute.DAMAGE_PHYSICAL.getColouredName("b")+" as the Stone Shell explodes!"));
-				}
-			} else {
-				boolean first=true;
-				for(NPC combatant : Combat.getEnemies()) {
-					int damage = (int) Math.round(10 * (1-(Util.getModifiedDropoffValue(combatant.getAttributeValue(Attribute.RESISTANCE_PHYSICAL), 100)/100f)));
-					if (damage < 1) {
-						damage = 1;
-					}
-					combatant.incrementHealth(-damage);
-					sb.append(UtilText.parse(combatant, (first?"":"<br/>")+"[npc.Name] takes <b>" + damage + "</b> "+Attribute.DAMAGE_PHYSICAL.getColouredName("b")+" as the Stone Shell explodes!"));
-					first=false;
-				}
+			boolean first=true;
+			for(GameCharacter combatant : Combat.getEnemies(target)) {
+				int damage = DamageType.PHYSICAL.damageTarget(target, combatant, 10);
+				sb.append(UtilText.parse(combatant, target, (first?"":"<br/>")+"<br/>[npc.Name] [npc.verb(take)] <b>" + damage + "</b> "+Attribute.DAMAGE_PHYSICAL.getColouredName("b")+" as [npc2.namePos] Stone Shell explodes!"));
+				first=false;
 			}
 			
 			return sb.toString();
@@ -8929,7 +9002,7 @@ public enum StatusEffect {
 			false,
 			null,
 			Util.newArrayListOfValues(
-					"-50% [style.colourHealth(maximum energy)]")) {
+					"-50% [style.colourHealth(maximum "+Attribute.HEALTH_MAXIMUM.getName()+")]")) {
 		
 		@Override
 		public String getDescription(GameCharacter target) {
@@ -8994,7 +9067,7 @@ public enum StatusEffect {
 			true,
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.DAMAGE_PHYSICAL, 25f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, 25f)),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, 10f)),
 			null) {
 		
 		@Override
@@ -9029,7 +9102,7 @@ public enum StatusEffect {
 			Colour.DAMAGE_TYPE_LUST,
 			false,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.MISS_CHANCE, 15f)),
+					new Value<Attribute, Float>(Attribute.ENERGY_SHIELDING, -15f)),
 			null) {
 		
 		@Override
@@ -9060,7 +9133,7 @@ public enum StatusEffect {
 			Colour.DAMAGE_TYPE_LUST,
 			false,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.MISS_CHANCE, 15f),
+					new Value<Attribute, Float>(Attribute.ENERGY_SHIELDING, -15f),
 					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, -25f)),
 			null) {
 		
@@ -9160,7 +9233,7 @@ public enum StatusEffect {
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.DAMAGE_LUST, 30f)),
 			Util.newArrayListOfValues(
-					"[style.boldLust(Seduce)] [style.boldExcellent(applies)] -25 "+Attribute.RESISTANCE_PHYSICAL.getColouredName("b")+" to the target for [style.boldGood(2 turns)]")) {
+					"[style.boldLust(Tease)] [style.boldExcellent(applies)] -25 "+Attribute.RESISTANCE_PHYSICAL.getColouredName("b")+" to the target for [style.boldGood(2 turns)]")) {
 		
 		@Override
 		public String getDescription(GameCharacter target) {
@@ -9255,11 +9328,9 @@ public enum StatusEffect {
 		
 		@Override
 		public String applyEffect(GameCharacter target, int secondsPassed) {
-			int damage = (int) Math.round(5 * (1-(Util.getModifiedDropoffValue(target.getAttributeValue(Attribute.RESISTANCE_LUST), 100)/100f)));
-			if (damage < 1) {
-				damage = 1;
-			}
-			return target.incrementLust(damage, true);
+			int damage = DamageType.LUST.damageTarget(null, target, 5);
+
+			return UtilText.parse(target, "[npc.Name] [npc.verb(take)] <b>" + damage + "</b> [style.boldLust(lust damage)]!");
 		}
 		
 		@Override
@@ -9295,11 +9366,9 @@ public enum StatusEffect {
 		
 		@Override
 		public String applyEffect(GameCharacter target, int secondsPassed) {
-			int damage = (int) Math.round(15 * (1-(Util.getModifiedDropoffValue(target.getAttributeValue(Attribute.RESISTANCE_LUST), 100)/100f)));
-			if (damage < 1) {
-				damage = 1;
-			}
-			return target.incrementLust(damage, true);
+			int damage = DamageType.LUST.damageTarget(null, target, 15);
+
+			return UtilText.parse(target, "[npc.Name] [npc.verb(take)] <b>" + damage + "</b> [style.boldLust(lust damage)]!");
 		}
 		
 		@Override
@@ -9336,30 +9405,11 @@ public enum StatusEffect {
 		@Override
 		public String applyEffect(GameCharacter target, int secondsPassed) {
 			StringBuilder sb = new StringBuilder();
-			if(Combat.getEnemies().contains(target)) {
-				for(NPC combatant : Combat.getEnemies()) {
-					int damage = (int) Math.round(15 * (1-(Util.getModifiedDropoffValue(combatant.getAttributeValue(Attribute.RESISTANCE_LUST), 100)/100f)));
-					if (damage < 1) {
-						damage = 1;
-					}
-					
-					sb.append(combatant.incrementLust(damage, true));
-				}
-				
-			} else {
-				int damage = (int) Math.round(15 * (1-(Util.getModifiedDropoffValue(Main.game.getPlayer().getAttributeValue(Attribute.RESISTANCE_LUST), 100)/100f)));
-				if (damage < 1) {
-					damage = 1;
-				}
-				sb.append(Main.game.getPlayer().incrementLust(damage, true));
-				
-				for(NPC combatant : Combat.getAllies()) {
-					damage = (int) Math.round(15 * (1-(Util.getModifiedDropoffValue(combatant.getAttributeValue(Attribute.RESISTANCE_LUST), 100)/100f)));
-					if (damage < 1) {
-						damage = 1;
-					}
-					sb.append(combatant.incrementLust(damage, true));
-				}
+			
+			for(GameCharacter combatant : Combat.getEnemies(target)) {
+				int damage = DamageType.LUST.damageTarget(null, combatant, 15);
+
+				sb.append(UtilText.parse(combatant, "[npc.Name] [npc.verb(take)] <b>" + damage + "</b> [style.boldLust(lust damage)]!"));
 			}
 			
 			return sb.toString();
@@ -9475,7 +9525,7 @@ public enum StatusEffect {
 		@Override
 		public boolean isConditionsMet(GameCharacter target) {
 			if(Main.game.isInCombat()) {
-				List<GameCharacter> enemies = new ArrayList<>(Combat.getEnemies().contains(target)?Combat.getAllies():Combat.getEnemies());
+				List<GameCharacter> enemies = Combat.getEnemies(target);
 				
 				for(GameCharacter combatant : enemies) {
 					if(combatant instanceof Elemental
@@ -9501,7 +9551,7 @@ public enum StatusEffect {
 			false,
 			null,
 			Util.newArrayListOfValues(
-					"-50% [style.colourHealth(maximum energy)]")) {
+					"-50% [style.colourHealth(maximum "+Attribute.HEALTH_MAXIMUM.getName()+")]")) {
 		
 		@Override
 		public String getDescription(GameCharacter target) {
@@ -9566,7 +9616,7 @@ public enum StatusEffect {
 			true,
 			Util.newHashMapOfValues(
 					new Value<Attribute, Float>(Attribute.DAMAGE_LUST, 25f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, 25f)),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, 10f)),
 			null) {
 		
 		@Override
@@ -9603,11 +9653,11 @@ public enum StatusEffect {
 			Colour.GENERIC_ARCANE,
 			true,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, 10f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, 10f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_FIRE, 10f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_ICE, 10f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_POISON, 10f)),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, 5f),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, 5f),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_FIRE, 5f),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_ICE, 5f),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_POISON, 5f)),
 			null) {
 		
 		@Override
@@ -9633,11 +9683,11 @@ public enum StatusEffect {
 			Colour.GENERIC_ARCANE,
 			false,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, -10f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, -10f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_FIRE, -10f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_ICE, -10f),
-					new Value<Attribute, Float>(Attribute.RESISTANCE_POISON, -10f)),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_PHYSICAL, -5f),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_LUST, -5f),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_FIRE, -5f),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_ICE, -5f),
+					new Value<Attribute, Float>(Attribute.RESISTANCE_POISON, -5f)),
 			null) {
 		
 		@Override
@@ -9663,7 +9713,7 @@ public enum StatusEffect {
 			Colour.GENERIC_ARCANE,
 			true,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.DODGE_CHANCE, 100f)),
+					new Value<Attribute, Float>(Attribute.ENERGY_SHIELDING, 100f)),
 			null) {
 		
 		@Override
@@ -9694,27 +9744,16 @@ public enum StatusEffect {
 			Colour.GENERIC_ARCANE,
 			true,
 			Util.newHashMapOfValues(
-					new Value<Attribute, Float>(Attribute.DODGE_CHANCE, 100f)),
+					new Value<Attribute, Float>(Attribute.ENERGY_SHIELDING, 100f)),
 			Util.newArrayListOfValues("<b>5</b> "+Attribute.DAMAGE_LUST.getColouredName("b")+" per turn to a random enemy")) {
 		
 		@Override
 		public String applyEffect(GameCharacter target, int secondsPassed) {
-			GameCharacter randomEnemy = Main.game.getPlayer();
+			GameCharacter randomEnemy = Combat.getEnemies(target).get(Util.random.nextInt(Combat.getEnemies(target).size()));
 			
-			if(Combat.getEnemies().contains(target)) {
-				if(!Combat.getAllies().isEmpty() && Math.random() > (1f/(1+Combat.getAllies().size()))) {
-					randomEnemy = Combat.getAllies().get(Util.random.nextInt(Combat.getAllies().size()));
-				}
-			} else {
-				randomEnemy = Combat.getEnemies().get(Util.random.nextInt(Combat.getEnemies().size()));
-			}
-			
-			
-			int damage = (int) Math.round(5 * (1-(Util.getModifiedDropoffValue(randomEnemy.getAttributeValue(Attribute.RESISTANCE_LUST), 100)/100f)));
-			if (damage < 1) {
-				damage = 1;
-			}
-			return randomEnemy.incrementLust(damage, true);
+			int damage = DamageType.LUST.damageTarget(null, randomEnemy, 15);
+
+			return UtilText.parse(randomEnemy, "[npc.Name] [npc.verb(take)] <b>" + damage + "</b> [style.boldLust(lust damage)]!");
 		}
 		
 		@Override
@@ -9812,7 +9851,7 @@ public enum StatusEffect {
 						+ "<i style='color:"+Colour.GENERIC_ARCANE.toWebHexString()+";'>"
 						+ (preference!=null
 								?"[npc.Name] wants to use [npc.her] "+preference.getPerformingSexArea().getName(target)+" and [npc2.namePos] "+preference.getTargetedSexArea().getName(Sex.getTargetedPartner(target))+"."
-								:"")
+								:"[npc.Name] has no preference in how to fuck [npc2.name]...")
 						+ "</i>");
 				
 			} else {
@@ -10068,6 +10107,116 @@ public enum StatusEffect {
 		@Override
 		public String getSVGString(GameCharacter owner) {
 			return getOrificeSVGString(owner, SexAreaPenetration.PENIS, SVGImages.SVG_IMAGE_PROVIDER.getPenetrationTypePenis());
+		}
+	},
+	
+	CLIT_STATUS(
+			95,
+			"Clitoris status",
+			null,
+			Colour.GENERIC_SEX,
+			false,
+			null,
+			null) {
+		
+		@Override
+		public float getArousalPerTurnSelf(GameCharacter target) {
+			return getPenetrationArousalPerTurn(target, SexAreaPenetration.CLIT);
+		}
+
+		@Override
+		public float getArousalPerTurnPartner(GameCharacter self, GameCharacter target) {
+			return 0;
+		}
+				
+		@Override
+		public List<String> getModifiersAsStringList(GameCharacter target) {
+			return getPenetrationModifiersAsStringList(target, SexAreaPenetration.CLIT);
+		}
+
+		@Override
+		public String getDescription(GameCharacter target) {
+			descriptionSB = new StringBuilder();
+			SexAreaPenetration type = SexAreaPenetration.CLIT;
+
+			descriptionSB.append("<p style='text-align:center; padding:0;margin:0;'>");
+			for(Entry<GameCharacter, Set<SexAreaInterface>> entry : Sex.getContactingSexAreas(target, type).entrySet()) {
+				for(SexAreaInterface sArea : entry.getValue()) {
+					if(sArea.isPenetration()) {
+						switch((SexAreaPenetration)sArea) {
+							case FINGER:
+								descriptionSB.append(UtilText.parse(entry.getKey(), target, "[npc.NameIsFull] <b style='color:"+Colour.GENERIC_SEX.toWebHexString()+";'>fingering</b> [npc2.name]!"));
+								break;
+							case PENIS:
+								descriptionSB.append(UtilText.parse(entry.getKey(), target, "[npc.NameIsFull] <b style='color:"+Colour.GENERIC_SEX.toWebHexString()+";'>teasing</b> [npc2.namePos] pussy!"));
+								break;
+							case TAIL:
+								descriptionSB.append(UtilText.parse(entry.getKey(), target, "[npc.NameIsFull] <b style='color:"+Colour.GENERIC_SEX.toWebHexString()+";'>tail-teasing</b> [npc2.namePos] pussy!"));
+								break;
+							case TENTACLE:
+								descriptionSB.append(UtilText.parse(entry.getKey(), target, "[npc.NameIsFull] <b style='color:"+Colour.GENERIC_SEX.toWebHexString()+";'>tentacle-teasing</b> [npc2.namePos] pussy!"));
+								break;
+							case TONGUE:
+								descriptionSB.append(UtilText.parse(entry.getKey(), target, "[npc.NameIsFull] <b style='color:"+Colour.GENERIC_SEX.toWebHexString()+";'>performing cunnilingus</b> on [npc2.name]!"));
+								break;
+							case CLIT:
+								descriptionSB.append(UtilText.parse(entry.getKey(), target, "[npc.NameIsFull] <b style='color:"+Colour.GENERIC_SEX.toWebHexString()+";'>tribbing</b> with [npc2.name]!"));
+								break;
+							case FOOT:
+								descriptionSB.append(UtilText.parse(entry.getKey(), target, "[npc.NameIsFull] <b style='color:"+Colour.GENERIC_SEX.toWebHexString()+";'>foot-teasing</b> [npc2.namePos] pussy!"));
+								break;
+						}
+						
+					}
+				}
+			}
+			
+			if(Sex.getContactingSexAreas(target, type).isEmpty()) {
+				descriptionSB.append("<b style='color:"+Colour.TEXT_GREY.toWebHexString()+";'>No ongoing action.</b>");
+			}
+
+			appendPenetrationAdditionGenericDescriptions(target, type, UtilText.parse(target, "[npc.NamePos] [npc.clit]"), descriptionSB);
+			
+			descriptionSB.append("</p>");
+			
+			return descriptionSB.toString();
+		}
+		
+		@Override
+		public String getAdditionalDescription(GameCharacter target) {
+			if(Sex.getCharactersHavingOngoingActionWith(target, SexAreaPenetration.CLIT).isEmpty()) {
+				return null;
+			}
+			
+			GameCharacter partner = Sex.getCharactersHavingOngoingActionWith(target, SexAreaPenetration.CLIT).get(0);
+			
+			return Sex.formatPenetration(
+					target.getPenetrationDescription(false,
+							target,
+							SexAreaPenetration.CLIT,
+							partner,
+							Sex.getOngoingActionsMap(target).get(SexAreaPenetration.CLIT).get(partner).iterator().next()));
+		}
+
+		@Override
+		public boolean isConditionsMet(GameCharacter target) {
+			return Main.game.isInSex()
+					&& Sex.getAllParticipants(true).contains(target)
+					&& Sex.getOngoingActionsMap(target)!=null
+					&& !Sex.getContactingSexAreas(target, SexAreaPenetration.CLIT).isEmpty()
+					&& !Collections.disjoint(
+							Sex.getContactingSexAreas(target, SexAreaPenetration.CLIT).get(Sex.getCharacterContactingSexArea(target, SexAreaPenetration.CLIT).get(0)),
+							Util.newArrayListOfValues(SexAreaPenetration.values()));
+		}
+		
+		@Override
+		public boolean isSexEffect() {
+			return true;
+		}
+		
+		@Override
+		public String getSVGString(GameCharacter owner) {
+			return getOrificeSVGString(owner, SexAreaPenetration.CLIT, SVGImages.SVG_IMAGE_PROVIDER.getPenetrationTypeClit());
 		}
 	},
 	
@@ -10891,7 +11040,8 @@ public enum StatusEffect {
 		public boolean isConditionsMet(GameCharacter target) {
 			return Main.game.isInSex()
 					&& Sex.getAllParticipants(true).contains(target)
-					&& target.hasBreastsCrotch();
+					&& target.hasBreastsCrotch()
+					&& Main.getProperties().udders>0;
 		}
 		
 		@Override
@@ -11038,6 +11188,7 @@ public enum StatusEffect {
 			return Main.game.isInSex()
 					&& Sex.getAllParticipants(true).contains(target)
 					&& target.hasBreastsCrotch()
+					&& Main.getProperties().udders>0
 					&& target.isBreastCrotchFuckableNipplePenetration()
 					&& Main.getProperties().hasValue(PropertyValue.nipplePenContent);
 		}
@@ -11992,6 +12143,10 @@ public enum StatusEffect {
 	
 	public String getPenetrationSVGString(GameCharacter owner, SexAreaInterface penetration, String baseSVG) {
 		SVGImageSB = new StringBuilder();
+
+		if(!Sex.getContactingSexAreas(owner, penetration).isEmpty()) {
+			SVGImageSB.append("<div style='width:100%;height:100%;position:absolute;left:0;top:0;'>"+SVGImages.SVG_IMAGE_PROVIDER.getActiveSexBackground()+"</div>");
+		}
 		
 		SVGImageSB.append("<div style='width:50%;height:50%;position:absolute;left:0;top:0;'>"+baseSVG+"</div>");
 		
@@ -12037,6 +12192,10 @@ public enum StatusEffect {
 	
 	public String getOrificeSVGString(GameCharacter owner, SexAreaInterface orifice, String baseSVG) {
 		SVGImageSB = new StringBuilder();
+
+		if(!Sex.getContactingSexAreas(owner, orifice).isEmpty()) {
+			SVGImageSB.append("<div style='width:100%;height:100%;position:absolute;left:0;top:0;'>"+SVGImages.SVG_IMAGE_PROVIDER.getActiveSexBackground()+"</div>");
+		}
 		
 		SVGImageSB.append("<div style='width:50%;height:50%;position:absolute;left:0;top:0;'>"+baseSVG+"</div>");
 		
@@ -12051,7 +12210,7 @@ public enum StatusEffect {
 					}
 				}
 			}
-			switch(firstPenetration){
+			switch(firstPenetration) {
 				case FINGER:
 					SVGImageSB.append("<div style='width:50%;height:50%;position:absolute;right:0;bottom:0;'>"+SVGImages.SVG_IMAGE_PROVIDER.getPenetrationTypeFinger()+"</div>");
 					break;
@@ -12065,6 +12224,7 @@ public enum StatusEffect {
 					SVGImageSB.append("<div style='width:50%;height:50%;position:absolute;right:0;bottom:0;'>"+SVGImages.SVG_IMAGE_PROVIDER.getPenetrationTypeTongue()+"</div>");
 					break;
 				case CLIT:
+					SVGImageSB.append("<div style='width:50%;height:50%;position:absolute;right:0;bottom:0;'>"+SVGImages.SVG_IMAGE_PROVIDER.getPenetrationTypeClit()+"</div>");
 					break;
 				case FOOT:
 					SVGImageSB.append("<div style='width:50%;height:50%;position:absolute;right:0;bottom:0;'>"+SVGImages.SVG_IMAGE_PROVIDER.getPenetrationTypeFoot()+"</div>");
@@ -12177,7 +12337,9 @@ public enum StatusEffect {
 		} else if (owner.isFeminine() && owner.isCoverableAreaVisible(CoverableArea.NIPPLES)) {
 			names.add("nipples");
 		}
-		if(owner.hasBreastsCrotch() && owner.isCoverableAreaVisible(CoverableArea.NIPPLES_CROTCH)) {
+		if(owner.hasBreastsCrotch()
+				&& Main.getProperties().udders>0
+				&& owner.isCoverableAreaVisible(CoverableArea.NIPPLES_CROTCH)) {
 			names.add(UtilText.parse(owner, "[npc.crotchBoobs]"));
 		}
 		if(owner.isCoverableAreaVisible(CoverableArea.ANUS)) {
@@ -12204,7 +12366,9 @@ public enum StatusEffect {
 		
 		boolean breastsExposed = owner.hasBreasts() && owner.isCoverableAreaVisible(CoverableArea.NIPPLES);
 		boolean nipplesExposed = ! breastsExposed && owner.isFeminine() && owner.isCoverableAreaVisible(CoverableArea.NIPPLES);
-		boolean crotchBoobsExposed = owner.hasBreastsCrotch() && owner.isCoverableAreaVisible(CoverableArea.NIPPLES_CROTCH);
+		boolean crotchBoobsExposed = owner.hasBreastsCrotch()
+				&& Main.getProperties().udders>0
+				&& owner.isCoverableAreaVisible(CoverableArea.NIPPLES_CROTCH);
 
 		boolean anusExposed = owner.isCoverableAreaVisible(CoverableArea.ANUS);
 		
@@ -12263,7 +12427,9 @@ public enum StatusEffect {
 		boolean vaginaRecovering = owner.hasVagina() && owner.getVaginaRawCapacityValue()!=owner.getVaginaStretchedCapacity();
 		boolean anusRecovering = owner.getAssRawCapacityValue()!=owner.getAssStretchedCapacity();
 		boolean nipplesRecovering = owner.getNippleRawCapacityValue()!=owner.getNippleStretchedCapacity();
-		boolean nipplesCrotchRecovering = owner.hasBreastsCrotch() && owner.getNippleCrotchRawCapacityValue()!=owner.getNippleCrotchStretchedCapacity();
+		boolean nipplesCrotchRecovering = owner.hasBreastsCrotch()
+				&& Main.getProperties().udders>0
+				&& owner.getNippleCrotchRawCapacityValue()!=owner.getNippleCrotchStretchedCapacity();
 		boolean penileUrethraRecovering = owner.hasPenis() && owner.getPenisRawCapacityValue()!=owner.getPenisStretchedCapacity();
 		boolean vaginalUrethraRecovering = owner.hasVagina() && owner.getVaginaUrethraRawCapacityValue()!=owner.getVaginaUrethraStretchedCapacity();
 		

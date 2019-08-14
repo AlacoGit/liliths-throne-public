@@ -20,7 +20,10 @@ public enum BodyCoveringType {
 	// Skin shades go light->dark
 
 	HUMAN(BodyCoveringTemplateFactory.createTopSkin(
-			Util.newArrayListOfValues(CoveringPattern.NONE, CoveringPattern.FRECKLED),
+			Util.newArrayListOfValues(
+					CoveringPattern.NONE,
+					CoveringPattern.FRECKLED,
+					CoveringPattern.FRECKLED_FACE),
 			Colour.humanSkinColours)),
 	
 	FOX_FUR("a layer of",
@@ -153,9 +156,9 @@ public enum BodyCoveringType {
 			null,
 			null,
 			null,
-			ColourListPresets.ALL.getPresetColourList(),
+			ColourListPresets.ALL,
 			null,
-			ColourListPresets.ALL.getPresetColourList(),
+			ColourListPresets.ALL,
 			null),
 	
 	PENIS(BodyCoveringTemplateFactory.createPenisSkin()),

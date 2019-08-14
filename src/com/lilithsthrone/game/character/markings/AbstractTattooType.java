@@ -39,8 +39,9 @@ public class AbstractTattooType extends AbstractCoreType {
 	private boolean isMod;
 	
 	private int value;
-	
-	private int enchantmentLimit;
+
+	@SuppressWarnings("unused")
+	private int enchantmentLimit; // Removed as part of 0.3.3.7's update to add enchantment capacity mechanics.
 	
 	private List<InventorySlot> slotAvailability;
 
@@ -186,7 +187,7 @@ public class AbstractTattooType extends AbstractCoreType {
 
 
 	private List<Colour> readColoursFromElement(Element coreAttributes, String elementTagName) {
-		Element coloursElement = ((Element)coreAttributes.getElementsByTagName("primaryColours").item(0));
+		Element coloursElement = ((Element)coreAttributes.getElementsByTagName(elementTagName).item(0));
 		if(coloursElement.getAttribute("values").isEmpty()) {
 			NodeList coloursNodeList = coloursElement.getElementsByTagName("colour");
 			List<Colour> result = new ArrayList<>(coloursNodeList.getLength());
@@ -195,7 +196,7 @@ public class AbstractTattooType extends AbstractCoreType {
 			}
 			return result;
 		}
-		return ColourListPresets.valueOf(coloursElement.getAttribute("values")).getPresetColourList();
+		return ColourListPresets.getColourListFromId(coloursElement.getAttribute("values"));
 	}
 	
 	@Override
@@ -271,7 +272,7 @@ public class AbstractTattooType extends AbstractCoreType {
 	}
 	
 	public int getEnchantmentLimit() {
-		return enchantmentLimit;
+		return 100;
 	}
 	
 	public AbstractItemEffectType getEnchantmentEffect() {

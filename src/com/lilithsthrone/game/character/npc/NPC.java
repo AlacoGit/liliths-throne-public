@@ -1,5 +1,6 @@
 package com.lilithsthrone.game.character.npc;
 
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.ArrayList;
@@ -15,8 +16,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import com.lilithsthrone.game.Game;
 import com.lilithsthrone.game.character.CharacterImportSetting;
 import com.lilithsthrone.game.character.CharacterUtils;
+import com.lilithsthrone.game.character.EquipClothingSetting;
 import com.lilithsthrone.game.character.GameCharacter;
 import com.lilithsthrone.game.character.attributes.AffectionLevel;
 import com.lilithsthrone.game.character.attributes.Attribute;
@@ -37,7 +40,6 @@ import com.lilithsthrone.game.character.body.valueEnums.OrificeModifier;
 import com.lilithsthrone.game.character.body.valueEnums.PenisSize;
 import com.lilithsthrone.game.character.body.valueEnums.TesticleSize;
 import com.lilithsthrone.game.character.body.valueEnums.Wetness;
-import com.lilithsthrone.game.character.effects.Addiction;
 import com.lilithsthrone.game.character.effects.Perk;
 import com.lilithsthrone.game.character.effects.StatusEffect;
 import com.lilithsthrone.game.character.fetishes.Fetish;
@@ -50,9 +52,7 @@ import com.lilithsthrone.game.character.race.FurryPreference;
 import com.lilithsthrone.game.character.race.Race;
 import com.lilithsthrone.game.character.race.RaceStage;
 import com.lilithsthrone.game.character.race.Subspecies;
-import com.lilithsthrone.game.combat.Attack;
 import com.lilithsthrone.game.combat.Combat;
-import com.lilithsthrone.game.combat.SpecialAttack;
 import com.lilithsthrone.game.combat.Spell;
 import com.lilithsthrone.game.combat.SpellSchool;
 import com.lilithsthrone.game.dialogue.DialogueNode;
@@ -71,6 +71,7 @@ import com.lilithsthrone.game.inventory.item.AbstractItemType;
 import com.lilithsthrone.game.inventory.item.ItemType;
 import com.lilithsthrone.game.occupantManagement.SlaveJob;
 import com.lilithsthrone.game.settings.ForcedTFTendency;
+import com.lilithsthrone.game.sex.NPCGenericSexFlag;
 import com.lilithsthrone.game.sex.Sex;
 import com.lilithsthrone.game.sex.SexAreaInterface;
 import com.lilithsthrone.game.sex.SexAreaOrifice;
@@ -81,6 +82,7 @@ import com.lilithsthrone.game.sex.SexParticipantType;
 import com.lilithsthrone.game.sex.SexType;
 import com.lilithsthrone.game.sex.positions.AbstractSexPosition;
 import com.lilithsthrone.game.sex.positions.SexSlot;
+import com.lilithsthrone.game.sex.sexActions.SexAction;
 import com.lilithsthrone.game.sex.sexActions.SexActionInterface;
 import com.lilithsthrone.main.Main;
 import com.lilithsthrone.utils.Colour;
@@ -92,7 +94,7 @@ import com.lilithsthrone.world.places.AbstractPlaceType;
 
 /**
  * @since 0.1.0
- * @version 0.3.1
+ * @version 0.3.2
  * @author Innoxia
  */
 public abstract class NPC extends GameCharacter implements XMLSaving {
@@ -150,7 +152,7 @@ public abstract class NPC extends GameCharacter implements XMLSaving {
 		if(!isImported) {
 			setStartingBody(true);
 			if(!flags.contains(NPCGenerationFlag.NO_CLOTHING_EQUIP)) {
-				equipClothing(true, true, true, true);
+				equipClothing(EquipClothingSetting.getAllClothingSettings());
 			}
 		}
 		
@@ -161,10 +163,18 @@ public abstract class NPC extends GameCharacter implements XMLSaving {
 				}
 			}
 		}
+
+		if(!isImported || Main.isVersionOlderThan(Game.loadingVersion, "0.3.3.5")) {
+			this.setStartingCombatMoves();
+		}
 		
 		loadImages();
 	}
 	
+	
+	public void setStartingCombatMoves() {
+		resetDefaultMoves();
+	}
 
 	/**
 	 * Helper method that should be overridden and included in constructor. Sets custom body parts.<br/>
@@ -253,8 +263,8 @@ public abstract class NPC extends GameCharacter implements XMLSaving {
 	 * <b>-</b> Piercings.<br/>
 	 * <b>-</b> Clothing (remember underwear and accessories).<br/>
 	 */
-	public void equipClothing(boolean replaceUnsuitableClothing, boolean addWeapons, boolean addScarsAndTattoos, boolean addAccessories) {
-		CharacterUtils.equipClothingFromOutfit(this, null, replaceUnsuitableClothing, addWeapons, addScarsAndTattoos, addAccessories);
+	public void equipClothing(List<EquipClothingSetting> settings) {
+		CharacterUtils.equipClothingFromOutfit(this, null, settings);
 	}
 	
 	protected void resetBodyAfterVersion_2_10_5() {
@@ -264,7 +274,7 @@ public abstract class NPC extends GameCharacter implements XMLSaving {
 		float milkStored = this.getBreastRawStoredMilkValue();
 		
 		setStartingBody(true);
-		equipClothing(true, true, true, true);
+		equipClothing(EquipClothingSetting.getAllClothingSettings());
 		
 		this.setBreastSize(size.getMeasurement());
 		this.setBreastMilkStorage((int) milkStorage);
@@ -374,7 +384,13 @@ public abstract class NPC extends GameCharacter implements XMLSaving {
 	public boolean isClothingStealable() {
 		return false;
 	}
-	
+
+	/**
+	 * Allows the player to equip items onto this character, overriding the normal unique-NPC checks to prevent it. False by default.
+	 */
+	public boolean isOverrideInventoryEquip() {
+		return false;
+	}
 
 	public String getPresentInTileDescription(boolean inHiding) {
 		StringBuilder tileSB = new StringBuilder();
@@ -838,51 +854,6 @@ public abstract class NPC extends GameCharacter implements XMLSaving {
 		return weightedSpellMap;
 	}
 	
-	public List<SpecialAttack> getSpecialAttacksAbleToUse() {
-		List<SpecialAttack> specialAttacksAbleToUse = new ArrayList<>();
-		
-		for(SpecialAttack sa : this.getSpecialAttacks()) {
-			if(Main.game.isInCombat()) {
-				if(Combat.getCooldown(this, sa)==0) {
-					specialAttacksAbleToUse.add(sa);
-				}
-			} else {
-				specialAttacksAbleToUse.add(sa);
-			}
-		}
-		
-		return specialAttacksAbleToUse;
-	}
-	
-	public Attack attackType() {
-		boolean canCastASpell = !this.getWeightedSpellsAvailable(Combat.getTargetedCombatant(this)).isEmpty();
-		boolean canCastASpecialAttack = !getSpecialAttacksAbleToUse().isEmpty();
-		
-		Map<Attack, Integer> attackWeightingMap = new HashMap<>();
-		
-		attackWeightingMap.put(Attack.MAIN, this.getRace().getPreferredAttacks().contains(Attack.MAIN)?75:50);
-		attackWeightingMap.put(Attack.OFFHAND, this.getOffhandWeapon()==null?0:(this.getRace().getPreferredAttacks().contains(Attack.MAIN)?50:25));
-		attackWeightingMap.put(Attack.SEDUCTION, this.getRace().getPreferredAttacks().contains(Attack.SEDUCTION)?100:(int)this.getAttributeValue(Attribute.MAJOR_CORRUPTION));
-		attackWeightingMap.put(Attack.SPELL, !canCastASpell?0:(this.getRace().getPreferredAttacks().contains(Attack.MAIN)?100:50));
-		attackWeightingMap.put(Attack.SPECIAL_ATTACK, !canCastASpecialAttack?0:(this.getRace().getPreferredAttacks().contains(Attack.MAIN)?100:50));
-		
-		int total = 0;
-		for(Entry<Attack, Integer> entry : attackWeightingMap.entrySet()) {
-			total+=entry.getValue();
-		}
-		
-		int index = Util.random.nextInt(total);
-		total = 0;
-		for(Entry<Attack, Integer> entry : attackWeightingMap.entrySet()) {
-			total+=entry.getValue();
-			if(index<total) {
-				return entry.getKey();
-			}
-		}
-		
-		return Attack.MAIN;
-	}
-	
 	/**
 	 * Handles the behaviour when the player escapes from this enemy in combat.
 	 */
@@ -1200,15 +1171,20 @@ public abstract class NPC extends GameCharacter implements XMLSaving {
 	}
 	
 	public boolean isPendingTransformationToGenderIdentity() {
-		return NPCFlagValues.contains(NPCFlagValue.pendingTransformationToGenderIdentity);
+		return this.getGender()!=this.getGenderIdentity()
+				&& !this.isPregnant()
+				&& !this.isUnique()
+				&& !this.isSlave()
+				&& (this.getSubspeciesOverride()==Subspecies.DEMON || this.getSubspecies()==Subspecies.SLIME);
+//		return NPCFlagValues.contains(NPCFlagValue.pendingTransformationToGenderIdentity);
 	}
-	public void setPendingTransformationToGenderIdentity(boolean pendingTransformationToGenderIdentity) {
-		if(pendingTransformationToGenderIdentity) {
-			NPCFlagValues.add(NPCFlagValue.pendingTransformationToGenderIdentity);
-		} else {
-			NPCFlagValues.remove(NPCFlagValue.pendingTransformationToGenderIdentity);
-		}
-	}
+//	public void setPendingTransformationToGenderIdentity(boolean pendingTransformationToGenderIdentity) {
+//		if(pendingTransformationToGenderIdentity) {
+//			NPCFlagValues.add(NPCFlagValue.pendingTransformationToGenderIdentity);
+//		} else {
+//			NPCFlagValues.remove(NPCFlagValue.pendingTransformationToGenderIdentity);
+//		}
+//	}
 	
 	public long getLastTimeEncountered() {
 		return lastTimeEncountered;
@@ -1893,7 +1869,7 @@ public abstract class NPC extends GameCharacter implements XMLSaving {
 			}
 			
 			// Chance for race to be random:
-			if(Math.random()>0.85f) {
+			if(Math.random() <= Main.getProperties().getRandomRacePercentage()) {
 				List<Subspecies> availableRaces = new ArrayList<>();
 				availableRaces.add(Subspecies.CAT_MORPH);
 				availableRaces.add(Subspecies.DOG_MORPH);
@@ -2693,16 +2669,22 @@ public abstract class NPC extends GameCharacter implements XMLSaving {
 	
 	// Sex:
 	
-	public void calculateGenericSexEffects(boolean isDom, NPC partner, SexType sexType) {
+	public String calculateGenericSexEffects(boolean isDom, NPC partner, SexType sexType, NPCGenericSexFlag... flagsInput) {
+		List<NPCGenericSexFlag> flags = Arrays.asList(flagsInput);
+		
+		StringBuilder sexDescriptionSB = new StringBuilder();
+		
+		sexDescriptionSB.append(sexType.getPerformanceDescription(isDom, this, partner)); //TODO append cum/preg chances
+		
 		this.setLastTimeHadSex(Main.game.getMinutesPassed(), true);
 		partner.setLastTimeHadSex(Main.game.getMinutesPassed(), true);
 		
 		if(isDom) {
-			this.setSexAsDomCount(partner, this.getSexAsSubCount(partner)+1);
-			partner.setSexAsSubCount(partner, partner.getSexAsSubCount(partner)+1);
+			this.setSexAsDomCount(partner, this.getSexAsDomCount(partner)+1);
+			partner.setSexAsSubCount(this, partner.getSexAsSubCount(this)+1);
 			
 		} else {
-			partner.setSexAsDomCount(partner, partner.getSexAsSubCount(partner)+1);
+			partner.setSexAsDomCount(this, partner.getSexAsDomCount(this)+1);
 			this.setSexAsSubCount(partner, this.getSexAsSubCount(partner)+1);
 		}
 		
@@ -2722,9 +2704,17 @@ public abstract class NPC extends GameCharacter implements XMLSaving {
 					if(performingArea.isOrifice() && ((SexAreaOrifice)performingArea).isInternalOrifice()) {
 						partner.setVirginityLoss(partnerSexType, this, this.getLostVirginityDescriptor());
 						partner.setPenisVirgin(false);
-						if(partner.getPenisRawCumStorageValue()>0 && performingArea.isOrifice()) {
+						if(!flags.contains(NPCGenericSexFlag.PREVENT_CREAMPIE) && partner.getPenisRawCumStorageValue()>0 && performingArea.isOrifice()) {
 							partnerCummed = true;
 							this.ingestFluid(partner, partner.getCum(), (SexAreaOrifice)performingArea, partner.getPenisRawOrgasmCumQuantity());
+							this.incrementCumCount(new SexType(SexParticipantType.NORMAL, performingArea, SexAreaPenetration.PENIS));
+							partner.applyOrgasmCumEffect();
+							sexDescriptionSB.append(
+									UtilText.parse(this, partner,
+											"<br/>[npc2.Name] came inside of [npc.namePos] "+performingArea.getName(partner)
+												+(performingArea==SexAreaOrifice.VAGINA && !partner.isVisiblyPregnant()
+													?"; [npc.she] may have gotten pregnant!"
+													:"!")));
 						}
 					}
 					break;
@@ -2861,223 +2851,183 @@ public abstract class NPC extends GameCharacter implements XMLSaving {
 					}
 				}
 			}
+			
+		} else if(performingArea.isPenetration()) {
+			boolean thisCummed = false;
+			switch(((SexAreaPenetration)performingArea)) {
+				case FINGER:
+					break;
+				case PENIS:
+					if(targetedArea.isOrifice() && ((SexAreaOrifice)targetedArea).isInternalOrifice()) {
+						this.setVirginityLoss(sexType, partner, partner.getLostVirginityDescriptor());
+						this.setPenisVirgin(false);
+						if(!flags.contains(NPCGenericSexFlag.PREVENT_CREAMPIE) && this.getPenisRawCumStorageValue()>0 && targetedArea.isOrifice()) {
+							thisCummed = true;
+							partner.ingestFluid(this, this.getCum(), (SexAreaOrifice)targetedArea, this.getPenisRawOrgasmCumQuantity());
+							partner.incrementCumCount(new SexType(SexParticipantType.NORMAL, targetedArea, SexAreaPenetration.PENIS));
+							this.applyOrgasmCumEffect();
+							sexDescriptionSB.append(
+									UtilText.parse(this, partner,
+											"<br/>[npc.Name] came inside of [npc2.namePos] "+targetedArea.getName(partner)
+												+(targetedArea==SexAreaOrifice.VAGINA && !partner.isVisiblyPregnant()
+													?"; [npc2.she] may have gotten pregnant!"
+													:"!")));
+						}
+					}
+					break;
+				case TAIL:
+					break;
+				case TENTACLE:
+					break;
+				case TONGUE:
+					break;
+				case CLIT:
+					break;
+				case FOOT:
+					break;
+			}
+			if(((SexAreaPenetration)performingArea).isTakesVirginity()) {
+				this.setVirginityLoss(partnerSexType, this, this.getLostVirginityDescriptor());
+				if(targetedArea.isOrifice()) {
+					switch(((SexAreaOrifice)targetedArea)) {
+						case ANUS:
+							partner.setAssVirgin(false);
+							if(thisCummed) {
+								partner.addDirtySlot(InventorySlot.ANUS);
+								if(Math.random()<0.5f) { partner.addDirtySlot(InventorySlot.LEG); }
+								if(Math.random()<0.5f) { partner.addDirtySlot(InventorySlot.HIPS); }
+								if(Math.random()<0.5f) { partner.addDirtySlot(InventorySlot.GROIN); }
+							}
+							break;
+						case ASS:
+							if(thisCummed) {
+								partner.addDirtySlot(InventorySlot.ANUS);
+								if(Math.random()<0.5f) { partner.addDirtySlot(InventorySlot.LEG); }
+								if(Math.random()<0.5f) { partner.addDirtySlot(InventorySlot.HIPS); }
+								if(Math.random()<0.5f) { partner.addDirtySlot(InventorySlot.GROIN); }
+							}
+							break;
+						case BREAST:
+							if(thisCummed) {
+								partner.addDirtySlot(InventorySlot.CHEST);
+								if(Math.random()<0.5f) {
+									partner.addDirtySlot(InventorySlot.TORSO_OVER);
+									partner.addDirtySlot(InventorySlot.TORSO_UNDER);
+								}
+								if(Math.random()<0.5f) { partner.addDirtySlot(InventorySlot.NECK); }
+								if(Math.random()<0.5f) { partner.addDirtySlot(InventorySlot.STOMACH); }
+							}
+							break;
+						case BREAST_CROTCH:
+							if(thisCummed) {
+								partner.addDirtySlot(InventorySlot.STOMACH);
+								if(Math.random()<0.5f) { partner.addDirtySlot(InventorySlot.LEG); }
+								if(Math.random()<0.5f) { partner.addDirtySlot(InventorySlot.HIPS); }
+								if(Math.random()<0.5f) { partner.addDirtySlot(InventorySlot.GROIN); }
+							}
+							break;
+						case MOUTH:
+							partner.setFaceVirgin(false);
+							if(thisCummed) {
+								partner.addDirtySlot(InventorySlot.MOUTH);
+								if(Math.random()<0.5f) { partner.addDirtySlot(InventorySlot.HEAD); }
+								if(Math.random()<0.5f) { partner.addDirtySlot(InventorySlot.NECK); }
+								if(Math.random()<0.5f) { partner.addDirtySlot(InventorySlot.EYES); }
+							}
+							break;
+						case NIPPLE:
+							partner.setNippleVirgin(false);
+							if(thisCummed) {
+								partner.addDirtySlot(InventorySlot.CHEST);
+								if(Math.random()<0.5f) {
+									partner.addDirtySlot(InventorySlot.TORSO_OVER);
+									partner.addDirtySlot(InventorySlot.TORSO_UNDER);
+								}
+								if(Math.random()<0.5f) { partner.addDirtySlot(InventorySlot.NECK); }
+								if(Math.random()<0.5f) { partner.addDirtySlot(InventorySlot.STOMACH); }
+							}
+							break;
+						case NIPPLE_CROTCH:
+							partner.setNippleCrotchVirgin(false);
+							if(thisCummed) {
+								partner.addDirtySlot(InventorySlot.STOMACH);
+								if(Math.random()<0.5f) { partner.addDirtySlot(InventorySlot.LEG); }
+								if(Math.random()<0.5f) { partner.addDirtySlot(InventorySlot.HIPS); }
+								if(Math.random()<0.5f) { partner.addDirtySlot(InventorySlot.GROIN); }
+							}
+							break;
+						case THIGHS:
+							if(thisCummed) {
+								partner.addDirtySlot(InventorySlot.LEG);
+								if(Math.random()<0.5f) { partner.addDirtySlot(InventorySlot.HIPS); }
+								if(Math.random()<0.5f) { partner.addDirtySlot(InventorySlot.GROIN); }
+								if(Math.random()<0.5f) { partner.addDirtySlot(InventorySlot.ANKLE); }
+								if(Math.random()<0.5f) { partner.addDirtySlot(InventorySlot.FOOT); }
+								if(Math.random()<0.5f) { partner.addDirtySlot(InventorySlot.SOCK); }
+							}
+							break;
+						case URETHRA_PENIS:
+							partner.setUrethraVirgin(false);
+							if(thisCummed) {
+								partner.addDirtySlot(InventorySlot.PENIS);
+								if(partner.hasVagina()) {
+									partner.addDirtySlot(InventorySlot.VAGINA);
+								}
+								partner.addDirtySlot(InventorySlot.GROIN);
+								if(Math.random()<0.5f) { partner.addDirtySlot(InventorySlot.HIPS); }
+								if(Math.random()<0.5f) { partner.addDirtySlot(InventorySlot.LEG); }
+								if(Math.random()<0.5f) { partner.addDirtySlot(InventorySlot.STOMACH); }
+							}
+							break;
+						case URETHRA_VAGINA:
+							partner.setVaginaUrethraVirgin(false);
+							if(thisCummed) {
+								if(partner.hasPenis()) {
+									partner.addDirtySlot(InventorySlot.PENIS);
+								}
+								partner.addDirtySlot(InventorySlot.VAGINA);
+								partner.addDirtySlot(InventorySlot.GROIN);
+								if(Math.random()<0.5f) { partner.addDirtySlot(InventorySlot.HIPS); }
+								if(Math.random()<0.5f) { partner.addDirtySlot(InventorySlot.LEG); }
+								if(Math.random()<0.5f) { partner.addDirtySlot(InventorySlot.STOMACH); }
+							}
+							break;
+						case VAGINA:
+							partner.setVaginaVirgin(false);
+							if(thisCummed) {
+								if(partner.hasPenis()) {
+									partner.addDirtySlot(InventorySlot.PENIS);
+								}
+								partner.addDirtySlot(InventorySlot.VAGINA);
+								partner.addDirtySlot(InventorySlot.GROIN);
+								if(Math.random()<0.5f) { partner.addDirtySlot(InventorySlot.HIPS); }
+								if(Math.random()<0.5f) { partner.addDirtySlot(InventorySlot.LEG); }
+								if(Math.random()<0.5f) { partner.addDirtySlot(InventorySlot.STOMACH); }
+							}
+							break;
+					}
+				}
+			}
 		}
 		
+		return sexDescriptionSB.toString();
 	}
 	
 	public void endSex() {
 	}
 	
 	public boolean getSexBehaviourDeniesRequests(SexType sexTypeRequest) {
+		boolean isConvincing = Main.game.getPlayer().hasPerkAnywhereInTree(Perk.CONVINCING_REQUESTS);
 		
-		if(Main.game.isInSex()) {
+		if(Main.game.isInSex() && !isConvincing) {
 			if(Sex.getSexControl(Main.game.getPlayer()).getValue()<=SexControl.ONGOING_PLUS_LIMITED_PENETRATIONS.getValue() && Sex.getSexPace(this)==SexPace.DOM_ROUGH) {
 				return true;
 			}
 		}
 		
-		boolean keenToPerform = false;
+		int weight = calculateSexTypeWeighting(sexTypeRequest, Main.game.getPlayer(), null);
 		
-		if(sexTypeRequest.getPerformingSexArea()!=null) {
-			if(sexTypeRequest.getPerformingSexArea().isOrifice()) {
-				switch((SexAreaOrifice)sexTypeRequest.getPerformingSexArea()) {
-					case ANUS:
-						if(this.getFetishDesire(Fetish.FETISH_ANAL_RECEIVING).isNegative()) {
-							return true;
-						} else if(this.getFetishDesire(Fetish.FETISH_ANAL_RECEIVING).isPositive()) {
-							keenToPerform = true;
-						}
-						break;
-					case ASS:
-						if(this.getFetishDesire(Fetish.FETISH_ANAL_RECEIVING).isNegative()) {
-							return true;
-						} else if(this.getFetishDesire(Fetish.FETISH_ANAL_RECEIVING).isPositive()) {
-							keenToPerform = true;
-						}
-						break;
-					case BREAST: case BREAST_CROTCH: case NIPPLE: case NIPPLE_CROTCH:
-						if(this.getFetishDesire(Fetish.FETISH_BREASTS_SELF).isNegative()) {
-							return true;
-						} else if(this.getFetishDesire(Fetish.FETISH_BREASTS_SELF).isPositive()) {
-							keenToPerform = true;
-						}
-						break;
-					case MOUTH:
-						if(this.getFetishDesire(Fetish.FETISH_ORAL_GIVING).isNegative()) {
-							return true;
-						} else if(this.getFetishDesire(Fetish.FETISH_ORAL_GIVING).isPositive()) {
-							keenToPerform = true;
-						}
-						break;
-					case THIGHS:
-						if(this.getFetishDesire(Fetish.FETISH_STRUTTER).isNegative()) {
-							return true;
-						} else if(this.getFetishDesire(Fetish.FETISH_STRUTTER).isPositive()) {
-							keenToPerform = true;
-						}
-						break;
-					case URETHRA_PENIS:
-						if(this.getFetishDesire(Fetish.FETISH_PENIS_GIVING).isNegative()) {
-							return true;
-						} else if(this.getFetishDesire(Fetish.FETISH_PENIS_GIVING).isPositive()) {
-							keenToPerform = true;
-						}
-						break;
-					case URETHRA_VAGINA:
-						if(this.getFetishDesire(Fetish.FETISH_VAGINAL_RECEIVING).isNegative()) {
-							return true;
-						} else if(this.getFetishDesire(Fetish.FETISH_VAGINAL_RECEIVING).isPositive()) {
-							keenToPerform = true;
-						}
-						break;
-					case VAGINA:
-						if(this.getFetishDesire(Fetish.FETISH_VAGINAL_RECEIVING).isNegative()) {
-							return true;
-						} else if(this.getFetishDesire(Fetish.FETISH_VAGINAL_RECEIVING).isPositive()) {
-							keenToPerform = true;
-						}
-						break;
-				}
-			} else {
-				switch((SexAreaPenetration)sexTypeRequest.getPerformingSexArea()) {
-					case CLIT:
-						if(this.getFetishDesire(Fetish.FETISH_VAGINAL_RECEIVING).isNegative()) {
-							return true;
-						} else if(this.getFetishDesire(Fetish.FETISH_VAGINAL_RECEIVING).isPositive()) {
-							keenToPerform = true;
-						}
-						break;
-					case FINGER:
-						break;
-					case PENIS:
-						if(this.getFetishDesire(Fetish.FETISH_PENIS_GIVING).isNegative()) {
-							return true;
-						} else if(this.getFetishDesire(Fetish.FETISH_PENIS_GIVING).isPositive()) {
-							keenToPerform = true;
-						}
-						break;
-					case TAIL:
-						break;
-					case TENTACLE:
-						break;
-					case FOOT:
-						if(this.getFetishDesire(Fetish.FETISH_FOOT_GIVING).isNegative()) {
-							return true;
-						} else if(this.getFetishDesire(Fetish.FETISH_FOOT_GIVING).isPositive()) {
-							keenToPerform = true;
-						}
-						break;
-					case TONGUE:
-						if(this.getFetishDesire(Fetish.FETISH_ORAL_GIVING).isNegative()) {
-							return true;
-						} else if(this.getFetishDesire(Fetish.FETISH_ORAL_GIVING).isPositive()) {
-							keenToPerform = true;
-						}
-						break;
-				}
-			}
-			
-		} else if(sexTypeRequest.getTargetedSexArea()!=null) {
-			if(sexTypeRequest.getTargetedSexArea().isOrifice()) {
-				switch((SexAreaOrifice)sexTypeRequest.getTargetedSexArea()) {
-					case ANUS:
-						if(this.getFetishDesire(Fetish.FETISH_ANAL_GIVING).isNegative()) {
-							return true;
-						} else if(this.getFetishDesire(Fetish.FETISH_ANAL_GIVING).isPositive()) {
-							keenToPerform = true;
-						}
-						break;
-					case ASS:
-						if(this.getFetishDesire(Fetish.FETISH_ANAL_GIVING).isNegative()) {
-							return true;
-						} else if(this.getFetishDesire(Fetish.FETISH_ANAL_GIVING).isPositive()) {
-							keenToPerform = true;
-						}
-						break;
-					case BREAST: case NIPPLE: case BREAST_CROTCH: case NIPPLE_CROTCH:
-						if(this.getFetishDesire(Fetish.FETISH_BREASTS_OTHERS).isNegative()) {
-							return true;
-						} else if(this.getFetishDesire(Fetish.FETISH_BREASTS_OTHERS).isPositive()) {
-							keenToPerform = true;
-						}
-						break;
-					case MOUTH:
-						if(this.getFetishDesire(Fetish.FETISH_ORAL_RECEIVING).isNegative()) {
-							return true;
-						} else if(this.getFetishDesire(Fetish.FETISH_ORAL_RECEIVING).isPositive()) {
-							keenToPerform = true;
-						}
-						break;
-					case THIGHS:
-						if(this.getFetishDesire(Fetish.FETISH_LEG_LOVER).isNegative()) {
-							return true;
-						} else if(this.getFetishDesire(Fetish.FETISH_LEG_LOVER).isPositive()) {
-							keenToPerform = true;
-						}
-						break;
-					case URETHRA_PENIS:
-						if(this.getFetishDesire(Fetish.FETISH_PENIS_RECEIVING).isNegative()) {
-							return true;
-						} else if(this.getFetishDesire(Fetish.FETISH_PENIS_RECEIVING).isPositive()) {
-							keenToPerform = true;
-						}
-						break;
-					case URETHRA_VAGINA:
-						if(this.getFetishDesire(Fetish.FETISH_VAGINAL_GIVING).isNegative()) {
-							return true;
-						} else if(this.getFetishDesire(Fetish.FETISH_VAGINAL_GIVING).isPositive()) {
-							keenToPerform = true;
-						}
-						break;
-					case VAGINA:
-						if(this.getFetishDesire(Fetish.FETISH_VAGINAL_GIVING).isNegative()) {
-							return true;
-						} else if(this.getFetishDesire(Fetish.FETISH_VAGINAL_GIVING).isPositive()) {
-							keenToPerform = true;
-						}
-						break;
-				}
-			} else {
-				switch((SexAreaPenetration)sexTypeRequest.getTargetedSexArea()) {
-					case CLIT:
-						if(this.getFetishDesire(Fetish.FETISH_VAGINAL_GIVING).isNegative()) {
-							return true;
-						} else if(this.getFetishDesire(Fetish.FETISH_VAGINAL_GIVING).isPositive()) {
-							keenToPerform = true;
-						}
-						break;
-					case FINGER:
-						break;
-					case PENIS:
-						if(this.getFetishDesire(Fetish.FETISH_PENIS_RECEIVING).isNegative()) {
-							return true;
-						} else if(this.getFetishDesire(Fetish.FETISH_PENIS_RECEIVING).isPositive()) {
-							keenToPerform = true;
-						}
-						break;
-					case TAIL:
-						break;
-					case TENTACLE:
-						break;
-					case FOOT:
-						if(this.getFetishDesire(Fetish.FETISH_FOOT_RECEIVING).isNegative()) {
-							return true;
-						} else if(this.getFetishDesire(Fetish.FETISH_FOOT_RECEIVING).isPositive()) {
-							keenToPerform = true;
-						}
-						break;
-					case TONGUE:
-						if(this.getFetishDesire(Fetish.FETISH_ORAL_RECEIVING).isNegative()) {
-							return true;
-						} else if(this.getFetishDesire(Fetish.FETISH_ORAL_RECEIVING).isPositive()) {
-							keenToPerform = true;
-						}
-						break;
-				}
-			}
-		}
-		
-		return !keenToPerform && hasFetish(Fetish.FETISH_SADIST);
+		return weight<0 || (!isConvincing && this.hasFetish(Fetish.FETISH_SADIST));
 	}
 	
 	protected Map<GameCharacter, SexType> foreplayPreference = new HashMap<>();
@@ -3098,90 +3048,13 @@ public abstract class NPC extends GameCharacter implements XMLSaving {
 	public void setMainSexPreference(GameCharacter target, SexType mainSexPreference) {
 		this.mainSexPreference.put(target, mainSexPreference);
 	}
-	
-	public int calculateSexTypeWeighting(SexType type, GameCharacter target, List<SexType> request) {
-		int weight = 0;
-		
-		List<Fetish> fetishes = type.getRelatedFetishes(this, target, true, false);
-		
-		for(Fetish fetish : fetishes) {
-			if(this.hasFetish(fetish)) {
-				weight+=7;
-			} else {
-				switch(this.getFetishDesire(fetish)) {
-					case FOUR_LOVE:
-						weight+=5;
-						break;
-					case THREE_LIKE:
-						weight+=3;
-						break;
-					case TWO_NEUTRAL:
-						weight+=1;
-						break;
-					case ONE_DISLIKE:
-						weight-=4;
-						break;
-					case ZERO_HATE:
-						weight-=8;
-						break;
-				}
-			}
-		}
-		
-		boolean isRequest = false;
-		if(request!=null) {
-			for(SexType st : request) {
-				if((st.getTargetedSexArea()==type.getTargetedSexArea() || st.getPerformingSexArea()==type.getPerformingSexArea())) {
-					weight += 50;
-					isRequest = true;
-				}
-			}
-		}
-		
-		if(fetishes.contains(Fetish.FETISH_ORAL_GIVING)) {
-			for(Addiction add : this.getAddictions()) {
-				if(target.hasPenisIgnoreDildo() && add.getFluid() == target.getCumType() && fetishes.contains(Fetish.FETISH_PENIS_RECEIVING)) {
-					weight+=10;
-				}
-				if(target.hasVagina() && add.getFluid() == target.getGirlcumType() && fetishes.contains(Fetish.FETISH_VAGINAL_GIVING)) {
-					weight+=10;
-				}
-				if(target.getBreastRawMilkStorageValue()>0 && add.getFluid() == target.getMilkType() && fetishes.contains(Fetish.FETISH_BREASTS_OTHERS)) {
-					weight+=10;
-				}
-			}
-		}
-		
-		if((fetishes.contains(Fetish.FETISH_ANAL_GIVING) || fetishes.contains(Fetish.FETISH_ANAL_RECEIVING)) && !Main.game.isAnalContentEnabled()) {
-			weight-=100000;
-		}
 
-		// Anal actions are not available unless the person likes anal.
-		if(fetishes.contains(Fetish.FETISH_ANAL_RECEIVING) && !isRequest) {
-			if(type.getAsParticipant()==SexParticipantType.SELF && !this.getFetishDesire(Fetish.FETISH_ANAL_RECEIVING).isPositive()) {
-				weight-=100000; // ban self-anal actions unless the character likes anal
-			}
-			if(!fetishes.contains(Fetish.FETISH_PENIS_RECEIVING) && !this.getFetishDesire(Fetish.FETISH_ANAL_RECEIVING).isPositive()) {
-				weight-=100000; // Ban non-penis anal actions (like fingering and tail sex) unless the character likes anal
-			}
+	public SexType getCurrentSexPreference(GameCharacter target) {
+		if(Sex.isInForeplay(this)) {
+			return getForeplayPreference(target);
+		} else {
+			return getMainSexPreference(target);
 		}
-		if(fetishes.contains(Fetish.FETISH_ANAL_GIVING) && !isRequest) {
-			if(type.getAsParticipant()==SexParticipantType.SELF && !this.getFetishDesire(Fetish.FETISH_ANAL_GIVING).isPositive()) {
-				weight-=100000; // ban self-anal actions unless the character likes anal
-			}
-			if(!fetishes.contains(Fetish.FETISH_PENIS_GIVING) && !this.getFetishDesire(Fetish.FETISH_ANAL_GIVING).isPositive()) {
-				weight-=100000; // Ban non-penis anal actions (like fingering and tail sex) unless the character likes anal
-			}
-		}
-
-		List<Fetish> fetishesOpposite = type.getOppositeFetishes(this, target, true, false);
-		if(fetishesOpposite.contains(Fetish.FETISH_DEFLOWERING)
-				&& this.hasFetish(Fetish.FETISH_PURE_VIRGIN)
-				&& fetishes.contains(Fetish.FETISH_VAGINAL_RECEIVING)) {
-			weight-=50;
-		}
-		
-		return weight;
 	}
 	
 	private void addSexTypeWeighting(SexType type, GameCharacter target, List<SexType> request, Map<SexType, Integer> map, float multiplier) {
@@ -3197,6 +3070,10 @@ public abstract class NPC extends GameCharacter implements XMLSaving {
 		Map<SexType, Integer> mainSexTypes = new HashMap<>();
 		
 		boolean debug = false;
+		
+		if(debug) {
+			System.out.println("-----\n"+this.getName()+" targeting "+target.getName());
+		}
 		
 		// ************************ Populate possibilities from fetishes and likes. ************************ //
 		
@@ -3268,11 +3145,21 @@ public abstract class NPC extends GameCharacter implements XMLSaving {
 		
 		addSexTypeWeighting(new SexType(SexParticipantType.NORMAL, SexAreaPenetration.PENIS, SexAreaOrifice.THIGHS), target, request, foreplaySexTypes, 0.5f);
 		addSexTypeWeighting(new SexType(SexParticipantType.NORMAL, SexAreaPenetration.PENIS, SexAreaOrifice.THIGHS), target, request, mainSexTypes, 0.5f);
+
+		// Feet:
+		addSexTypeWeighting(new SexType(SexParticipantType.NORMAL, SexAreaPenetration.FOOT, SexAreaPenetration.PENIS), target, request, foreplaySexTypes, 3);
+		addSexTypeWeighting(new SexType(SexParticipantType.NORMAL, SexAreaPenetration.FOOT, SexAreaPenetration.PENIS), target, request, mainSexTypes, 1f);
+		
+		addSexTypeWeighting(new SexType(SexParticipantType.NORMAL, SexAreaPenetration.PENIS, SexAreaPenetration.FOOT), target, request, foreplaySexTypes, 3);
+		addSexTypeWeighting(new SexType(SexParticipantType.NORMAL, SexAreaPenetration.PENIS, SexAreaPenetration.FOOT), target, request, mainSexTypes, 1f);
 		
 		
-		foreplaySexTypes.entrySet().removeIf(e -> e.getValue()<=0);
+		foreplaySexTypes.entrySet().removeIf(e -> e.getValue()<=0); //TODO
 		mainSexTypes.entrySet().removeIf(e -> e.getValue()<=0);
-		
+
+		if(debug && foreplaySexTypes.containsKey(new SexType(SexParticipantType.NORMAL, SexAreaPenetration.FOOT, SexAreaPenetration.PENIS))) {
+			System.out.println("Foreplay contains foot actions 1");
+		}
 		
 		// ************************ This section deals with the possibilities that no fetish-related SexTypes were chosen ************************ //
 		
@@ -3366,14 +3253,17 @@ public abstract class NPC extends GameCharacter implements XMLSaving {
 			foreplaySexTypes.keySet().removeIf(sexType -> sexType.getPerformingSexArea()==SexAreaPenetration.TAIL);
 			mainSexTypes.keySet().removeIf(sexType -> sexType.getPerformingSexArea()==SexAreaPenetration.TAIL);
 		}
-		
+
+		if(debug && foreplaySexTypes.containsKey(new SexType(SexParticipantType.NORMAL, SexAreaPenetration.FOOT, SexAreaPenetration.PENIS))) {
+			System.out.println("Foreplay contains foot actions 2");
+		}
 		
 		// ************************ Finally, set preferences from the resulting lists. ************************ //
 
 		//TODO Further prioritise genital interactions?
 		
 		// If cannot switch position, only return preferences that are actually available:
-		if(!Sex.isPositionChangingAllowed(this)) {
+		if(Main.game.isInSex() && !Sex.isPositionChangingAllowed(this)) {
 			List<SexType> availableTypes = new ArrayList<>();
 			
 //			System.out.println(this.getName()+" restricting prefs");
@@ -3381,10 +3271,8 @@ public abstract class NPC extends GameCharacter implements XMLSaving {
 			for(SexActionInterface action : Sex.getActionsAvailablePartner(this, target)) {
 				for(SexType st : foreplaySexTypes.keySet()) {
 					if(action.getParticipantType()!=SexParticipantType.SELF
-							&& (action.getPerformingCharacterOrifices().contains(st.getPerformingSexArea())
-								|| action.getPerformingCharacterPenetrations().contains(st.getPerformingSexArea()))
-							&& (action.getTargetedCharacterOrifices().contains(st.getTargetedSexArea())
-									|| action.getTargetedCharacterPenetrations().contains(st.getTargetedSexArea()))) {
+							&& (action.getPerformingCharacterOrifices().contains(st.getPerformingSexArea()) || action.getPerformingCharacterPenetrations().contains(st.getPerformingSexArea()))
+							&& (action.getTargetedCharacterOrifices().contains(st.getTargetedSexArea()) || action.getTargetedCharacterPenetrations().contains(st.getTargetedSexArea()))) {
 						availableTypes.add(st);
 					}
 				}
@@ -3392,6 +3280,9 @@ public abstract class NPC extends GameCharacter implements XMLSaving {
 			Set<SexType> foreplayKeys = new HashSet<>(foreplaySexTypes.keySet());
 			for(SexType st : foreplayKeys) {
 				if(!availableTypes.contains(st)) {
+					if(debug) {
+						System.out.println("Removed foreplay: "+st);
+					}
 					foreplaySexTypes.remove(st);
 				}
 			}
@@ -3410,6 +3301,9 @@ public abstract class NPC extends GameCharacter implements XMLSaving {
 			Set<SexType> mainKeys = new HashSet<>(mainSexTypes.keySet());
 			for(SexType st : mainKeys) {
 				if(!availableTypes.contains(st)) {
+					if(debug) {
+						System.out.println("Removed sex: "+st);
+					}
 					mainSexTypes.remove(st);
 				}
 			}
@@ -3417,6 +3311,9 @@ public abstract class NPC extends GameCharacter implements XMLSaving {
 		
 		foreplayPreference.put(target, null);
 		if(!foreplaySexTypes.isEmpty()) {
+			if(debug && foreplaySexTypes.containsKey(new SexType(SexParticipantType.NORMAL, SexAreaPenetration.FOOT, SexAreaPenetration.PENIS))) {
+				System.out.println("Foreplay contains foot actions 3");
+			}
 			if(request!=null) {
 				Map<SexType, Integer> requestedSexTypes = new HashMap<>(foreplaySexTypes);
 				requestedSexTypes.keySet().removeIf((type) -> type.getTargetedSexArea()!=request);
@@ -3427,17 +3324,49 @@ public abstract class NPC extends GameCharacter implements XMLSaving {
 			if(foreplayPreference.get(target)==null) {
 				foreplayPreference.put(target, Util.getRandomObjectFromWeightedMap(foreplaySexTypes));
 			}
-			if(debug)
+			if(debug) {
 				System.out.println("Foreplay: "+foreplayPreference.get(target).getPerformingSexArea().toString()+" "+foreplayPreference.get(target).getTargetedSexArea().toString());
+			}
+		} else {
+			if(debug) {
+				System.out.println("foreplaySexTypes is empty at assignment");
+			}
 		}
 
 		mainSexPreference.put(target, null);
 		if(!mainSexTypes.isEmpty()) {
+			if(debug) {
+				for(Entry<SexType, Integer> e : mainSexTypes.entrySet()) {
+					System.out.println("Main entry: "+e.getKey().toString()+", "+e.getValue());
+				}
+			}
 			if(request!=null) {
+				if(debug)
+					System.out.println("Main request");
 				Map<SexType, Integer> requestedSexTypes = new HashMap<>(mainSexTypes);
 				requestedSexTypes.keySet().removeIf((type) -> type.getTargetedSexArea()!=request);
 				if(!requestedSexTypes.isEmpty()) {
 					mainSexPreference.put(target, Util.getRandomObjectFromWeightedMap(requestedSexTypes));
+				}
+			}
+//			if(debug) {
+//				for(int i=0; i<10; i++) {
+//					SexType st = Util.getRandomObjectFromWeightedMap(mainSexTypes);
+//					System.out.println("Main entry: "+st.toString());
+//				}
+//			}
+			List<SexType> stList = new ArrayList<>();
+			for(Entry<SexType, Integer> e : mainSexTypes.entrySet()) {
+				if(e.getKey().isTakesVirginity()) { // Prefer to have a main sex type that is actually penetrative sex
+					stList.add(e.getKey());
+				}
+			}
+			for(SexType st : stList) {
+				mainSexTypes.computeIfPresent(st, (k, v) -> v*=2);
+			}
+			if(debug) {
+				for(Entry<SexType, Integer> e : mainSexTypes.entrySet()) {
+					System.out.println("Main entry: "+e.getKey().toString()+", "+e.getValue());
 				}
 			}
 			if(mainSexPreference.get(target)==null) {
@@ -3445,7 +3374,13 @@ public abstract class NPC extends GameCharacter implements XMLSaving {
 			}
 			if(debug)
 				System.out.println("Main: "+mainSexPreference.get(target).getPerformingSexArea().toString()+" "+mainSexPreference.get(target).getTargetedSexArea().toString());
+			
+		} else {
+			if(debug) {
+				System.out.println("mainSexPreference is empty at assignment");
+			}
 		}
+		
 		// After generating choices, unblock positioning:
 		if(Main.game.isInSex() && resetPositioningBan) {
 			Sex.removeCharacterBannedFromPositioning(this);
@@ -3453,7 +3388,9 @@ public abstract class NPC extends GameCharacter implements XMLSaving {
 	}
 
 	/**
+	 * @param position The position to check.
 	 * @param slot The slot to check.
+	 * @param slot The target's slot to check.
 	 * @param target The person who is being interacted with in this slot.
 	 * @return Whether this NPC is happy to be in this SexSlot
 	 */
@@ -3551,6 +3488,35 @@ public abstract class NPC extends GameCharacter implements XMLSaving {
 	}
 	
 	/**
+	 * Override this method and return a non-null list of SexActionInterfaces in order to limit what actions are available to this character during sex. For an example, see the Amber class.
+	 * Use the <b>getSexActionInterfacesFromClass()</b> helper method to add all SexActionInterfaces from a containing class.
+	 */
+	public List<SexActionInterface> getLimitedSexClasses() {
+		return null;
+	}
+	
+	/**
+	 * Helper method for the getLimitedSexClasses() method. Extracts all SexActionInterfaces from a class, and returns them in a list.
+	 */
+	protected List<SexActionInterface> getSexActionInterfacesFromClass(Class<?> classToAddSexActionsFrom) {
+		List<SexActionInterface> actions = new ArrayList<>();
+		Field[] fields = classToAddSexActionsFrom.getFields();
+		
+		for(Field f : fields){
+			if (SexAction.class.isAssignableFrom(f.getType())) {
+				try {
+					SexAction action = ((SexAction) f.get(null));
+					actions.add(action);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		return actions;
+	}
+	
+	/**
 	 * Override this to set a preferred target for this character in sex. If there is an orgasm happening, and the returned character is not an orgasming character, this preference will be ignored.
 	 */
 	public GameCharacter getPreferredSexTarget() {
@@ -3563,23 +3529,15 @@ public abstract class NPC extends GameCharacter implements XMLSaving {
 	public String getItemUseEffects(AbstractItem item, GameCharacter itemOwner, GameCharacter user, GameCharacter target){
 		// Player is using an item:
 		if(user.isPlayer()) {
-			// Player uses item on themselves:
 			if(target.isPlayer()) {
+				// Player uses item on themselves:
 				return itemOwner.useItem(item, target, false);
 				
-			// Player uses item on NPC:
 			} else {
+				//Player uses item on NPC:
 				boolean isItemOrdinary = !item.getItemType().isTransformative() && !item.getItemType().isFetishGiving();
 				
-				if(((target.isSlave() && target.getOwner()!=null && target.getOwner().equals(user)) || ((isItemOrdinary || !target.isUnique())) // Cannot TF non-player-slave uniques
-							&& ((Main.game.isInSex() && !Sex.isConsensual() && Sex.isDom(user) && !Sex.isDom(target))
-								|| (target.getPartyLeader()==null || (target.getPartyLeader().equals(user) && isItemOrdinary))
-								|| (!target.isUnique()
-										&& ((target.hasFetish(Fetish.FETISH_TRANSFORMATION_RECEIVING) && item.getItemType().isTransformative())
-												|| (target.hasFetish(Fetish.FETISH_KINK_RECEIVING) && item.getItemType().isFetishGiving())))))) {
-					return this.getItemUseEffectsAllowingUse(item, itemOwner, user, target);
-					
-				} else if(target instanceof Elemental) {
+				if(target instanceof Elemental) {
 					if(item.getItemType().isTransformative()) {
 						return "<p>"
 									+ UtilText.parse(this, "As you move to get [npc.name] to "+item.getItemType().getUseName()+" the "+item.getName()+", [npc.she] calmly states,"
@@ -3591,6 +3549,21 @@ public abstract class NPC extends GameCharacter implements XMLSaving {
 					} else {
 						return itemOwner.useItem(item, target, false);
 					}
+					
+				} else if(isItemOrdinary
+						|| (!Main.game.isInCombat() && Combat.isPlayerVictory() && Combat.getEnemies(Main.game.getPlayer()).contains(target))
+						|| (target.isSlave() && target.getOwner()!=null && target.getOwner().equals(user))) {
+					return this.getItemUseEffectsAllowingUse(item, itemOwner, user, target);
+					
+				} else if(!target.isUnique()
+					&& ((target.hasStatusEffect(StatusEffect.DRUNK_5)
+							|| target.hasStatusEffect(StatusEffect.DRUNK_4)
+							|| target.hasStatusEffect(StatusEffect.PSYCHOACTIVE))
+						|| target.getAffectionLevel(user)==AffectionLevel.POSITIVE_FIVE_WORSHIP
+						|| (target.getFetishDesire(Fetish.FETISH_TRANSFORMATION_RECEIVING).isPositive() && item.getItemType().isTransformative())
+						|| (target.getFetishDesire(Fetish.FETISH_KINK_RECEIVING).isPositive() && item.getItemType().isFetishGiving())
+						|| (Main.game.isInSex() && !Sex.isConsensual() && Sex.isDom(user) && !Sex.isDom(target)))) {
+					return this.getItemUseEffectsAllowingUse(item, itemOwner, user, target);
 					
 				} else {
 					if(item.getItemType().isTransformative()) {

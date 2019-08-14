@@ -30,6 +30,7 @@ import com.lilithsthrone.game.character.race.Subspecies;
 import com.lilithsthrone.game.inventory.InventorySlot;
 import com.lilithsthrone.game.inventory.clothing.AbstractClothing;
 import com.lilithsthrone.game.inventory.clothing.DisplacementType;
+import com.lilithsthrone.main.Main;
 
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
@@ -122,15 +123,17 @@ public class Util {
 	
 	public static Color midpointColor(Color first, Color second) {
 		
-		double r = (first.getRed() + second.getRed())/2,
-				g = (first.getGreen() + second.getGreen())/2,
-					b = (first.getBlue() + second.getBlue())/2;
-		
-		return newColour(r*255, g*255, b*255);
+		double r = (first.getRed() + second.getRed())/2;
+		double g = (first.getGreen() + second.getGreen())/2;
+		double b = (first.getBlue() + second.getBlue())/2;
+//		System.out.println(r+","+g+","+b);
+		return Color.color(r, g, b);
 	}
 	
 	public static String toWebHexString(Color colour) {
-		return colour.toString().substring(2, 8);
+		String c = colour.toString().substring(2, 8);
+//		System.out.println(c);
+		return "#"+c;
 	}
 	
 	public static Color newColour(double r, double g, double b) {
@@ -172,7 +175,7 @@ public class Util {
 	public static class Value<T, S> {
 		private T key;
 		private S value;
-
+		
 		public Value(T key, S value) {
 			this.key = key;
 			this.value = value;
@@ -192,7 +195,9 @@ public class Util {
 		LinkedHashMap<T, S> map = new LinkedHashMap<>();
 
 		for (Value<T, S> v : values) {
-			map.put(v.getKey(), v.getValue());
+			if(v!=null) {
+				map.put(v.getKey(), v.getValue());
+			}
 		}
 		
 		return map;
@@ -243,11 +248,11 @@ public class Util {
 		return "Unknown";
 	}
 	
-	@SafeVarargs
 	/**
 	 * @param values The values to add to the new list.
 	 * @return A list of provided values, with nulls stripped.
 	 */
+	@SafeVarargs
 	public static <U> ArrayList<U> newArrayListOfValues(U... values) {
 		ArrayList<U> list = new ArrayList<>(Arrays.asList(values));
 		list.removeIf(e -> e==null);
@@ -263,8 +268,10 @@ public class Util {
 		ArrayList<U> mergedList = new ArrayList<>();
 		
 		for(List<U> list : lists) {
-			for(U value : list) {
-				mergedList.add(value);
+			if(list!=null) {
+				for(U value : list) {
+					mergedList.add(value);
+				}
 			}
 		}
 		
@@ -295,8 +302,13 @@ public class Util {
 		
 		return mergedMap;
 	}
-	
+
 	public static <T> T getRandomObjectFromWeightedMap(Map<T, Integer> map) {
+		return getRandomObjectFromWeightedMap(map, Util.random);
+	}
+	
+	
+	public static <T> T getRandomObjectFromWeightedMap(Map<T, Integer> map, Random rnd) {
 		int total = 0;
 		for(int i : map.values()) {
 			total+=i;
@@ -306,7 +318,7 @@ public class Util {
 			return null;
 		}
 		
-		int choice = Util.random.nextInt(total) + 1;
+		int choice = rnd.nextInt(total) + 1;
 		
 		total = 0;
 		for(Entry<T, Integer> entry : map.entrySet()) {
@@ -408,7 +420,7 @@ public class Util {
 		}
 		integer = Math.abs(integer);
 		if (integer >= 100_000) {
-			return intToString + " a lot";
+			return String.valueOf(integer); // Too big
 		}
 		
 		
@@ -471,7 +483,7 @@ public class Util {
 		}
 		integer = Math.abs(integer);
 		if (integer >= 100_000) {
-			return intToString + " a lot";
+			return String.valueOf(integer); // Too big
 		}
 		
 		
@@ -540,13 +552,17 @@ public class Util {
         return numeralMap.get(l) + intToNumerals(integer-l);
 	}
 	
-	public static String intToTally(int integer) {
+	public static String intToTally(int integer, int max) {
 		StringBuilder numeralSB = new StringBuilder();
-		for(int i=0; i<integer/5; i++) {
+		int limit = Math.min(integer, max);
+		for(int i=0; i<limit/5; i++) {
 			numeralSB.append("<strike>IIII</strike> ");
 		}
-		for(int i=0; i<integer%5; i++) {
+		for(int i=0; i<limit%5; i++) {
 			numeralSB.append("I");
+		}
+		if(limit<integer) {
+			numeralSB.append("... (Total: "+integer+")");
 		}
 		
 		return numeralSB.toString();
@@ -761,6 +777,16 @@ public class Util {
 	public static String addMuffle(String sentence, int frequency) {
 		return insertIntoSentences(sentence, frequency, muffledSounds);
 	}
+	
+	public static String replaceWithMuffle(String sentence, int wordToMuffleRatio) {
+		int muffles = sentence.split(" ").length/wordToMuffleRatio;
+		StringBuilder muffleSB = new StringBuilder();
+		for(int i=0; i<muffles; i++) {
+			muffleSB.append(muffledSounds[random.nextInt(muffledSounds.length)]);
+		}
+		muffleSB.delete(0, 1); // Remove space at start
+		return muffleSB.toString();
+	}
 
 	private static String[] sexSounds = new String[] { " ~Aah!~", " ~Mmm!~", "~Ooh!~" };
 	/**
@@ -789,24 +815,70 @@ public class Util {
 	 * Turns a normal sentence into a drunk one.<br/>
 	 * Example:<br/>
 	 * "How far is it to the town hall?"<br/>
-	 * "How ~Hic!~ far is it ~Hic!~ to the town ~Hic!~ hall?"<br/>
+	 * "How ~Hic!~ far ish it ~Hic!~ to the town ~Hic!~ hall?"<br/>
 	 *
-	 * @param sentence
-	 *            sentence to apply sexy modifications
-	 * @param frequency
-	 *            of drunk sounds (i.e. 4 would be 1 in 4 words are drunk)
-	 * @return
-	 *            modified sentence
+	 * @param sentence to apply drunk modifications to.
+	 * @param frequency of drunk sounds (i.e. 4 would be 1 in 4 words are drunk)
+	 * @return modified sentence
 	 */
 	public static String addDrunkSlur(String sentence, int frequency) {
-		return insertIntoSentences(sentence, frequency, drunkSounds, false)
-			.replaceAll("Hi ", "Heeey ")
-			.replaceAll("yes", "yesh")
-			.replaceAll("is", "ish")
-			.replaceAll("So", "Sho")
-			.replaceAll("so", "sho");
+		sentence = insertIntoSentences(sentence, frequency, drunkSounds, false);
+		
+		String [] split = sentence.split("\\[(.*?)\\]");
+		for(String s : split) {
+			String sReplace = s
+					.replaceAll("Hi ", "Heeey ")
+					.replaceAll("yes", "yesh")
+					.replaceAll("Is", "Ish")
+					.replaceAll("is", "ish")
+					.replaceAll("It's", "It'sh")
+					.replaceAll("it's", "it'sh")
+					.replaceAll("So", "Sho")
+					.replaceAll("so", "sho");
+			
+			sentence = sentence.replace(s, sReplace);
+		}
+		
+		return sentence;
+		
+//		return insertIntoSentences(sentence, frequency, drunkSounds, false)
+//			.replaceAll("Hi ", "Heeey ")
+//			.replaceAll("yes", "yesh")
+//			.replaceAll("is", "ish")
+//			.replaceAll("So", "Sho")
+//			.replaceAll("so", "sho");
 	}
-
+	
+	/**
+	 * Applies a lisp to speech (a speech defect in which s is pronounced like th in thick and z is pronounced like th in this). Modified sibilants are italicised in order to assist with reading.<br/>
+	 * Example:<br/>
+	 * "Is there a zoo that's nearby?"<br/>
+	 * "I<i>th</i> there a <i>th</i>oo that'<i>th</i> nearby?"<br/>
+	 *
+	 * @param sentence The speech to which the lisp should be applied.
+	 * @return The modified sentence.
+	 */
+	public static String applyLisp(String sentence) {
+		String [] split = sentence.split("\\[(.*?)\\]");
+		for(String s : split) {
+			String sReplace = s
+				.replaceAll("s", "<i>th</i>")
+				.replaceAll("z", "<i>th</i>")
+				.replaceAll("S", "<i>Th</i>")
+				.replaceAll("Z", "<i>Th</i>");
+			
+			sentence = sentence.replace(s, sReplace);
+		}
+		
+		return sentence;
+//		return sentence
+//			.replaceAll("s", "<i>th</i>")
+//			.replaceAll("z", "<i>th</i>")
+//			.replaceAll("S", "<i>Th</i>")
+//			.replaceAll("Z", "<i>Th</i>");
+	}
+	
+	
 	/**
 	 * Builds a string representing the list of items in a collection.
 	 *
@@ -893,9 +965,17 @@ public class Util {
 	}
 
 	public static <Any> Any randomItemFrom(List<Any> list) {
+		if(list.isEmpty()) {
+			return null;
+		}
 		return list.get(Util.random.nextInt(list.size()));
 	}
 
+	public static <Any> Any randomItemFrom(Set<Any> set) {
+		List<Any> list = new ArrayList<>(set);
+		return randomItemFrom(list);
+	}
+	
 	public static <Any> Any randomItemFrom(Any[] array) {
 		return array[Util.random.nextInt(array.length)];
 	}
@@ -905,6 +985,9 @@ public class Util {
 	}
 	
 	public static String getClosestStringMatch(String input, Collection<String> choices) {
+		if (choices.contains(input)) {
+			return input;
+		}
 		int distance = Integer.MAX_VALUE;
 		String closestString = input;
 		for(String choice : choices) {
@@ -947,10 +1030,12 @@ public class Util {
 	
 	private static Map<String, List<String>> errorLogMap = new HashMap<>();
 	public static void logGetNpcByIdError(String method, String id) {
-		errorLogMap.putIfAbsent(method, new ArrayList<>());
-		if(!errorLogMap.get(method).contains(id)) {
-			System.err.println("Main.game.getNPCById("+id+") returning null in method: "+method);
-			errorLogMap.get(method).add(id);
+		if(Main.DEBUG) { // So this doesn't flood error.log
+			errorLogMap.putIfAbsent(method, new ArrayList<>());
+			if(!errorLogMap.get(method).contains(id)) {
+				System.err.println("Main.game.getNPCById("+id+") returning null in method: "+method);
+				errorLogMap.get(method).add(id);
+			}
 		}
 	}
 }

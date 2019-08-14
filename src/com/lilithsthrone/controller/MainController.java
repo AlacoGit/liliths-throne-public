@@ -1,9 +1,11 @@
 package com.lilithsthrone.controller;
 
 import java.net.URL;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.ResourceBundle;
@@ -36,6 +38,7 @@ import com.lilithsthrone.game.character.CharacterChangeEventListener;
 import com.lilithsthrone.game.character.GameCharacter;
 import com.lilithsthrone.game.character.attributes.Attribute;
 import com.lilithsthrone.game.character.body.CoverableArea;
+import com.lilithsthrone.game.character.effects.AbstractPerk;
 import com.lilithsthrone.game.character.effects.Perk;
 import com.lilithsthrone.game.character.effects.StatusEffect;
 import com.lilithsthrone.game.character.fetishes.Fetish;
@@ -45,13 +48,13 @@ import com.lilithsthrone.game.character.npc.NPC;
 import com.lilithsthrone.game.character.npc.dominion.TestNPC;
 import com.lilithsthrone.game.character.persona.NameTriplet;
 import com.lilithsthrone.game.combat.Combat;
-import com.lilithsthrone.game.combat.SpecialAttack;
+import com.lilithsthrone.game.combat.CombatMove;
 import com.lilithsthrone.game.combat.Spell;
 import com.lilithsthrone.game.dialogue.DebugDialogue;
 import com.lilithsthrone.game.dialogue.DialogueNode;
 import com.lilithsthrone.game.dialogue.DialogueNodeType;
 import com.lilithsthrone.game.dialogue.OccupantManagementDialogue;
-import com.lilithsthrone.game.dialogue.places.dominion.CityHall;
+import com.lilithsthrone.game.dialogue.places.dominion.cityHall.CityHallDemographics;
 import com.lilithsthrone.game.dialogue.places.dominion.shoppingArcade.SuccubisSecrets;
 import com.lilithsthrone.game.dialogue.responses.Response;
 import com.lilithsthrone.game.dialogue.responses.ResponseSex;
@@ -290,7 +293,7 @@ public class MainController implements Initializable {
 			
 		} else if(Main.game.isInCombat()) {
 			if(Combat.getTargetedCombatant(Main.game.getPlayer()).isPlayer()) {
-				openInventory(Combat.getEnemies().get(0), InventoryInteraction.COMBAT);
+				openInventory((NPC) Combat.getEnemies(Main.game.getPlayer()).get(0), InventoryInteraction.COMBAT);
 			} else {
 				openInventory((NPC) Combat.getTargetedCombatant(Main.game.getPlayer()), InventoryInteraction.COMBAT);
 			}
@@ -333,6 +336,12 @@ public class MainController implements Initializable {
 				Main.game.saveDialogueNode();
 			}
 			
+			if(npc!=null) {
+				npc.sortInventory();
+			} else {
+				Main.game.getPlayerCell().getInventory().sortInventory();
+			}
+			
 			Main.game.setContent(new Response("", "", InventoryDialogue.INVENTORY_MENU));
 		}
 	}
@@ -347,7 +356,6 @@ public class MainController implements Initializable {
 		}
 		
 		if(characterViewed!=null && characterViewed != CharactersPresentDialogue.characterViewed) {
-			
 			if (Main.game.getCurrentDialogueNode().getDialogueNodeType() == DialogueNodeType.NORMAL
 					|| Main.game.getCurrentDialogueNode().getDialogueNodeType() == DialogueNodeType.OCCUPANT_MANAGEMENT) {
 				Main.game.saveDialogueNode();
@@ -361,7 +369,6 @@ public class MainController implements Initializable {
 				Main.game.restoreSavedContent(false);
 				
 			} else if (!Main.game.getCharactersPresent().isEmpty()) {
-	
 				if (Main.game.getCurrentDialogueNode().getDialogueNodeType() == DialogueNodeType.NORMAL
 						|| Main.game.getCurrentDialogueNode().getDialogueNodeType() == DialogueNodeType.OCCUPANT_MANAGEMENT) {
 					Main.game.saveDialogueNode();
@@ -444,25 +451,12 @@ public class MainController implements Initializable {
 						System.arraycopy(lastKeys, 0, lastKeys, 1, 4);
 						lastKeys[0] = event.getCode();
 						checkLastKeys();
-
-						 if(event.getCode()==KeyCode.END && Main.DEBUG){
-//							 Main.game.getPlayer().addSpecialPerk(Perk.POWER_OF_LYSSIETH_4);
-//							 System.out.println(UtilText.parse(Main.game.getPlayer(), Sex.getActivePartner(), "[npc.Name], [npc2.Name].  #IFnpc2.isFeminine()#THEN:3#ENDIF #IFnpc.isFeminine()#THEN:0#ENDIF"));
-//							 Main.game.getPlayer().setLegConfiguration(LegConfiguration.TAUR, false);
-							 
-//							 for(KeyboardAction action : KeyboardAction.values()) {
-//								 System.out.println(action.getPrimaryDefault().getFullName()+(action.getSecondaryDefault()!=null?" | "+action.getSecondaryDefault().getFullName():"")+": "+action.getName());
-//							 }
-							 
-//							 try {
-//								OutfitType.getAllOutfits().get(0).applyOutfit(Main.game.getPlayer(), true, true, true, true);
-//							} catch (XMLLoadException e) {
-//								e.printStackTrace();
-//							}
-							
-							
-//							 System.out.println(Main.isVersionOlderThan("0.1.3", "0.1.3.01"));
-						 }
+						
+						if(event.getCode()==KeyCode.END && Main.DEBUG){
+//							Pathing.aStarPathingPerkTree(PerkManager.MANAGER.getPerkTree(Main.game.getPlayer()),
+//									new TreeEntry<PerkCategory, AbstractPerk>(PerkCategory.PHYSICAL, 1, Perk.PHYSICAL_BASE),
+//									new TreeEntry<PerkCategory, AbstractPerk>(PerkCategory.ARCANE, 10, Perk.ARCANE_VAMPYRISM));
+						}
 						 
 
 						// Escape Menu:
@@ -530,7 +524,7 @@ public class MainController implements Initializable {
 						boolean enterConsumed = false;
 						
 						// Name selections:
-						if(Main.game.getCurrentDialogueNode() == CharacterCreation.CHOOSE_NAME || Main.game.getCurrentDialogueNode() == CityHall.CITY_HALL_NAME_CHANGE_FORM){
+						if(Main.game.getCurrentDialogueNode() == CharacterCreation.CHOOSE_NAME || Main.game.getCurrentDialogueNode() == CityHallDemographics.NAME_CHANGE){
 							if((boolean) Main.mainController.getWebEngine().executeScript("document.getElementById('nameInput') === document.activeElement")) {
 								allowInput = false;
 								if (event.getCode() == KeyCode.ENTER) {
@@ -572,15 +566,6 @@ public class MainController implements Initializable {
 											Main.game.setContent(new Response("Rename Room", "", Main.game.getCurrentDialogueNode()));
 										}
 									}
-								}
-							}
-						}
-						if(Main.game.getCurrentDialogueNode() == CityHall.CITY_HALL_NAME_CHANGE_FORM){
-							if((boolean) Main.mainController.getWebEngine().executeScript("document.getElementById('nameInput') === document.activeElement")) {
-								allowInput = false;
-								if (event.getCode() == KeyCode.ENTER) {
-									enterConsumed = true;
-									Main.game.setContent(1);
 								}
 							}
 						}
@@ -699,7 +684,7 @@ public class MainController implements Initializable {
 									 
 										Main.mainController.getWebEngine().executeScript("document.getElementById('hiddenFieldName').innerHTML=document.getElementById('slaveSurnameInput').value;");
 										if(Main.mainController.getWebEngine().getDocument()!=null) {
-											unsuitableName = Main.mainController.getWebEngine().getDocument().getElementById("hiddenFieldName").getTextContent().length() == 0
+											unsuitableName = Main.mainController.getWebEngine().getDocument().getElementById("hiddenFieldName").getTextContent().length() < 1
 															|| Main.mainController.getWebEngine().getDocument().getElementById("hiddenFieldName").getTextContent().length() > 32;
 										}
 										
@@ -717,6 +702,45 @@ public class MainController implements Initializable {
 								}
 							}
 						}
+						
+						//TODO for some reason, if this catches a ResponseEffectsOnly and sets content using that, it blanks the main page. I have absolutely no idea why.
+						if(Main.game.getCurrentDialogueNode() == OptionsDialogue.OPTIONS_PRONOUNS) {
+							allowInput = false;
+							if (event.getCode() == KeyCode.ENTER) {
+								enterConsumed = true;
+								boolean found = false;
+								for(GenderPronoun gp : GenderPronoun.values()) {
+									if((boolean) Main.mainController.getWebEngine().executeScript("document.getElementById('feminine_" + gp + "') === document.activeElement")
+										|| (boolean) Main.mainController.getWebEngine().executeScript("document.getElementById('masculine_" + gp + "') === document.activeElement")) {
+										Main.game.setContent(
+												new Response("Save", "Save all the pronouns that are currently displayed.", OptionsDialogue.OPTIONS_PRONOUNS) {
+													@Override
+													public void effects() {
+														OptionsDialogue.OPTIONS_PRONOUNS.getResponse(0, 1).effects();
+													}
+												});
+										found = true;
+										break;
+									}
+								}
+								if(!found) {
+									for(GenderNames genderName : GenderNames.values()) {
+										if((boolean) Main.mainController.getWebEngine().executeScript("document.getElementById('GENDER_NAME_MASCULINE_" + genderName + "') === document.activeElement")
+											|| (boolean) Main.mainController.getWebEngine().executeScript("document.getElementById('GENDER_NAME_ANDROGYNOUS_" + genderName + "') === document.activeElement")
+											|| (boolean) Main.mainController.getWebEngine().executeScript("document.getElementById('GENDER_NAME_FEMININE_" + genderName + "') === document.activeElement")) {
+											Main.game.setContent(
+													new Response("Save", "Save all the pronouns that are currently displayed.", OptionsDialogue.OPTIONS_PRONOUNS) {
+														@Override
+														public void effects() {
+															OptionsDialogue.OPTIONS_PRONOUNS.getResponse(0, 1).effects();
+														}
+													});
+										}
+									}
+								}
+							}
+						}
+						
 						
 						if(((boolean) Main.mainController.getWebEngine().executeScript("document.getElementById('offspringPetNameInput') === document.activeElement"))) {
 							allowInput = false;
@@ -750,33 +774,11 @@ public class MainController implements Initializable {
 							}
 						}
 						
-						if(Main.game.getCurrentDialogueNode() == OptionsDialogue.OPTIONS_PRONOUNS){
-							for(GenderPronoun gp : GenderPronoun.values()) {
-								if((boolean) Main.mainController.getWebEngine().executeScript("document.getElementById('feminine_" + gp + "') === document.activeElement")
-									|| (boolean) Main.mainController.getWebEngine().executeScript("document.getElementById('masculine_" + gp + "') === document.activeElement")) {
-									allowInput = false;
-									if (event.getCode() == KeyCode.ENTER) {
-										enterConsumed = true;
-										Main.game.setContent(1);
-									}
-								}
-							}
-							for(GenderNames genderName : GenderNames.values()) {
-								if((boolean) Main.mainController.getWebEngine().executeScript("document.getElementById('GENDER_NAME_MASCULINE_" + genderName + "') === document.activeElement")
-									|| (boolean) Main.mainController.getWebEngine().executeScript("document.getElementById('GENDER_NAME_ANDROGYNOUS_" + genderName + "') === document.activeElement")
-									|| (boolean) Main.mainController.getWebEngine().executeScript("document.getElementById('GENDER_NAME_FEMININE_" + genderName + "') === document.activeElement")) {
-									allowInput = false;
-									if (event.getCode() == KeyCode.ENTER) {
-										enterConsumed = true;
-										Main.game.setContent(1);
-									}
-								}
-							}
-						}
-						
 						if(Main.game.getCurrentDialogueNode() == DebugDialogue.PARSER){
-							if((boolean) Main.mainController.getWebEngine().executeScript("document.getElementById('parseInput') === document.activeElement"))
+							if((boolean) Main.mainController.getWebEngine().executeScript("document.getElementById('parseInput') === document.activeElement")
+									|| (boolean) Main.mainController.getWebEngine().executeScript("document.getElementById('xmlTest') === document.activeElement")) {
 								allowInput = false;
+							}
 						}
 						
 						if(allowInput){
@@ -950,7 +952,7 @@ public class MainController implements Initializable {
 		} else {
 			webEngineTooltip.setUserStyleSheetLocation(getClass().getResource("/com/lilithsthrone/res/css/webViewTooltip_stylesheet.css").toExternalForm());
 		}
-
+		
 		// Main WebView:
 		webViewMain.setContextMenuEnabled(false);
 		webEngine = webViewMain.getEngine();
@@ -971,6 +973,7 @@ public class MainController implements Initializable {
 				}
 			});
 		}
+		webEngine.executeScript("var timer = false;");
 
 		// Buttons webview:
 
@@ -1408,7 +1411,30 @@ public class MainController implements Initializable {
 					"");
 			addEventListener(documentAttributes, id, "mouseenter", el2, false);
 		}
-
+		
+		id = "INVENTORY_ENCHANTMENT_LIMIT";
+		if (((EventTarget) documentAttributes.getElementById(id)) != null) {
+			addEventListener(documentAttributes, id, "mousemove", moveTooltipListener, false);
+			addEventListener(documentAttributes, id, "mouseleave", hideTooltipListener, false);
+			TooltipInformationEventListener el2 = new TooltipInformationEventListener().setInformation(
+					Util.capitaliseSentence(Attribute.ENCHANTMENT_LIMIT.getName()),
+					"The total amount of weapon, clothing, and tattoo attribute enchantments you're able to handle without incurring massive penalties."
+					+" Your limit is calculated from: <i>10 + (level) + (perk gains)</i>");
+			addEventListener(documentAttributes, id, "mouseenter", el2, false);
+		}
+		
+		id = "INVENTORY_ENCHANTMENT_LIMIT_NPC";
+		if (((EventTarget) documentAttributes.getElementById(id)) != null) {
+			addEventListener(documentAttributes, id, "mousemove", moveTooltipListener, false);
+			addEventListener(documentAttributes, id, "mouseleave", hideTooltipListener, false);
+			TooltipInformationEventListener el2 = new TooltipInformationEventListener().setInformation(
+					Util.capitaliseSentence(Attribute.ENCHANTMENT_LIMIT.getName()),
+					UtilText.parse(RenderingEngine.getCharacterToRender(),
+							"The total amount of weapon, clothing, and tattoo attribute enchantments you're able to handle without incurring massive penalties."
+								+" [npc.Her] maximum is calculated from: <i>10 + (level) + (perk gains)</i>"));
+			addEventListener(documentAttributes, id, "mouseenter", el2, false);
+		}
+		
 		id = "DATE_DISPLAY_TOGGLE";
 		if (((EventTarget) documentAttributes.getElementById(id)) != null) {
 			((EventTarget) documentAttributes.getElementById(id)).addEventListener("click", e -> {
@@ -1419,11 +1445,13 @@ public class MainController implements Initializable {
 			
 			addEventListener(documentAttributes, id, "mousemove", moveTooltipListener, false);
 			addEventListener(documentAttributes, id, "mouseleave", hideTooltipListener, false);
+			String day = Main.game.getDateNow().getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
 			TooltipInformationEventListener el2 = new TooltipInformationEventListener().setInformation("Toggle Calendar Display",
 					"Toggle the date's display between a calendar and day count.<br/>"
 						+ "The current date is: <b style='color:"+Colour.BASE_BLUE_LIGHT.toWebHexString()+";'>"
 						+ Main.game.getDisplayDate(true)
 						+"</b><br/>"
+						+ "It is currently <b>"+UtilText.generateSingularDeterminer(day)+" "+day+"</b>.<br/>"
 						+ "You've been in this new world for: <b style='color:"+Colour.GENERIC_EXCELLENT.toWebHexString()+";'>"+Main.game.getDayNumber()+" day"+(Main.game.getDayNumber()>1?"s":"")+"</b>");
 			addEventListener(documentAttributes, id, "mouseenter", el2, false);
 		}
@@ -1472,7 +1500,7 @@ public class MainController implements Initializable {
 			charactersBeingRendered.addAll(Sex.getSubmissiveParticipants(true).keySet());
 		} else if(Main.game.isInCombat()) {
 			charactersBeingRendered.add(Main.game.getPlayer());
-			charactersBeingRendered.addAll(Combat.getAllies());
+			charactersBeingRendered.addAll(Combat.getAllies(Main.game.getPlayer()));
 		} else {
 			if(Main.game.getPlayer()!=null) {
 				charactersBeingRendered.add(Main.game.getPlayer());
@@ -1633,8 +1661,8 @@ public class MainController implements Initializable {
 			}
 			
 			
-			for (Perk trait : character.getTraits()) {
-				id = "TRAIT_" + idModifier + trait;
+			for (AbstractPerk trait : character.getTraits()) {
+				id = "TRAIT_" + idModifier + Perk.getIdFromPerk(trait);
 				if (((EventTarget) documentAttributes.getElementById(id)) != null) {
 					addEventListener(documentAttributes, id, "mousemove", moveTooltipListener, false);
 					addEventListener(documentAttributes, id, "mouseleave", hideTooltipListener, false);
@@ -1642,7 +1670,7 @@ public class MainController implements Initializable {
 					addEventListener(documentAttributes, id, "mouseenter", el, false);
 				}
 			}
-			for (Fetish f : character.getFetishes()) {
+			for (Fetish f : character.getFetishes(true)) {
 				if (((EventTarget) documentAttributes.getElementById("FETISH_"+idModifier + f)) != null) {
 					addEventListener(documentAttributes, "FETISH_"+idModifier + f, "mousemove", moveTooltipListener, false);
 					addEventListener(documentAttributes, "FETISH_"+idModifier + f, "mouseleave", hideTooltipListener, false);
@@ -1651,13 +1679,14 @@ public class MainController implements Initializable {
 					addEventListener(documentAttributes, "FETISH_"+idModifier + f, "mouseenter", el, false);
 				}
 			}
-			for (SpecialAttack sa : character.getSpecialAttacks()) {
-				if (((EventTarget) documentAttributes.getElementById("SA_"+idModifier + sa)) != null) {
-					addEventListener(documentAttributes, "SA_"+idModifier + sa, "mousemove", moveTooltipListener, false);
-					addEventListener(documentAttributes, "SA_"+idModifier + sa, "mouseleave", hideTooltipListener, false);
+			for (CombatMove combatMove : character.getEquippedMoves()) {
+				id = "CM_"+idModifier + combatMove.getIdentifier();
+				if (((EventTarget) documentAttributes.getElementById(id)) != null) {
+					addEventListener(documentAttributes, id, "mousemove", moveTooltipListener, false);
+					addEventListener(documentAttributes, id, "mouseleave", hideTooltipListener, false);
 	
-					TooltipInformationEventListener el = new TooltipInformationEventListener().setSpecialAttack(sa, character);
-					addEventListener(documentAttributes, "SA_"+idModifier + sa, "mouseenter", el, false);
+					TooltipInformationEventListener el = new TooltipInformationEventListener().setCombatMove(combatMove, character);
+					addEventListener(documentAttributes, id, "mouseenter", el, false);
 				}
 			}
 			for (Spell s : character.getAllSpells()) {
@@ -1760,7 +1789,7 @@ public class MainController implements Initializable {
 		
 		if(Main.game.getPlayer()!=null) {
 			// Weapons on floor:
-			for (Entry<AbstractWeapon, Integer> entry : Main.game.getPlayerCell().getInventory().getMapOfDuplicateWeapons().entrySet()) {
+			for (Entry<AbstractWeapon, Integer> entry : Main.game.getPlayerCell().getInventory().getAllWeaponsInInventory().entrySet()) {
 				id = "WEAPON_FLOOR_" + entry.getKey().hashCode();
 				if (((EventTarget) documentRight.getElementById(id)) != null) {
 					if(!Main.game.getCurrentDialogueNode().isInventoryDisabled() || Main.game.getCurrentDialogueNode().getDialogueNodeType()==DialogueNodeType.INVENTORY) {
@@ -1775,7 +1804,7 @@ public class MainController implements Initializable {
 			}
 			
 			// Clothing on floor:
-			for (Entry<AbstractClothing, Integer> entry : Main.game.getPlayerCell().getInventory().getMapOfDuplicateClothing().entrySet()) {
+			for (Entry<AbstractClothing, Integer> entry : Main.game.getPlayerCell().getInventory().getAllClothingInInventory().entrySet()) {
 				id = "CLOTHING_FLOOR_" + entry.getKey().hashCode();
 				if (((EventTarget) documentRight.getElementById(id)) != null) {
 					if(!Main.game.getCurrentDialogueNode().isInventoryDisabled() || Main.game.getCurrentDialogueNode().getDialogueNodeType()==DialogueNodeType.INVENTORY) {
@@ -1790,7 +1819,7 @@ public class MainController implements Initializable {
 			}
 			
 			// Items on floor:
-			for (Entry<AbstractItem, Integer> entry : Main.game.getPlayerCell().getInventory().getMapOfDuplicateItems().entrySet()) {
+			for (Entry<AbstractItem, Integer> entry : Main.game.getPlayerCell().getInventory().getAllItemsInInventory().entrySet()) {
 				id = "ITEM_FLOOR_" + entry.getKey().hashCode();
 				if (((EventTarget) documentRight.getElementById(id)) != null) {
 					if(!Main.game.getCurrentDialogueNode().isInventoryDisabled() || Main.game.getCurrentDialogueNode().getDialogueNodeType()==DialogueNodeType.INVENTORY) {
@@ -1824,7 +1853,7 @@ public class MainController implements Initializable {
 			charactersBeingRendered.addAll(Sex.getSubmissiveParticipants(true).keySet());
 			
 		} else if(Main.game.isInCombat()) {
-			charactersBeingRendered.addAll(Combat.getEnemies());
+			charactersBeingRendered.addAll(Combat.getEnemies(Main.game.getPlayer()));
 			
 		} else if(RenderingEngine.ENGINE.isRenderingCharactersRightPanel()) {
 			charactersBeingRendered.add(RenderingEngine.getCharacterToRender());
@@ -1946,16 +1975,17 @@ public class MainController implements Initializable {
 				}
 				
 				// For perk slots:
-				for (Perk p : character.getMajorPerks()) {
-					if (((EventTarget) documentRight.getElementById("PERK_NPC_"+idModifier + p)) != null) {
-						addEventListener(documentRight, "PERK_NPC_"+idModifier + p, "mousemove", moveTooltipListener, false);
-						addEventListener(documentRight, "PERK_NPC_"+idModifier + p, "mouseleave", hideTooltipListener, false);
+				for (AbstractPerk p : character.getMajorPerks()) {
+					id = "PERK_NPC_"+idModifier + Perk.getIdFromPerk(p);
+					if (((EventTarget) documentRight.getElementById(id)) != null) {
+						addEventListener(documentRight, id, "mousemove", moveTooltipListener, false);
+						addEventListener(documentRight, id, "mouseleave", hideTooltipListener, false);
 		
 						TooltipInformationEventListener el = new TooltipInformationEventListener().setPerk(p, character);
-						addEventListener(documentRight, "PERK_NPC_"+idModifier + p, "mouseenter", el, false);
+						addEventListener(documentRight, id, "mouseenter", el, false);
 					}
 				}
-				for (Fetish f : character.getFetishes()) {
+				for (Fetish f : character.getFetishes(true)) {
 					if (((EventTarget) documentRight.getElementById("FETISH_NPC_"+idModifier + f)) != null) {
 						addEventListener(documentRight, "FETISH_NPC_"+idModifier + f, "mousemove", moveTooltipListener, false);
 						addEventListener(documentRight, "FETISH_NPC_"+idModifier + f, "mouseleave", hideTooltipListener, false);
@@ -1964,13 +1994,14 @@ public class MainController implements Initializable {
 						addEventListener(documentRight, "FETISH_NPC_"+idModifier + f, "mouseenter", el, false);
 					}
 				}
-				for (SpecialAttack sa : character.getSpecialAttacks()) {
-					if (((EventTarget) documentRight.getElementById("SA_NPC_"+idModifier + sa)) != null) {
-						addEventListener(documentRight, "SA_NPC_"+idModifier + sa, "mousemove", moveTooltipListener, false);
-						addEventListener(documentRight, "SA_NPC_"+idModifier + sa, "mouseleave", hideTooltipListener, false);
+				for (CombatMove combatMove : character.getEquippedMoves()) {
+					id = "CM_NPC_"+idModifier + combatMove.getIdentifier();
+					if (((EventTarget) documentRight.getElementById(id)) != null) {
+						addEventListener(documentRight, id, "mousemove", moveTooltipListener, false);
+						addEventListener(documentRight, id, "mouseleave", hideTooltipListener, false);
 		
-						TooltipInformationEventListener el = new TooltipInformationEventListener().setSpecialAttack(sa, character);
-						addEventListener(documentRight, "SA_NPC_"+idModifier + sa, "mouseenter", el, false);
+						TooltipInformationEventListener el = new TooltipInformationEventListener().setCombatMove(combatMove, character);
+						addEventListener(documentRight, id, "mouseenter", el, false);
 					}
 				}
 				for (Spell s : character.getAllSpells()) {
@@ -2086,13 +2117,13 @@ public class MainController implements Initializable {
 				if(Main.game.isStarted()
 						&& Main.game.isInNewWorld()
 						&& Main.game.isInCombat()
-						&& Combat.getAllCombatants().size()==1
-						&& !Combat.getEnemies().get(0).isUnique()
+						&& Combat.getAllCombatants(false).size()==1
+						&& !Combat.getEnemies(Main.game.getPlayer()).get(0).isUnique()
 						&& Main.game.getPlayer().hasPenis()
 						&& Main.game.getPlayer().isAbleToAccessCoverableArea(CoverableArea.PENIS, true)
-						&& Combat.getEnemies().get(0).hasVagina()
-						&& Combat.getEnemies().get(0).isAbleToAccessCoverableArea(CoverableArea.VAGINA, true)) {
-					GameCharacter target = Combat.getEnemies().get(0);
+						&& Combat.getEnemies(Main.game.getPlayer()).get(0).hasVagina()
+						&& Combat.getEnemies(Main.game.getPlayer()).get(0).isAbleToAccessCoverableArea(CoverableArea.VAGINA, true)) {
+					GameCharacter target = Combat.getEnemies(Main.game.getPlayer()).get(0);
 					Combat.endCombat(true);
 //					Main.game.setContent(new Response("", "", Main.game.getDefaultDialogueNoEncounter()));
 					Main.game.setContent(new ResponseSex(
@@ -2109,7 +2140,7 @@ public class MainController implements Initializable {
 									return false;
 								}
 								@Override
-								public boolean isPlayerAbleToSwapPositions() {
+								public boolean isSwapPositionAllowed(GameCharacter character, GameCharacter target) {
 									return false;
 								}
 								@Override
@@ -2121,7 +2152,7 @@ public class MainController implements Initializable {
 								@Override
 								public void initStartingLustAndArousal(GameCharacter character) {
 									if(!character.isPlayer()) {
-										character.setLust(100);
+										character.setLustNoText(100);
 										character.setArousal(25);
 									} else {
 										super.initStartingLustAndArousal(character);
@@ -2164,13 +2195,13 @@ public class MainController implements Initializable {
 				if(Main.game.isStarted()
 						&& Main.game.isInNewWorld()
 						&& Main.game.isInCombat()
-						&& Combat.getAllCombatants().size()==1
-						&& !Combat.getEnemies().get(0).isUnique()
-						&& Combat.getEnemies().get(0).hasPenis()
-						&& Combat.getEnemies().get(0).isAbleToAccessCoverableArea(CoverableArea.PENIS, true)
+						&& Combat.getAllCombatants(false).size()==1
+						&& !Combat.getEnemies(Main.game.getPlayer()).get(0).isUnique()
+						&& Combat.getEnemies(Main.game.getPlayer()).get(0).hasPenis()
+						&& Combat.getEnemies(Main.game.getPlayer()).get(0).isAbleToAccessCoverableArea(CoverableArea.PENIS, true)
 						&& Main.game.getPlayer().hasVagina()
 						&& Main.game.getPlayer().isAbleToAccessCoverableArea(CoverableArea.VAGINA, true)) {
-					GameCharacter target = Combat.getEnemies().get(0);
+					GameCharacter target = Combat.getEnemies(Main.game.getPlayer()).get(0);
 					Combat.endCombat(false);
 //					Main.game.setContent(new Response("", "", Main.game.getDefaultDialogueNoEncounter()));
 					Main.game.setContent(new ResponseSex(
@@ -2187,7 +2218,7 @@ public class MainController implements Initializable {
 									return false;
 								}
 								@Override
-								public boolean isPlayerAbleToSwapPositions() {
+								public boolean isSwapPositionAllowed(GameCharacter character, GameCharacter target) {
 									return false;
 								}
 								@Override
@@ -2198,7 +2229,7 @@ public class MainController implements Initializable {
 								}
 								@Override
 								public void initStartingLustAndArousal(GameCharacter character) {
-									character.setLust(100);
+									character.setLustNoText(100);
 									character.setArousal(25);
 								}
 								@Override

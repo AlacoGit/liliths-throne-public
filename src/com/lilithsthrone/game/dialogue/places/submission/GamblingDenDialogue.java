@@ -2,6 +2,7 @@ package com.lilithsthrone.game.dialogue.places.submission;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -401,10 +402,19 @@ public class GamblingDenDialogue {
 										Util.newHashMapOfValues(new Value<>(Main.game.getNpc(Roxy.class), SexSlotBipeds.FACE_SITTING_ON_FACE)),
 										Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexSlotBipeds.FACE_SITTING_ON_BACK))),
 								null,
-								null, AFTER_ROXY_SEX, UtilText.parseFromXMLFile("places/submission/gamblingDen", "TRADER_REPLY_YES")){
+								null,
+								AFTER_ROXY_SEX,
+								UtilText.parseFromXMLFile("places/submission/gamblingDen", "TRADER_REPLY_YES")){
+							@Override
+							public Map<GameCharacter, List<CoverableArea>> exposeAtStartOfSexMap() {
+								Map<GameCharacter, List<CoverableArea>> map = new HashMap<>();
+								map.put(Main.game.getNpc(Roxy.class),
+										Util.newArrayListOfValues(
+												CoverableArea.VAGINA));
+								return map;
+							}
 							@Override
 							public void effects() {
-								Main.game.getNpc(Roxy.class).displaceClothingForAccess(CoverableArea.VAGINA);
 								Main.game.getDialogueFlags().values.add(DialogueFlagValue.roxyIntroduced);
 							}
 						};
@@ -444,10 +454,19 @@ public class GamblingDenDialogue {
 											Util.newHashMapOfValues(new Value<>(Main.game.getNpc(Roxy.class), SexSlotBipeds.FACE_SITTING_ON_FACE)),
 											Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexSlotBipeds.FACE_SITTING_ON_BACK))),
 									null,
-									null, AFTER_ROXY_SEX_ADDICT, UtilText.parseFromXMLFile("places/submission/gamblingDen", "ROXY_SEX_START_ADDICT")){
+									null,
+									AFTER_ROXY_SEX_ADDICT,
+									UtilText.parseFromXMLFile("places/submission/gamblingDen", "ROXY_SEX_START_ADDICT")){
+								@Override
+								public Map<GameCharacter, List<CoverableArea>> exposeAtStartOfSexMap() {
+									Map<GameCharacter, List<CoverableArea>> map = new HashMap<>();
+									map.put(Main.game.getNpc(Roxy.class),
+											Util.newArrayListOfValues(
+													CoverableArea.VAGINA));
+									return map;
+								}
 								@Override
 								public void effects() {
-									Main.game.getNpc(Roxy.class).displaceClothingForAccess(CoverableArea.VAGINA);
 									Main.game.getTextEndStringBuilder().append(Main.game.getPlayer().incrementMoney(-1000));
 								}
 							};
@@ -462,10 +481,19 @@ public class GamblingDenDialogue {
 											Util.newHashMapOfValues(new Value<>(Main.game.getNpc(Roxy.class), SexSlotBipeds.FACE_SITTING_ON_FACE)),
 											Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexSlotBipeds.FACE_SITTING_ON_BACK))),
 									null,
-									null, AFTER_ROXY_SEX, UtilText.parseFromXMLFile("places/submission/gamblingDen", "ROXY_SEX_START")){
+									null,
+									AFTER_ROXY_SEX,
+									UtilText.parseFromXMLFile("places/submission/gamblingDen", "ROXY_SEX_START")){
+								@Override
+								public Map<GameCharacter, List<CoverableArea>> exposeAtStartOfSexMap() {
+									Map<GameCharacter, List<CoverableArea>> map = new HashMap<>();
+									map.put(Main.game.getNpc(Roxy.class),
+											Util.newArrayListOfValues(
+													CoverableArea.VAGINA));
+									return map;
+								}
 								@Override
 								public void effects() {
-									Main.game.getNpc(Roxy.class).displaceClothingForAccess(CoverableArea.VAGINA);
 									Main.game.getDialogueFlags().values.add(DialogueFlagValue.roxyIntroduced);
 								}
 							};
@@ -856,7 +884,7 @@ public class GamblingDenDialogue {
 				
 			} else {
 				if(index == 1) {
-					return new Response("Rules", "Ask Epona about the rules for pregnancy roulette", PREGNANCY_ROULETTE_RULES);
+					return new Response("Rules", "Ask Epona about the rules for pregnancy roulette.", PREGNANCY_ROULETTE_RULES);
 					
 				} else if(index==2) {
 					if(Main.game.getPlayer().isPregnant()) {
@@ -1000,9 +1028,6 @@ public class GamblingDenDialogue {
 								}
 								
 								initMother();
-								
-								
-								Main.game.getPlayer().displaceClothingForAccess(CoverableArea.PENIS);
 							}
 						};
 					}
@@ -1058,7 +1083,7 @@ public class GamblingDenDialogue {
 		
 		@Override
 		public String getContent() {
-			if(Sex.getNumberOfOrgasms(Main.game.getNpc(Epona.class))>0) {
+			if(Sex.getNumberOfOrgasms(Main.game.getNpc(Epona.class))>=Main.game.getNpc(Epona.class).getOrgasmsBeforeSatisfied()) {
 				return UtilText.parseFromXMLFile("places/submission/gamblingDen", "EPONA_POST_SEX");
 			} else {
 				return UtilText.parseFromXMLFile("places/submission/gamblingDen", "EPONA_POST_SEX_NO_ORGASM");
@@ -1216,7 +1241,7 @@ public class GamblingDenDialogue {
 							public void initStartingLustAndArousal(GameCharacter character) {
 								if(!character.isPlayer()) {
 									character.setArousal(75);
-									character.setLust(80);
+									character.setLustNoText(80);
 								}
 							}
 							@Override
@@ -1253,7 +1278,7 @@ public class GamblingDenDialogue {
 							public void initStartingLustAndArousal(GameCharacter character) {
 								if(!character.isPlayer()) {
 									character.setArousal(75);
-									character.setLust(80);
+									character.setLustNoText(80);
 								}
 							}
 							@Override
@@ -1312,7 +1337,7 @@ public class GamblingDenDialogue {
 								public void initStartingLustAndArousal(GameCharacter character) {
 									if(!character.isPlayer()) {
 										character.setArousal(75);
-										character.setLust(80);
+										character.setLustNoText(80);
 									}
 								}
 								@Override
@@ -1349,7 +1374,7 @@ public class GamblingDenDialogue {
 								public void initStartingLustAndArousal(GameCharacter character) {
 									if(!character.isPlayer()) {
 										character.setArousal(75);
-										character.setLust(80);
+										character.setLustNoText(80);
 									}
 								}
 								@Override
@@ -1526,13 +1551,20 @@ public class GamblingDenDialogue {
 								Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexSlotBipeds.BREEDING_STALL_FUCKING)),
 								Util.newHashMapOfValues(new Value<>(mother, SexSlotBipeds.BREEDING_STALL_BACK))) {
 							@Override
+							public Map<GameCharacter, List<CoverableArea>> exposeAtStartOfSexMap() {
+								Map<GameCharacter, List<CoverableArea>> map = new HashMap<>();
+								map.put(Main.game.getPlayer(),
+										Util.newArrayListOfValues(CoverableArea.PENIS));
+								return map;
+							}
+							@Override
 							public boolean isPositionChangingAllowed(GameCharacter character) {
 								return false;
 							}
 							@Override
 							public void initStartingLustAndArousal(GameCharacter character) {
 								character.setArousal(50);
-								character.setLust(80);
+								character.setLustNoText(80);
 							}
 						},
 						null,

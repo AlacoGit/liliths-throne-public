@@ -10,7 +10,7 @@ import com.lilithsthrone.game.character.GameCharacter;
 import com.lilithsthrone.game.character.attributes.CorruptionLevel;
 import com.lilithsthrone.game.character.body.CoverableArea;
 import com.lilithsthrone.game.character.body.valueEnums.Femininity;
-import com.lilithsthrone.game.character.effects.Perk;
+import com.lilithsthrone.game.character.effects.AbstractPerk;
 import com.lilithsthrone.game.character.fetishes.Fetish;
 import com.lilithsthrone.game.character.race.Race;
 import com.lilithsthrone.game.dialogue.DialogueNode;
@@ -34,7 +34,7 @@ import com.lilithsthrone.utils.Util.Value;
 
 /**
  * @since 0.1.69
- * @version 0.2.11
+ * @version 0.3.4
  * @author Innoxia
  */
 public class ResponseSex extends Response {
@@ -101,7 +101,7 @@ public class ResponseSex extends Response {
 			List<Fetish> fetishesForUnlock,
 			List<Fetish> fetishesBlocking,
 			CorruptionLevel corruptionBypass,
-			List<Perk> perksRequired,
+			List<AbstractPerk> perksRequired,
 			Femininity femininityRequired,
 			Race raceRequired,
 			boolean consensual,
@@ -176,6 +176,7 @@ public class ResponseSex extends Response {
 											case PREFER_ORAL:
 											case PREFER_MISSIONARY:
 											case PREFER_DOGGY:
+											case PREFER_COW_GIRL:
 												break;
 										}
 									}
@@ -213,6 +214,7 @@ public class ResponseSex extends Response {
 											case PREFER_ORAL:
 											case PREFER_MISSIONARY:
 											case PREFER_DOGGY:
+											case PREFER_COW_GIRL:
 												break;
 										}
 									}
@@ -312,7 +314,7 @@ public class ResponseSex extends Response {
 			List<Fetish> fetishesForUnlock,
 			List<Fetish> fetishesBlocking,
 			CorruptionLevel corruptionBypass,
-			List<Perk> perksRequired,
+			List<AbstractPerk> perksRequired,
 			Femininity femininityRequired,
 			Race raceRequired,
 			boolean consensual,
@@ -356,7 +358,7 @@ public class ResponseSex extends Response {
 			List<Fetish> fetishesForUnlock,
 			List<Fetish> fetishesBlocking,
 			CorruptionLevel corruptionBypass,
-			List<Perk> perksRequired,
+			List<AbstractPerk> perksRequired,
 			Femininity femininityRequired,
 			Race raceRequired,
 			boolean consensual,
@@ -510,6 +512,7 @@ public class ResponseSex extends Response {
 								case PREFER_ORAL:
 								case PREFER_MISSIONARY:
 								case PREFER_DOGGY:
+								case PREFER_COW_GIRL:
 									break;
 							}
 						}
@@ -663,6 +666,7 @@ public class ResponseSex extends Response {
 								case PREFER_ORAL:
 								case PREFER_MISSIONARY:
 								case PREFER_DOGGY:
+								case PREFER_COW_GIRL:
 									break;
 							}
 						}
@@ -806,6 +810,7 @@ public class ResponseSex extends Response {
 								case PREFER_ORAL:
 								case PREFER_MISSIONARY:
 								case PREFER_DOGGY:
+								case PREFER_COW_GIRL:
 									break;
 							}
 						}

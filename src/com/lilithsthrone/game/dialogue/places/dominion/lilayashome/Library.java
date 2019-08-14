@@ -135,7 +135,7 @@ public class Library {
 						@Override
 						public void effects() {
 							if(!Main.game.getDialogueFlags().values.contains(DialogueFlagValue.readBook1)) {
-								Main.game.getPlayer().incrementAttribute(Attribute.MAJOR_ARCANE, 0.5f);
+								Main.game.getPlayer().incrementAttribute(Attribute.SPELL_COST_MODIFIER, 1f);
 								Main.game.getDialogueFlags().values.add(DialogueFlagValue.readBook1);
 							}
 						}
@@ -162,11 +162,10 @@ public class Library {
 					};
 
 				} else if (index == 4) {
-					return new Response("Knocked Up", "A small paperback book which contains all the information you'd ever need concerning pregnancies in this world.", PREGNANCY_INFO) {
+					return new Response("Knocked up", "A small paperback book which contains all the information you'd ever need concerning pregnancies in this world.", PREGNANCY_INFO) {
 						@Override
 						public void effects() {
 							if(!Main.game.getDialogueFlags().values.contains(DialogueFlagValue.readBook4)) {
-								Main.game.getPlayer().incrementAttribute(Attribute.MAJOR_ARCANE, 0.5f);
 								Main.game.getDialogueFlags().values.add(DialogueFlagValue.readBook4);
 							}
 						}
@@ -447,8 +446,10 @@ public class Library {
 					+ "</p>"
 					+ "<p>"
 						+ " Apart from that, the only other part of the book that piques your interest is a small section justifying the practice of slavery as a necessary evil."
-						+ " The passage explains how demons and half-demons are the only races who are almost never subjected to enslavement."
-						+ " Apparently, this is due to a non-demon owning a demonic slave being considered completely unacceptable in Dominion's society."
+						+ " The passage explains how demons, not including half-demons, are the only race which are almost never seen to be enslaved."
+						+ " Apparently, this is due to a non-demon owning a demonic slave being considered completely unacceptable in Dominion's society, and requires a very hard-to-obtain license."
+						+ " It also mentions that Enforcers are very hesitant to sign off on any demon enslavement order,"
+							+ " as for all they know, the demon in question could turn out to be the favourite offspring of a lilin, who would be sure to bring their wrath down upon them..."
 					+ "</p>"
 					+ "<p>"
 						+ "Other than that snippet of trivia, the book doesn't contain anything useful."
@@ -477,7 +478,7 @@ public class Library {
 		public String getContent() {
 			return "<p>"
 						+ "You slide the small paperback book out from the shelf, and, turning it over in your [pc.hands], you take a look at the front cover."
-						+ " On it, the title 'Knocked Up' is displayed in bold pink lettering, and beneath that, there's a picture of a heavily-pregnant rabbit-girl cradling her swollen belly."
+						+ " On it, the title 'Knocked up' is displayed in bold pink lettering, and beneath that, there's a picture of a heavily-pregnant rabbit-girl cradling her swollen belly."
 						+ " A little speech-bubble is drawn coming from her mouth, and in it, you read the words 'All you need to know about being a parent!'."
 					+ "</p>"
 					+ "<p>"
@@ -495,6 +496,11 @@ public class Library {
 						+ " Despite this almost-immediate separation, a parent will always share special maternal or paternal bonds with their children, and, whether due to the arcane or some natural intuition,"
 							+ " a parent and child, as well as siblings, will always recognise each other at first sight."
 					+ "</p>";
+		}
+
+		@Override
+		public String getResponseTabTitle(int index) {
+			return LIBRARY.getResponseTabTitle(index);
 		}
 
 		@Override

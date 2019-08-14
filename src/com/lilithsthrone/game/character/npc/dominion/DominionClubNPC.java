@@ -1,12 +1,14 @@
 package com.lilithsthrone.game.character.npc.dominion;
 
 import java.time.Month;
+import java.util.List;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import com.lilithsthrone.game.character.CharacterImportSetting;
 import com.lilithsthrone.game.character.CharacterUtils;
+import com.lilithsthrone.game.character.EquipClothingSetting;
 import com.lilithsthrone.game.character.attributes.Attribute;
 import com.lilithsthrone.game.character.gender.Gender;
 import com.lilithsthrone.game.character.npc.NPC;
@@ -88,12 +90,12 @@ public class DominionClubNPC extends NPC {
 			resetInventory(true);
 			inventory.setMoney(10 + Util.random.nextInt(getLevel()*10) + 1);
 			
-			equipClothing(true, true, true, true);
+			equipClothing(EquipClothingSetting.getAllClothingSettings());
 			
 			CharacterUtils.applyMakeup(this, true);
 			
 			// Set starting attributes based on the character's race
-			initAttributes();
+			initPerkTreeAndBackgroundPerks();
 			
 			setMana(getAttributeValue(Attribute.MANA_MAXIMUM));
 			setHealth(getAttributeValue(Attribute.HEALTH_MAXIMUM));
@@ -114,9 +116,9 @@ public class DominionClubNPC extends NPC {
 	}
 
 	@Override
-	public void equipClothing(boolean replaceUnsuitableClothing, boolean addWeapons, boolean addScarsAndTattoos, boolean addAccessories) {
-		CharacterUtils.equipClothingFromOutfitType(this, OutfitType.CLUBBING, replaceUnsuitableClothing, addWeapons, addScarsAndTattoos, addAccessories);
-//		super.equipClothing(replaceUnsuitableClothing, addWeapons, addScarsAndTattoos, addAccessories);
+	public void equipClothing(List<EquipClothingSetting> settings) {
+		CharacterUtils.equipClothingFromOutfitType(this, OutfitType.CLUBBING, settings);
+//		super.equipClothing(settings);
 	}
 	
 	@Override

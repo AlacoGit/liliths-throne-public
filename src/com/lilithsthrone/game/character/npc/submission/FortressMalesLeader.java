@@ -11,8 +11,8 @@ import org.w3c.dom.Element;
 
 import com.lilithsthrone.game.Game;
 import com.lilithsthrone.game.character.CharacterImportSetting;
+import com.lilithsthrone.game.character.EquipClothingSetting;
 import com.lilithsthrone.game.character.GameCharacter;
-import com.lilithsthrone.game.character.attributes.Attribute;
 import com.lilithsthrone.game.character.body.Covering;
 import com.lilithsthrone.game.character.body.types.BodyCoveringType;
 import com.lilithsthrone.game.character.body.types.HornType;
@@ -31,6 +31,9 @@ import com.lilithsthrone.game.character.body.valueEnums.Muscle;
 import com.lilithsthrone.game.character.body.valueEnums.PenisGirth;
 import com.lilithsthrone.game.character.body.valueEnums.TesticleSize;
 import com.lilithsthrone.game.character.body.valueEnums.TongueLength;
+import com.lilithsthrone.game.character.effects.Perk;
+import com.lilithsthrone.game.character.effects.PerkCategory;
+import com.lilithsthrone.game.character.effects.PerkManager;
 import com.lilithsthrone.game.character.fetishes.Fetish;
 import com.lilithsthrone.game.character.gender.Gender;
 import com.lilithsthrone.game.character.npc.NPC;
@@ -100,11 +103,24 @@ public class FortressMalesLeader extends NPC {
 		loadNPCVariablesFromXML(this, null, parentElement, doc, settings);
 		if(Main.isVersionOlderThan(Game.loadingVersion, "0.2.11.8")) {
 			setStartingBody(true);
-			equipClothing(true, true, true, true);
+			equipClothing(EquipClothingSetting.getAllClothingSettings());
 		}
-		if(Main.isVersionOlderThan(Game.loadingVersion, "0.2.12")) {
-			this.setAttribute(Attribute.MAJOR_ARCANE, 35);
+		if(Main.isVersionOlderThan(Game.loadingVersion, "0.3.3.6")) {
+			this.resetPerksMap(true);
 		}
+	}
+
+	@Override
+	public void setupPerks(boolean autoSelectPerks) {
+		this.addSpecialPerk(Perk.SPECIAL_MARTIAL_BACKGROUND);
+		PerkManager.initialisePerks(this,
+				Util.newArrayListOfValues(
+						Perk.FETISH_SEEDER,
+						Perk.MELEE_DAMAGE),
+				Util.newHashMapOfValues(
+						new Value<>(PerkCategory.PHYSICAL, 5),
+						new Value<>(PerkCategory.LUST, 0),
+						new Value<>(PerkCategory.ARCANE, 2)));
 	}
 	
 	@Override
@@ -113,14 +129,6 @@ public class FortressMalesLeader extends NPC {
 		// Persona:
 		
 		if(setPersona) {
-			this.setAttribute(Attribute.MAJOR_PHYSIQUE, 50);
-			this.setAttribute(Attribute.MAJOR_ARCANE, 35);
-			this.setAttribute(Attribute.MAJOR_CORRUPTION, 100);
-			this.setAttribute(Attribute.VIRILITY, 100);
-			this.setAttribute(Attribute.DAMAGE_MELEE_WEAPON, 75);
-			this.setAttribute(Attribute.DAMAGE_PHYSICAL, 50);
-			this.setAttribute(Attribute.RESISTANCE_PHYSICAL, 25);
-			
 			this.setPersonality(Util.newHashMapOfValues(
 					new Value<>(PersonalityTrait.AGREEABLENESS, PersonalityWeight.LOW),
 					new Value<>(PersonalityTrait.CONSCIENTIOUSNESS, PersonalityWeight.LOW),
@@ -228,16 +236,16 @@ public class FortressMalesLeader extends NPC {
 	}
 	
 	@Override
-	public void equipClothing(boolean replaceUnsuitableClothing, boolean addWeapons, boolean addScarsAndTattoos, boolean addAccessories) {
+	public void equipClothing(List<EquipClothingSetting> settings) {
 		
-		this.unequipAllClothingIntoVoid(true);
+		this.unequipAllClothingIntoVoid(true, true);
 		
 		this.equipClothingFromNowhere(AbstractClothingType.generateClothing(ClothingType.STOMACH_SARASHI, Colour.CLOTHING_WHITE, false), true, this);
-		this.equipClothingFromNowhere(AbstractClothingType.generateClothing(ClothingType.HAND_WRAPS, Colour.CLOTHING_WHITE, false), true, this);
+		this.equipClothingFromNowhere(AbstractClothingType.generateClothing("innoxia_hand_wraps", Colour.CLOTHING_WHITE, false), true, this);
 		this.equipClothingFromNowhere(AbstractClothingType.generateClothing(ClothingType.GROIN_BRIEFS, Colour.CLOTHING_BLACK, false), true, this);
 		this.equipClothingFromNowhere(AbstractClothingType.generateClothing(ClothingType.getClothingTypeFromId("innoxia_leg_mens_hakama"), Colour.CLOTHING_BLACK, false), true, this);
 
-		if(addWeapons) {
+		if(settings.contains(EquipClothingSetting.ADD_WEAPONS)) {
 			this.equipMainWeaponFromNowhere(AbstractWeaponType.generateWeapon(WeaponType.getWeaponTypeFromId("innoxia_japaneseSwords_katana"), DamageType.PHYSICAL));
 			this.equipOffhandWeaponFromNowhere(AbstractWeaponType.generateWeapon(WeaponType.getWeaponTypeFromId("innoxia_japaneseSwords_wakizashi"), DamageType.FIRE));
 		}
@@ -277,12 +285,11 @@ public class FortressMalesLeader extends NPC {
 	public boolean isAbleToEquipDildo(GameCharacter target) {
 		AbstractClothing dildo = AbstractClothingType.generateClothing(ClothingType.getClothingTypeFromId("innoxia_insertableVibrator_insertable_vibrator"), Colour.CLOTHING_PURPLE_DARK, null);
 		return target.isAbleToEquip(dildo, true, this)
-				&& Sex.getSexTypeCount(this, target, new SexType(SexParticipantType.NORMAL, SexAreaPenetration.PENIS, SexAreaOrifice.VAGINA))>0;	
+				&& Sex.getSexTypeCount(this, target, new SexType(SexParticipantType.NORMAL, SexAreaPenetration.PENIS, SexAreaOrifice.VAGINA))>0;
 	}
 	
 	@Override
 	public void endSex() {
-		
 		if(Sex.getPostSexDialogue().equals(ImpFortressDialogue.KEEP_AFTER_SEX_DEFEAT)) {
 			if(ImpFortressDialogue.getMainCompanion()!=null && Sex.getAllParticipants().contains(ImpFortressDialogue.getMainCompanion())) {
 				Main.game.getTextEndStringBuilder().append(UtilText.parseFromXMLFile("places/submission/fortress"+ImpFortressDialogue.getDialogueEncounterId(), "KEEP_AFTER_SEX_DEFEAT_WITH_COMPANION", ImpFortressDialogue.getAllCharacters()));

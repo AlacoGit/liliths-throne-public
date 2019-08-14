@@ -9,8 +9,8 @@ import org.w3c.dom.Element;
 
 import com.lilithsthrone.game.Game;
 import com.lilithsthrone.game.character.CharacterImportSetting;
+import com.lilithsthrone.game.character.EquipClothingSetting;
 import com.lilithsthrone.game.character.GameCharacter;
-import com.lilithsthrone.game.character.attributes.Attribute;
 import com.lilithsthrone.game.character.body.Covering;
 import com.lilithsthrone.game.character.body.types.BodyCoveringType;
 import com.lilithsthrone.game.character.body.types.HornType;
@@ -40,6 +40,9 @@ import com.lilithsthrone.game.character.body.valueEnums.TesticleSize;
 import com.lilithsthrone.game.character.body.valueEnums.TongueLength;
 import com.lilithsthrone.game.character.body.valueEnums.Wetness;
 import com.lilithsthrone.game.character.body.valueEnums.WingSize;
+import com.lilithsthrone.game.character.effects.Perk;
+import com.lilithsthrone.game.character.effects.PerkCategory;
+import com.lilithsthrone.game.character.effects.PerkManager;
 import com.lilithsthrone.game.character.fetishes.Fetish;
 import com.lilithsthrone.game.character.gender.Gender;
 import com.lilithsthrone.game.character.markings.Tattoo;
@@ -114,6 +117,20 @@ public class Kate extends NPC {
 		if(Main.isVersionOlderThan(Game.loadingVersion, "0.2.11")) {
 			this.setAgeAppearanceDifferenceToAppearAsAge(28);
 		}
+		if(Main.isVersionOlderThan(Game.loadingVersion, "0.3.3.6")) {
+			this.resetPerksMap(true);
+		}
+	}
+
+	@Override
+	public void setupPerks(boolean autoSelectPerks) {
+		this.addSpecialPerk(Perk.SPECIAL_ARCANE_TATTOOIST);
+		PerkManager.initialisePerks(this,
+				Util.newArrayListOfValues(),
+				Util.newHashMapOfValues(
+						new Value<>(PerkCategory.PHYSICAL, 0),
+						new Value<>(PerkCategory.LUST, 5),
+						new Value<>(PerkCategory.ARCANE, 0)));
 	}
 
 	@Override
@@ -122,10 +139,6 @@ public class Kate extends NPC {
 		// Persona:
 
 		if(setPersona) {
-			this.setAttribute(Attribute.MAJOR_PHYSIQUE, 30);
-			this.setAttribute(Attribute.MAJOR_ARCANE, 50);
-			this.setAttribute(Attribute.MAJOR_CORRUPTION, 90);
-	
 			this.setPersonality(Util.newHashMapOfValues(
 					new Value<>(PersonalityTrait.AGREEABLENESS, PersonalityWeight.AVERAGE),
 					new Value<>(PersonalityTrait.CONSCIENTIOUSNESS, PersonalityWeight.LOW),
@@ -278,9 +291,9 @@ public class Kate extends NPC {
 	}
 	
 	@Override
-	public void equipClothing(boolean replaceUnsuitableClothing, boolean addWeapons, boolean addScarsAndTattoos, boolean addAccessories) {
+	public void equipClothing(List<EquipClothingSetting> settings) {
 
-		this.unequipAllClothingIntoVoid(true);
+		this.unequipAllClothingIntoVoid(true, true);
 
 		this.setMoney(10);
 
@@ -288,8 +301,8 @@ public class Kate extends NPC {
 		this.equipClothingFromNowhere(AbstractClothingType.generateClothing(ClothingType.LEG_MICRO_SKIRT_BELTED, Colour.CLOTHING_BLACK, false), true, this);
 		this.equipClothingFromNowhere(AbstractClothingType.generateClothing(ClothingType.TORSO_CAMITOP_STRAPS, Colour.CLOTHING_PINK, false), true, this);
 		this.equipClothingFromNowhere(AbstractClothingType.generateClothing(ClothingType.TORSO_OVER_WOMENS_LEATHER_JACKET, Colour.CLOTHING_BLACK, false), true, this);
-		this.equipClothingFromNowhere(AbstractClothingType.generateClothing(ClothingType.SOCK_FISHNET_STOCKINGS, Colour.CLOTHING_BLACK, false), true, this);
-		this.equipClothingFromNowhere(AbstractClothingType.generateClothing(ClothingType.FOOT_HEELS, Colour.CLOTHING_BLACK, false), true, this);
+		this.equipClothingFromNowhere(AbstractClothingType.generateClothing("innoxia_sock_fishnets", Colour.CLOTHING_BLACK, false), true, this);
+		this.equipClothingFromNowhere(AbstractClothingType.generateClothing("innoxia_foot_heels", Colour.CLOTHING_BLACK, false), true, this);
 
 		this.setPiercedEar(true);
 		this.setPiercedNavel(true);
@@ -389,7 +402,7 @@ public class Kate extends NPC {
 					+ "Quickly sorting your own clothes back into position, you watch as Kate does the same."
 					+ " Standing up, she wipes herself clean with a tissue she's produced from somewhere, before flattening down her mini skirt and turning to smile at you."
 					+ " She seems to have got her lust fully under control by now, and as she speaks, she sounds almost embarrassed of what just happened, "
-					+ UtilText.parseSpeech("Ehhh, thanks for helping me out there... You know, it's pretty hard for us demons sometimes... Anyway! What are you even doing in here?"
+					+ UtilText.parseSpeech("Mmm, thanks for helping me out there... You know, it's pretty hard for us demons sometimes... Anyway! What are you even doing in here?"
 							+ " Weren't you deterred by the boarded-up windows and stuff?",
 						Main.game.getNpc(Kate.class))
 					+ "</p>"
@@ -444,7 +457,7 @@ public class Kate extends NPC {
 					+ "Quickly sorting your own clothes back into position, you watch as Kate does the same."
 					+ " Standing up, she wipes herself clean with a tissue she's produced from somewhere, before flattening down her mini skirt and turning to smile at you."
 					+ " She seems to have got her lust fully under control by now, and as she speaks, she sounds almost embarrassed of what just happened, "
-					+ UtilText.parseSpeech("Ehhh, thanks for helping me out there... You know, it's pretty hard for us demons sometimes... Anyway! You need any more of my services?",
+					+ UtilText.parseSpeech("Mmm, thanks for helping me out there... You know, it's pretty hard for us demons sometimes... Anyway! You need any more of my services?",
 						Main.game.getNpc(Kate.class))
 					+ "</p>"
 					+ "<p>"

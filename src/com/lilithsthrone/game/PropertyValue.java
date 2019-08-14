@@ -11,6 +11,8 @@ public enum PropertyValue {
 	mapReveal(false),
 	concealedSlotsReveal(false),
 	
+	enchantmentLimits(true),
+	
 	artwork(true),
 	thumbnail(true),
 	
@@ -46,17 +48,22 @@ public enum PropertyValue {
 	urethralContent(false),
 	nipplePenContent(true),
 	analContent(true),
+	footContent(true),
 	futanariTesticles(true),
 	bipedalCloaca(true),
 	voluntaryNTR(false),
 	involuntaryNTR(false),
+
+	spittingEnabled(true),
+	opportunisticAttackers(false),
+	bypassSexActions(true),
 
 	levelUpHightlight(false),
 	newWeaponDiscovered(false),
 	newClothingDiscovered(false),
 	newItemDiscovered(false),
 	newRaceDiscovered(false);
-	
+
 	
 	private boolean defaultValue;
 

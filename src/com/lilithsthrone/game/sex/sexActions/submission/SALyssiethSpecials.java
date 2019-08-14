@@ -1,5 +1,6 @@
 package com.lilithsthrone.game.sex.sexActions.submission;
 
+import com.lilithsthrone.game.character.PlayerCharacter;
 import com.lilithsthrone.game.character.attributes.CorruptionLevel;
 import com.lilithsthrone.game.character.body.types.AssType;
 import com.lilithsthrone.game.character.body.types.BreastType;
@@ -23,6 +24,7 @@ import com.lilithsthrone.game.character.body.valueEnums.TesticleSize;
 import com.lilithsthrone.game.character.body.valueEnums.Wetness;
 import com.lilithsthrone.game.character.npc.submission.Lyssieth;
 import com.lilithsthrone.game.character.race.Race;
+import com.lilithsthrone.game.dialogue.utils.ParserTag;
 import com.lilithsthrone.game.dialogue.utils.UtilText;
 import com.lilithsthrone.game.inventory.clothing.AbstractClothing;
 import com.lilithsthrone.game.inventory.clothing.AbstractClothingType;
@@ -38,7 +40,9 @@ import com.lilithsthrone.game.sex.SexParticipantType;
 import com.lilithsthrone.game.sex.SexType;
 import com.lilithsthrone.game.sex.managers.submission.SMLyssiethDemonTF;
 import com.lilithsthrone.game.sex.positions.SexPositionBipeds;
+import com.lilithsthrone.game.sex.positions.SexPositionOther;
 import com.lilithsthrone.game.sex.positions.SexSlotBipeds;
+import com.lilithsthrone.game.sex.positions.SexSlotOther;
 import com.lilithsthrone.game.sex.sexActions.SexAction;
 import com.lilithsthrone.game.sex.sexActions.SexActionCategory;
 import com.lilithsthrone.game.sex.sexActions.SexActionPriority;
@@ -74,7 +78,29 @@ public class SALyssiethSpecials {
 		Main.game.getPlayer().setPenisCumExpulsion(FluidExpulsion.FOUR_HUGE.getMedianValue());
 		Main.game.getPlayer().fillCumToMaxStorage();
 	}
-	
+
+	public static final void playerGrowDemonicBreasts(CupSize breastCup, CupSize crotchBreastCup) {
+		PlayerCharacter player = Main.game.getPlayer();
+		if (player.getBreastCrotchType() != BreastType.NONE) {
+			player.setBreastCrotchType(BreastType.DEMON_COMMON);
+			if (crotchBreastCup != null) {
+				player.setMinimumBreastCrotchSize(crotchBreastCup);
+			}
+		}
+		player.setBreastType(BreastType.DEMON_COMMON);
+		if (breastCup != null) {
+			player.setMinimumBreastSize(breastCup);
+		}
+	}
+
+	public static final void playerGrowDemonicBreasts(CupSize breastCup) {
+		playerGrowDemonicBreasts(breastCup, null);
+	}
+
+	public static final void playerGrowDemonicBreasts() {
+		playerGrowDemonicBreasts(null, null);
+	}
+
 	public static final SexAction DEMON_TF_STAGE_1_CHOICE_GET_FUCKED = new SexAction(
 			SexActionType.SPECIAL,
 			ArousalIncrease.ONE_MINIMUM,
@@ -112,7 +138,7 @@ public class SALyssiethSpecials {
 
 		@Override
 		public String getDescription() {
-			return UtilText.parseFromXMLFile("characters/submission/lyssieth", "DEMON_TF_STAGE_1_CHOICE_GET_FUCKED");
+			return UtilText.parseFromXMLFile(Util.newArrayListOfValues(ParserTag.SEX_ALLOW_MUFFLED_SPEECH), "characters/submission/lyssieth", "DEMON_TF_STAGE_1_CHOICE_GET_FUCKED");
 		}
 
 		@Override
@@ -132,8 +158,7 @@ public class SALyssiethSpecials {
 			Main.game.getPlayer().setBodySize(BodySize.TWO_AVERAGE.getMedianValue());
 			Main.game.getPlayer().setHeight(168);
 			Main.game.getPlayer().setAssType(AssType.DEMON_COMMON);
-			Main.game.getPlayer().setBreastType(BreastType.DEMON_COMMON);
-			Main.game.getPlayer().setBreastSize(CupSize.DD);
+			playerGrowDemonicBreasts(CupSize.DD);
 			Main.game.getPlayer().setPenisType(PenisType.NONE);
 			playerGrowDemonicVagina();
 			
@@ -184,7 +209,7 @@ public class SALyssiethSpecials {
 
 		@Override
 		public String getDescription() {
-			return UtilText.parseFromXMLFile("characters/submission/lyssieth", "DEMON_TF_STAGE_1_CHOICE_GET_FUCKED_ANALLY");
+			return UtilText.parseFromXMLFile(Util.newArrayListOfValues(ParserTag.SEX_ALLOW_MUFFLED_SPEECH), "characters/submission/lyssieth", "DEMON_TF_STAGE_1_CHOICE_GET_FUCKED_ANALLY");
 		}
 
 		@Override
@@ -201,9 +226,7 @@ public class SALyssiethSpecials {
 				Main.game.getPlayer().setBodySize(BodySize.TWO_AVERAGE.getMedianValue());
 				Main.game.getPlayer().setHeight(168);
 				Main.game.getPlayer().setAssType(AssType.DEMON_COMMON);
-				Main.game.getPlayer().setBreastType(BreastType.DEMON_COMMON);
-				Main.game.getPlayer().setBreastSize(CupSize.AA);
-				
+				playerGrowDemonicBreasts(CupSize.AA);
 			} else {
 				Main.game.getPlayer().incrementFemininity(15);
 				Main.game.getPlayer().setHairLength(HairLength.FOUR_MID_BACK.getMedianValue());
@@ -213,8 +236,7 @@ public class SALyssiethSpecials {
 				Main.game.getPlayer().setBodySize(BodySize.TWO_AVERAGE.getMedianValue());
 				Main.game.getPlayer().setHeight(168);
 				Main.game.getPlayer().setAssType(AssType.DEMON_COMMON);
-				Main.game.getPlayer().setBreastType(BreastType.DEMON_COMMON);
-				Main.game.getPlayer().setBreastSize(CupSize.DD);
+				playerGrowDemonicBreasts(CupSize.DD);
 			}
 			
 			if(Main.game.getPlayer().hasPenis()) {
@@ -276,7 +298,7 @@ public class SALyssiethSpecials {
 
 		@Override
 		public String getDescription() {
-			return UtilText.parseFromXMLFile("characters/submission/lyssieth", "DEMON_TF_STAGE_1_CHOICE_FUCK_LYSSIETH");
+			return UtilText.parseFromXMLFile(Util.newArrayListOfValues(ParserTag.SEX_ALLOW_MUFFLED_SPEECH), "characters/submission/lyssieth", "DEMON_TF_STAGE_1_CHOICE_FUCK_LYSSIETH");
 		}
 
 		@Override
@@ -286,7 +308,7 @@ public class SALyssiethSpecials {
 			
 			playerGrowDemonicPenis();
 			Main.game.getPlayer().setAssType(AssType.DEMON_COMMON);
-			Main.game.getPlayer().setBreastType(BreastType.DEMON_COMMON);
+			playerGrowDemonicBreasts();
 			
 			if(!Main.game.getPlayer().isFeminine()) {
 				Main.game.getPlayer().setHeight(208);
@@ -366,9 +388,9 @@ public class SALyssiethSpecials {
 		@Override
 		public String getDescription() {
 			if(Main.game.getPlayer().hasPenis() && Main.game.getPlayer().getPenisType().getRace()==Race.DEMON && Main.game.getPlayer().getPenisRawSizeValue()<=4) {
-				return UtilText.parseFromXMLFile("characters/submission/lyssieth", "DEMON_TF_STAGE_2_CHOICE_FUCK_LYSSIETH_AS_SISSY");
+				return UtilText.parseFromXMLFile(Util.newArrayListOfValues(ParserTag.SEX_ALLOW_MUFFLED_SPEECH), "characters/submission/lyssieth", "DEMON_TF_STAGE_2_CHOICE_FUCK_LYSSIETH_AS_SISSY");
 			} else {
-				return UtilText.parseFromXMLFile("characters/submission/lyssieth", "DEMON_TF_STAGE_2_CHOICE_FUCK_LYSSIETH");
+				return UtilText.parseFromXMLFile(Util.newArrayListOfValues(ParserTag.SEX_ALLOW_MUFFLED_SPEECH), "characters/submission/lyssieth", "DEMON_TF_STAGE_2_CHOICE_FUCK_LYSSIETH");
 			}
 		}
 
@@ -428,9 +450,9 @@ public class SALyssiethSpecials {
 		@Override
 		public String getDescription() {
 			if(Main.game.getPlayer().hasPenis() && Main.game.getPlayer().getPenisType().getRace()==Race.DEMON && Main.game.getPlayer().getPenisRawSizeValue()<=4) {
-				return UtilText.parseFromXMLFile("characters/submission/lyssieth", "DEMON_TF_STAGE_2_CHOICE_LYSSIETH_ORAL_AS_SISSY");
+				return UtilText.parseFromXMLFile(Util.newArrayListOfValues(ParserTag.SEX_ALLOW_MUFFLED_SPEECH), "characters/submission/lyssieth", "DEMON_TF_STAGE_2_CHOICE_LYSSIETH_ORAL_AS_SISSY");
 			} else {
-				return UtilText.parseFromXMLFile("characters/submission/lyssieth", "DEMON_TF_STAGE_2_CHOICE_LYSSIETH_ORAL");
+				return UtilText.parseFromXMLFile(Util.newArrayListOfValues(ParserTag.SEX_ALLOW_MUFFLED_SPEECH), "characters/submission/lyssieth", "DEMON_TF_STAGE_2_CHOICE_LYSSIETH_ORAL");
 			}
 		}
 
@@ -445,9 +467,9 @@ public class SALyssiethSpecials {
 			
 			Sex.setSexManager(
 					new SMLyssiethDemonTF(
-							SexPositionBipeds.CHAIR_SEX_ORAL,
-							Util.newHashMapOfValues(new Value<>(Main.game.getNpc(Lyssieth.class), SexSlotBipeds.CHAIR_KNEELING)),
-							Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexSlotBipeds.CHAIR_ORAL_SITTING))));
+							SexPositionOther.SITTING,
+							Util.newHashMapOfValues(new Value<>(Main.game.getNpc(Lyssieth.class), SexSlotOther.PERFORMING_ORAL)),
+							Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexSlotOther.SITTING))));
 			
 			Main.game.getNpc(Lyssieth.class).fillCumToMaxStorage();
 		}
@@ -499,9 +521,9 @@ public class SALyssiethSpecials {
 		@Override
 		public String getDescription() {
 			if(Main.game.getNpc(Lyssieth.class).getForeplayPreference(Main.game.getPlayer()).getTargetedSexArea()==SexAreaOrifice.ANUS) {
-				return UtilText.parseFromXMLFile("characters/submission/lyssieth", "DEMON_TF_STAGE_2_ASK_FOR_MORE_GETTING_FUCKED_ANAL");
+				return UtilText.parseFromXMLFile(Util.newArrayListOfValues(ParserTag.SEX_ALLOW_MUFFLED_SPEECH), "characters/submission/lyssieth", "DEMON_TF_STAGE_2_ASK_FOR_MORE_GETTING_FUCKED_ANAL");
 			}
-			return UtilText.parseFromXMLFile("characters/submission/lyssieth", "DEMON_TF_STAGE_2_ASK_FOR_MORE_GETTING_FUCKED");
+			return UtilText.parseFromXMLFile(Util.newArrayListOfValues(ParserTag.SEX_ALLOW_MUFFLED_SPEECH), "characters/submission/lyssieth", "DEMON_TF_STAGE_2_ASK_FOR_MORE_GETTING_FUCKED");
 		}
 
 		@Override
@@ -605,7 +627,7 @@ public class SALyssiethSpecials {
 
 		@Override
 		public String getDescription() {
-			return UtilText.parseFromXMLFile("characters/submission/lyssieth", "DEMON_TF_STAGE_2_CHOICE_GET_FUCKED");
+			return UtilText.parseFromXMLFile(Util.newArrayListOfValues(ParserTag.SEX_ALLOW_MUFFLED_SPEECH), "characters/submission/lyssieth", "DEMON_TF_STAGE_2_CHOICE_GET_FUCKED");
 		}
 
 		@Override
@@ -622,8 +644,7 @@ public class SALyssiethSpecials {
 			Main.game.getPlayer().setBodySize(BodySize.TWO_AVERAGE.getMedianValue());
 			Main.game.getPlayer().setHeight(168);
 			Main.game.getPlayer().setAssType(AssType.DEMON_COMMON);
-			Main.game.getPlayer().setBreastType(BreastType.DEMON_COMMON);
-			Main.game.getPlayer().setBreastSize(CupSize.F);
+			playerGrowDemonicBreasts(CupSize.F);
 			playerGrowDemonicVagina();
 			
 			Sex.setSexManager(
@@ -671,7 +692,7 @@ public class SALyssiethSpecials {
 
 		@Override
 		public String getDescription() {
-			return UtilText.parseFromXMLFile("characters/submission/lyssieth", "DEMON_TF_STAGE_2_CHOICE_GET_FUCKED_ANALLY");
+			return UtilText.parseFromXMLFile(Util.newArrayListOfValues(ParserTag.SEX_ALLOW_MUFFLED_SPEECH), "characters/submission/lyssieth", "DEMON_TF_STAGE_2_CHOICE_GET_FUCKED_ANALLY");
 		}
 
 		@Override
@@ -689,8 +710,7 @@ public class SALyssiethSpecials {
 				Main.game.getPlayer().setBodySize(BodySize.TWO_AVERAGE.getMedianValue());
 				Main.game.getPlayer().setHeight(168);
 				Main.game.getPlayer().setAssType(AssType.DEMON_COMMON);
-				Main.game.getPlayer().setBreastType(BreastType.DEMON_COMMON);
-				Main.game.getPlayer().setBreastSize(CupSize.F);
+				playerGrowDemonicBreasts(CupSize.F);
 				
 			} else {
 				Main.game.getPlayer().setFemininity(50);
@@ -701,8 +721,7 @@ public class SALyssiethSpecials {
 				Main.game.getPlayer().setBodySize(BodySize.TWO_AVERAGE.getMedianValue());
 				Main.game.getPlayer().setHeight(168);
 				Main.game.getPlayer().setAssType(AssType.DEMON_COMMON);
-				Main.game.getPlayer().setBreastType(BreastType.DEMON_COMMON);
-				Main.game.getPlayer().setBreastSize(CupSize.AA);
+				playerGrowDemonicBreasts(CupSize.AA);
 			}
 			
 			Sex.setSexManager(
@@ -757,7 +776,7 @@ public class SALyssiethSpecials {
 
 		@Override
 		public String getDescription() {
-			return UtilText.parseFromXMLFile("characters/submission/lyssieth", "DEMON_TF_STAGE_2_MATING_PRESS");
+			return UtilText.parseFromXMLFile(Util.newArrayListOfValues(ParserTag.SEX_ALLOW_MUFFLED_SPEECH), "characters/submission/lyssieth", "DEMON_TF_STAGE_2_MATING_PRESS");
 		}
 
 		@Override
@@ -785,7 +804,7 @@ public class SALyssiethSpecials {
 							Util.newHashMapOfValues(new Value<>(Main.game.getPlayer(), SexSlotBipeds.MATING_PRESS_TOP)),
 							Util.newHashMapOfValues(new Value<>(Main.game.getNpc(Lyssieth.class), SexSlotBipeds.MATING_PRESS_BOTTOM))));
 			
-			Sex.applyOngoingAction(Main.game.getPlayer(), SexAreaPenetration.PENIS, Main.game.getNpc(Lyssieth.class), SexAreaOrifice.VAGINA);
+			Sex.applyOngoingAction(Main.game.getPlayer(), SexAreaPenetration.PENIS, Main.game.getNpc(Lyssieth.class), SexAreaOrifice.VAGINA, true);
 		}
 	};
 }

@@ -7,11 +7,12 @@ import java.util.List;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 import com.lilithsthrone.game.Game;
 import com.lilithsthrone.game.character.CharacterImportSetting;
+import com.lilithsthrone.game.character.EquipClothingSetting;
 import com.lilithsthrone.game.character.GameCharacter;
-import com.lilithsthrone.game.character.attributes.Attribute;
 import com.lilithsthrone.game.character.body.CoverableArea;
 import com.lilithsthrone.game.character.body.Covering;
 import com.lilithsthrone.game.character.body.types.BodyCoveringType;
@@ -35,6 +36,9 @@ import com.lilithsthrone.game.character.body.valueEnums.OrificePlasticity;
 import com.lilithsthrone.game.character.body.valueEnums.TesticleSize;
 import com.lilithsthrone.game.character.body.valueEnums.TongueLength;
 import com.lilithsthrone.game.character.body.valueEnums.Wetness;
+import com.lilithsthrone.game.character.effects.Perk;
+import com.lilithsthrone.game.character.effects.PerkCategory;
+import com.lilithsthrone.game.character.effects.PerkManager;
 import com.lilithsthrone.game.character.fetishes.Fetish;
 import com.lilithsthrone.game.character.gender.Gender;
 import com.lilithsthrone.game.character.npc.NPC;
@@ -55,6 +59,7 @@ import com.lilithsthrone.game.inventory.AbstractCoreItem;
 import com.lilithsthrone.game.inventory.AbstractCoreType;
 import com.lilithsthrone.game.inventory.CharacterInventory;
 import com.lilithsthrone.game.inventory.ItemTag;
+import com.lilithsthrone.game.inventory.clothing.AbstractClothing;
 import com.lilithsthrone.game.inventory.clothing.AbstractClothingType;
 import com.lilithsthrone.game.inventory.clothing.ClothingType;
 import com.lilithsthrone.game.inventory.enchanting.EnchantingUtils;
@@ -83,10 +88,14 @@ import com.lilithsthrone.world.places.PlaceType;
 
 /**
  * @since 0.1.0
- * @version 0.2.11
+ * @version 0.3.2
  * @author Innoxia
  */
 public class Vicky extends NPC {
+
+	private List<AbstractWeapon> weaponsForSale;
+	private List<AbstractItem> itemsForSale;
+	private List<AbstractClothing> clothingForSale;
 	
 	private AbstractItemType[] availableIngredients = new AbstractItemType[] {
 			ItemType.RACE_INGREDIENT_CAT_MORPH,
@@ -167,12 +176,49 @@ public class Vicky extends NPC {
 				37, Month.MAY, 26,
 				10, Gender.F_P_V_B_FUTANARI,
 				Subspecies.WOLF_MORPH, RaceStage.GREATER, new CharacterInventory(10), WorldType.SHOPPING_ARCADE, PlaceType.SHOPPING_ARCADE_VICKYS_SHOP, true);
-		
+
+		weaponsForSale = new ArrayList<>();
+		itemsForSale = new ArrayList<>();
+		clothingForSale = new ArrayList<>();
 		if(!isImported) {
 			dailyReset();
 		}
 	}
 
+
+	@Override
+	public Element saveAsXML(Element parentElement, Document doc) {
+		Element properties = super.saveAsXML(parentElement, doc);
+		
+		Element weaponsElement = doc.createElement("weaponsForSale");
+		properties.appendChild(weaponsElement);
+		for(AbstractWeapon weapon : weaponsForSale) {
+			try {
+				weapon.saveAsXML(weaponsElement, doc);
+			} catch(Exception ex) {
+			}
+		}
+
+		Element itemsElement = doc.createElement("itemsForSale");
+		properties.appendChild(itemsElement);
+		for(AbstractItem item : itemsForSale) {
+			try {
+				item.saveAsXML(itemsElement, doc);
+			} catch(Exception ex) {
+			}
+		}
+
+		Element clothingElement = doc.createElement("clothingForSale");
+		properties.appendChild(clothingElement);
+		for(AbstractClothing clothing : clothingForSale) {
+			try {
+				clothing.saveAsXML(clothingElement, doc);
+			} catch(Exception ex) {
+			}
+		}
+		
+		return properties;
+	}
 	
 	@Override
 	public void loadFromXML(Element parentElement, Document doc, CharacterImportSetting... settings) {
@@ -184,6 +230,65 @@ public class Vicky extends NPC {
 		if(Main.isVersionOlderThan(Game.loadingVersion, "0.2.12")) {
 			setStartingBody(false);
 		}
+
+		if(Main.isVersionOlderThan(Game.loadingVersion, "0.3.1.3")) {
+			this.dailyReset();
+			
+		} else {
+			Element weaponsElement = (Element) parentElement.getElementsByTagName("weaponsForSale").item(0);
+			if(weaponsElement!=null) {
+				weaponsForSale.clear();
+				
+				NodeList nodeList = weaponsElement.getElementsByTagName("weapon");
+				for(int i=0; i < nodeList.getLength(); i++){
+					Element e = (Element) nodeList.item(i);
+					try {
+						weaponsForSale.add(AbstractWeapon.loadFromXML(e, doc));
+					} catch(Exception ex) {
+					}
+				}
+			}
+			Element itemsElement = (Element) parentElement.getElementsByTagName("itemsForSale").item(0);
+			if(itemsElement!=null) {
+				itemsForSale.clear();
+				
+				NodeList nodeList = itemsElement.getElementsByTagName("item");
+				for(int i=0; i < nodeList.getLength(); i++){
+					Element e = (Element) nodeList.item(i);
+					try {
+						itemsForSale.add(AbstractItem.loadFromXML(e, doc));
+					} catch(Exception ex) {
+					}
+				}
+			}
+			Element clothingElement = (Element) parentElement.getElementsByTagName("clothingForSale").item(0);
+			if(clothingElement!=null) {
+				clothingForSale.clear();
+				
+				NodeList nodeList = clothingElement.getElementsByTagName("clothing");
+				for(int i=0; i < nodeList.getLength(); i++){
+					Element e = (Element) nodeList.item(i);
+					try {
+						clothingForSale.add(AbstractClothing.loadFromXML(e, doc));
+					} catch(Exception ex) {
+					}
+				}
+			}
+		}
+		if(Main.isVersionOlderThan(Game.loadingVersion, "0.3.3.6")) {
+			this.resetPerksMap(true);
+		}
+	}
+
+	@Override
+	public void setupPerks(boolean autoSelectPerks) {
+		this.addSpecialPerk(Perk.SPECIAL_MARTIAL_BACKGROUND);
+		PerkManager.initialisePerks(this,
+				Util.newArrayListOfValues(),
+				Util.newHashMapOfValues(
+						new Value<>(PerkCategory.PHYSICAL, 5),
+						new Value<>(PerkCategory.LUST, 1),
+						new Value<>(PerkCategory.ARCANE, 0)));
 	}
 	
 	@Override
@@ -192,9 +297,6 @@ public class Vicky extends NPC {
 		// Persona:
 
 		if(setPersona) {
-			this.setAttribute(Attribute.MAJOR_PHYSIQUE, 25);
-			this.setAttribute(Attribute.MAJOR_ARCANE, 0);
-			this.setAttribute(Attribute.MAJOR_CORRUPTION, 60);
 	
 			this.setPersonality(Util.newHashMapOfValues(
 					new Value<>(PersonalityTrait.AGREEABLENESS, PersonalityWeight.LOW),
@@ -287,17 +389,17 @@ public class Vicky extends NPC {
 	}
 	
 	@Override
-	public void equipClothing(boolean replaceUnsuitableClothing, boolean addWeapons, boolean addScarsAndTattoos, boolean addAccessories) {
+	public void equipClothing(List<EquipClothingSetting> settings) {
 		
-		this.unequipAllClothingIntoVoid(true);
+		this.unequipAllClothingIntoVoid(true, true);
 
 		this.setMoney(10);
 		
 		this.equipClothingFromNowhere(AbstractClothingType.generateClothing(ClothingType.GROIN_THONG, Colour.CLOTHING_BLACK, false), true, this);
 		this.equipClothingFromNowhere(AbstractClothingType.generateClothing(ClothingType.TORSO_CORSET_DRESS, Colour.CLOTHING_BLACK, false), true, this);
 		this.equipClothingFromNowhere(AbstractClothingType.generateClothing(ClothingType.HIPS_SUSPENDER_BELT, Colour.CLOTHING_BLACK, false), true, this);
-		this.equipClothingFromNowhere(AbstractClothingType.generateClothing(ClothingType.SOCK_STOCKINGS, Colour.CLOTHING_BLACK, false), true, this);
-		this.equipClothingFromNowhere(AbstractClothingType.generateClothing(ClothingType.FOOT_THIGH_HIGH_BOOTS, Colour.CLOTHING_BLACK, false), true, this);
+		this.equipClothingFromNowhere(AbstractClothingType.generateClothing("innoxia_sock_stockings", Colour.CLOTHING_BLACK, false), true, this);
+		this.equipClothingFromNowhere(AbstractClothingType.generateClothing("innoxia_foot_thigh_high_boots", Colour.CLOTHING_BLACK, false), true, this);
 
 	}
 
@@ -314,12 +416,15 @@ public class Vicky extends NPC {
 	@Override
 	public void dailyReset() {
 		clearNonEquippedInventory();
-
+		itemsForSale.clear();
+		weaponsForSale.clear();
+		clothingForSale.clear();
+		
 		int requiredRoomForMiscItems = ItemType.getEssences().size()+SpellSchool.values().length+availableSpellBooks.size()+10;
 		
 		List<AbstractCoreType> types = new ArrayList<>();
 		
-		for(AbstractWeaponType wt : WeaponType.getAllweapons()) {
+		for(AbstractWeaponType wt : WeaponType.getAllWeapons()) {
 			if(wt.getItemTags().contains(ItemTag.SOLD_BY_VICKY)) {
 				types.add(wt);
 			}
@@ -343,14 +448,14 @@ public class Vicky extends NPC {
 		for(AbstractCoreType type : types) {
 			if(type instanceof AbstractWeaponType) {
 				for(int i=0; i<1+Util.random.nextInt(3); i++){
-					this.addWeapon(AbstractWeaponType.generateWeapon((AbstractWeaponType) type), false);
+					weaponsForSale.add(AbstractWeaponType.generateWeapon((AbstractWeaponType) type));
 				}
 				
 			} else if(type instanceof AbstractItemType) {
-				this.addItem(AbstractItemType.generateItem((AbstractItemType) type), false);
+				itemsForSale.add(AbstractItemType.generateItem((AbstractItemType) type));
 				
 			} else if(type instanceof AbstractClothingType) {
-				this.addClothing(AbstractClothingType.generateClothing((AbstractClothingType) type, false), false);
+				clothingForSale.add(AbstractClothingType.generateClothing((AbstractClothingType) type));
 			}
 			count++;
 			if(count>=this.getMaximumInventorySpace()-requiredRoomForMiscItems) {
@@ -364,7 +469,7 @@ public class Vicky extends NPC {
 			try {
 				if(ingredient.getEnchantmentEffect().getEffectsDescription(primaryMod, TFModifier.NONE, TFPotency.MINOR_BOOST, 0, Main.game.getPlayer(), Main.game.getPlayer())!=null) {
 					AbstractItem potion = EnchantingUtils.craftItem(ingredient, Util.newArrayListOfValues(new ItemEffect(ingredient.getEnchantmentEffect(), primaryMod, TFModifier.NONE, TFPotency.MINOR_BOOST, 0)));
-					this.addItem(potion, false);
+					itemsForSale.add(potion);
 					potion.setName(EnchantingUtils.getPotionName(ingredient, potion.getEffects()));
 				}
 				
@@ -375,18 +480,31 @@ public class Vicky extends NPC {
 		}
 		
 		for(AbstractItemType itemType : availableSpellBooks) {
-			this.addItem(AbstractItemType.generateItem(itemType), false);
+			itemsForSale.add(AbstractItemType.generateItem(itemType));
 		}
 		
 		for(SpellSchool school : SpellSchool.values()) {
-			this.addItem(AbstractItemType.generateItem(ItemType.getSpellScrollType(school)), 10+Util.random.nextInt(20));
+			AbstractItem item = AbstractItemType.generateItem(ItemType.getSpellScrollType(school));
+			for(int i=0; i<10+Util.random.nextInt(20);i++) {
+				itemsForSale.add(item);
+			}
 		}
 		
 		if(Main.game.getPlayer().hasQuest(QuestLine.SIDE_ENCHANTMENT_DISCOVERY)) {
 			for(AbstractItemType itemType : ItemType.getEssences()) {
-				this.addItem(AbstractItemType.generateItem(itemType), 20+Util.random.nextInt(11));
+				AbstractItem item = AbstractItemType.generateItem(itemType);
+				for(int i=0; i<10+Util.random.nextInt(11);i++) {
+					itemsForSale.add(item);
+				}
 			}
 		}
+	}
+	
+	@Override
+	public void handleSellingEffects(AbstractCoreItem item, int count, int itemPrice){
+		weaponsForSale.remove(item);
+		clothingForSale.remove(item);
+		itemsForSale.remove(item);
 	}
 	
 	@Override
@@ -431,6 +549,18 @@ public class Vicky extends NPC {
 		}
 		
 		return false;
+	}
+
+	public List<AbstractWeapon> getWeaponsForSale() {
+		return weaponsForSale;
+	}
+
+	public List<AbstractItem> getItemsForSale() {
+		return itemsForSale;
+	}
+
+	public List<AbstractClothing> getClothingForSale() {
+		return clothingForSale;
 	}
 
 	@Override

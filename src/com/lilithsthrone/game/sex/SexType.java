@@ -9,6 +9,7 @@ import org.w3c.dom.Element;
 import com.lilithsthrone.game.character.CharacterUtils;
 import com.lilithsthrone.game.character.GameCharacter;
 import com.lilithsthrone.game.character.fetishes.Fetish;
+import com.lilithsthrone.game.dialogue.utils.UtilText;
 import com.lilithsthrone.utils.XMLSaving;
 
 /**
@@ -50,7 +51,7 @@ public class SexType implements XMLSaving {
 	
 	@Override
 	public String toString() {
-		return "Participant: "+asParticipant.toString()+"  Performing/Target: "+performingSexArea.toString()+"/"+targetedSexArea.toString();
+		return "Participant: "+asParticipant.toString()+"  Performing/Target: "+(performingSexArea==null?"null":performingSexArea.toString())+"/"+(targetedSexArea==null?"null":targetedSexArea.toString());
 	}
 	
 	@Override
@@ -76,6 +77,43 @@ public class SexType implements XMLSaving {
 		return "";
 	}
 
+	/**
+	 * @return A crude description of the sex that took place while using this SexType.
+	 */
+	public String getPerformanceDescription(boolean isDom, GameCharacter performer, GameCharacter target) {
+		if(isDom) {
+			if(this.getPerformingSexArea().isPenetration()) {
+				if(this.getTargetedSexArea().isPenetration()) {
+					return UtilText.parse(performer, target, "[npc.Name] rubbed [npc.her] "+this.getPerformingSexArea().getName(performer)+" against [npc2.namePos] "+this.getTargetedSexArea().getName(target)+".");
+				} else {
+					return UtilText.parse(performer, target, "[npc.Name] used [npc.her] "+this.getPerformingSexArea().getName(performer)+" to fuck [npc2.namePos] "+this.getTargetedSexArea().getName(target)+".");
+				}
+				
+			} else {
+				if(this.getTargetedSexArea().isPenetration()) {
+					return UtilText.parse(performer, target, "[npc.Name] had [npc.her] "+this.getPerformingSexArea().getName(performer)+" fucked by [npc2.namePos] "+this.getTargetedSexArea().getName(target)+".");
+				} else {
+					return UtilText.parse(performer, target, "[npc.Name] rubbed [npc.her] "+this.getPerformingSexArea().getName(performer)+" against [npc2.namePos] "+this.getTargetedSexArea().getName(target)+".");
+				}
+			}
+		} else {
+			if(this.getPerformingSexArea().isPenetration()) {
+				if(this.getTargetedSexArea().isPenetration()) {
+					return UtilText.parse(target, performer, "[npc.Name] rubbed [npc.her] "+this.getPerformingSexArea().getName(target)+" against [npc2.namePos] "+this.getTargetedSexArea().getName(performer)+".");
+				} else {
+					return UtilText.parse(target, performer, "[npc.Name] used [npc.her] "+this.getPerformingSexArea().getName(target)+" to fuck [npc2.namePos] "+this.getTargetedSexArea().getName(performer)+".");
+				}
+				
+			} else {
+				if(this.getTargetedSexArea().isPenetration()) {
+					return UtilText.parse(target, performer, "[npc.Name] had [npc.her] "+this.getPerformingSexArea().getName(target)+" fucked by [npc2.namePos] "+this.getTargetedSexArea().getName(performer)+".");
+				} else {
+					return UtilText.parse(target, performer, "[npc.Name] rubbed [npc.her] "+this.getPerformingSexArea().getName(target)+" against [npc2.namePos] "+this.getTargetedSexArea().getName(performer)+".");
+				}
+			}
+		}
+	}
+	
 	public SexParticipantType getAsParticipant() {
 		return asParticipant;
 	}
@@ -86,6 +124,31 @@ public class SexType implements XMLSaving {
 
 	public SexAreaInterface getTargetedSexArea() {
 		return targetedSexArea;
+	}
+	
+	/**
+	 * @return true if this SexType has the potential to take virginity of an itnernal orifice.
+	 */
+	public boolean isTakesVirginity() {
+		if(performingSexArea.isPenetration() && ((SexAreaPenetration)performingSexArea).isTakesVirginity()) {
+			return targetedSexArea.isOrifice() && ((SexAreaOrifice)targetedSexArea).isInternalOrifice();
+		}
+		if(targetedSexArea.isPenetration() && ((SexAreaPenetration)targetedSexArea).isTakesVirginity()) {
+			return performingSexArea.isOrifice() && ((SexAreaOrifice)performingSexArea).isInternalOrifice();
+		}
+		return false;
+	}
+
+	public boolean isPenetrating() {
+		return getPerformingSexArea().isPenetration() && getTargetedSexArea().isOrifice();
+	}
+	
+	public boolean isBeingPenetrated() {
+		return getPerformingSexArea().isOrifice() && getTargetedSexArea().isPenetration();
+	}
+	
+	public SexType getReversedSexType() {
+		return new SexType(getAsParticipant(), getTargetedSexArea(), getPerformingSexArea());
 	}
 	
 	public List<Fetish> getRelatedFetishes(GameCharacter characterPerforming, GameCharacter characterTargeted, boolean isPenetration, boolean isOrgasm) {
@@ -190,7 +253,7 @@ public class SexType implements XMLSaving {
 			switch((SexAreaOrifice)getTargetedSexArea()) {
 				case ANUS:
 					fetishes.add(Fetish.FETISH_ANAL_GIVING);
-					if(isPenetration && getPerformingSexArea().isPenetration() && ((SexAreaPenetration)getPerformingSexArea()).isTakesVirginity() &&  characterTargeted.isAssVirgin()) {
+					if(getPerformingSexArea()!=null && isPenetration && getPerformingSexArea().isPenetration() && ((SexAreaPenetration)getPerformingSexArea()).isTakesVirginity() &&  characterTargeted.isAssVirgin()) {
 						fetishes.add(Fetish.FETISH_DEFLOWERING);
 					}
 					break;
@@ -205,7 +268,7 @@ public class SexType implements XMLSaving {
 					break;
 				case MOUTH:
 					fetishes.add(Fetish.FETISH_ORAL_RECEIVING);
-					if(isPenetration && getPerformingSexArea().isPenetration() && ((SexAreaPenetration)getPerformingSexArea()).isTakesVirginity() &&  characterTargeted.isFaceVirgin()) {
+					if(getPerformingSexArea()!=null && isPenetration && getPerformingSexArea().isPenetration() && ((SexAreaPenetration)getPerformingSexArea()).isTakesVirginity() &&  characterTargeted.isFaceVirgin()) {
 						fetishes.add(Fetish.FETISH_DEFLOWERING);
 					}
 					break;
@@ -214,7 +277,7 @@ public class SexType implements XMLSaving {
 						fetishes.add(Fetish.FETISH_LACTATION_OTHERS);
 					}
 					fetishes.add(Fetish.FETISH_BREASTS_OTHERS);
-					if(isPenetration && getPerformingSexArea().isPenetration() && ((SexAreaPenetration)getPerformingSexArea()).isTakesVirginity() &&  characterTargeted.isNippleVirgin()) {
+					if(getPerformingSexArea()!=null && isPenetration && getPerformingSexArea().isPenetration() && ((SexAreaPenetration)getPerformingSexArea()).isTakesVirginity() &&  characterTargeted.isNippleVirgin()) {
 						fetishes.add(Fetish.FETISH_DEFLOWERING);
 					}
 					break;
@@ -223,7 +286,7 @@ public class SexType implements XMLSaving {
 						fetishes.add(Fetish.FETISH_LACTATION_OTHERS);
 					}
 					fetishes.add(Fetish.FETISH_BREASTS_OTHERS);
-					if(isPenetration && getPerformingSexArea().isPenetration() && ((SexAreaPenetration)getPerformingSexArea()).isTakesVirginity() &&  characterTargeted.isNippleCrotchVirgin()) {
+					if(getPerformingSexArea()!=null && isPenetration && getPerformingSexArea().isPenetration() && ((SexAreaPenetration)getPerformingSexArea()).isTakesVirginity() &&  characterTargeted.isNippleCrotchVirgin()) {
 						fetishes.add(Fetish.FETISH_DEFLOWERING);
 					}
 					break;
@@ -232,25 +295,26 @@ public class SexType implements XMLSaving {
 					break;
 				case URETHRA_PENIS:
 					fetishes.add(Fetish.FETISH_PENIS_RECEIVING);
-					if(isPenetration && getPerformingSexArea().isPenetration() && ((SexAreaPenetration)getPerformingSexArea()).isTakesVirginity() &&  characterTargeted.isUrethraVirgin()) {
+					if(getPerformingSexArea()!=null && isPenetration && getPerformingSexArea().isPenetration() && ((SexAreaPenetration)getPerformingSexArea()).isTakesVirginity() &&  characterTargeted.isUrethraVirgin()) {
 						fetishes.add(Fetish.FETISH_DEFLOWERING);
 					}
 					break;
 				case URETHRA_VAGINA:
 					fetishes.add(Fetish.FETISH_VAGINAL_GIVING);
-					if(isPenetration && getPerformingSexArea().isPenetration() && ((SexAreaPenetration)getPerformingSexArea()).isTakesVirginity() &&  characterTargeted.isVaginaUrethraVirgin()) {
+					if(getPerformingSexArea()!=null && isPenetration && getPerformingSexArea().isPenetration() && ((SexAreaPenetration)getPerformingSexArea()).isTakesVirginity() &&  characterTargeted.isVaginaUrethraVirgin()) {
 						fetishes.add(Fetish.FETISH_DEFLOWERING);
 					}
 					break;
 				case VAGINA:
 					if(characterPerforming.hasPenisIgnoreDildo() 
 							&& characterPerforming.getPenisRawStoredCumValue()>0
+							&& getPerformingSexArea()!=null
 							&& getPerformingSexArea()==SexAreaPenetration.PENIS
 							&& isOrgasm) {
 						fetishes.add(Fetish.FETISH_IMPREGNATION);
 					}
 					fetishes.add(Fetish.FETISH_VAGINAL_GIVING);
-					if(isPenetration && getPerformingSexArea().isPenetration() && ((SexAreaPenetration)getPerformingSexArea()).isTakesVirginity() &&  characterTargeted.isVaginaVirgin()) {
+					if(getPerformingSexArea()!=null && isPenetration && getPerformingSexArea().isPenetration() && ((SexAreaPenetration)getPerformingSexArea()).isTakesVirginity() &&  characterTargeted.isVaginaVirgin()) {
 						fetishes.add(Fetish.FETISH_DEFLOWERING);
 					}
 					break;

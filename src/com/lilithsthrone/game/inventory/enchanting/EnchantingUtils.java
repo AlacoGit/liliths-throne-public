@@ -175,6 +175,13 @@ public class EnchantingUtils {
 				|| freeSecondaryModifiers.contains(effect.getSecondaryModifier());
 	}
 	
+	private static boolean isEffectFreeForRemovingPositiveAttribute(ItemEffect effect) {
+		if(effect.getPrimaryModifier()==TFModifier.CLOTHING_ATTRIBUTE || effect.getPrimaryModifier()==TFModifier.CLOTHING_MAJOR_ATTRIBUTE) {
+			return !effect.getPotency().isNegative();
+		}
+		return false;
+	}
+	
 	private static int applyDiscountsForPerksAndFetishes(AbstractCoreItem ingredient, int cost) {
 		if(Main.game.getPlayer().hasFetish(Fetish.FETISH_TRANSFORMATION_GIVING) && ingredient instanceof AbstractItem) {
 			cost/=2;
@@ -182,13 +189,20 @@ public class EnchantingUtils {
 		if(Main.game.getPlayer().hasPerkAnywhereInTree(Perk.CLOTHING_ENCHANTER) && ingredient instanceof AbstractClothing) {
 			cost/=2;
 		}
+		if(Main.game.getPlayer().hasPerkAnywhereInTree(Perk.WEAPON_ENCHANTER) && ingredient instanceof AbstractWeapon) {
+			cost/=2;
+		}
 		return cost;
 	}
 	
-	public static int getModifierEffectCost(AbstractCoreItem ingredient, ItemEffect effect) {
+	public static int getModifierEffectCost(boolean addingEffect, AbstractCoreItem ingredient, ItemEffect effect) {
 		if(!(ingredient instanceof Tattoo)
 				&& Main.game.getPlayer().isSpellSchoolSpecialAbilityUnlocked(SpellSchool.WATER)
 				&& isEffectFreeForWaterSchool(effect)) {
+			return 0;
+		}
+		
+		if(!addingEffect && isEffectFreeForRemovingPositiveAttribute(effect)) {
 			return 0;
 		}
 		
@@ -202,9 +216,13 @@ public class EnchantingUtils {
 		}
 		for(ItemEffect ie : ingredient.getEffects()) {
 			if(effects.contains(ie)) {
-				effectCount.merge(ie, -1, Integer::sum);
+				if(effectCount.get(ie)>0 || !isEffectFreeForRemovingPositiveAttribute(ie)) {
+					effectCount.merge(ie, -1, Integer::sum);
+				}
 			} else {
-				effectCount.merge(ie, 1, Integer::sum);
+				if(!isEffectFreeForRemovingPositiveAttribute(ie)) {
+					effectCount.merge(ie, 1, Integer::sum);
+				}
 			}
 		}
 		

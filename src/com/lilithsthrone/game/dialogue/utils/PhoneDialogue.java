@@ -3,6 +3,8 @@ package com.lilithsthrone.game.dialogue.utils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.lilithsthrone.game.PropertyValue;
 import com.lilithsthrone.game.character.CharacterUtils;
@@ -16,7 +18,6 @@ import com.lilithsthrone.game.character.body.types.PenisType;
 import com.lilithsthrone.game.character.body.types.VaginaType;
 import com.lilithsthrone.game.character.body.valueEnums.BreastShape;
 import com.lilithsthrone.game.character.body.valueEnums.Femininity;
-import com.lilithsthrone.game.character.effects.Perk;
 import com.lilithsthrone.game.character.effects.PerkManager;
 import com.lilithsthrone.game.character.effects.StatusEffect;
 import com.lilithsthrone.game.character.fetishes.Fetish;
@@ -38,6 +39,7 @@ import com.lilithsthrone.game.dialogue.DialogueNode;
 import com.lilithsthrone.game.dialogue.DialogueNodeType;
 import com.lilithsthrone.game.dialogue.responses.Response;
 import com.lilithsthrone.game.dialogue.responses.ResponseEffectsOnly;
+import com.lilithsthrone.game.inventory.InventorySlot;
 import com.lilithsthrone.game.inventory.clothing.AbstractClothingType;
 import com.lilithsthrone.game.inventory.clothing.ClothingType;
 import com.lilithsthrone.game.inventory.enchanting.ItemEffect;
@@ -52,7 +54,14 @@ import com.lilithsthrone.game.sex.SexType;
 import com.lilithsthrone.main.Main;
 import com.lilithsthrone.rendering.RenderingEngine;
 import com.lilithsthrone.rendering.SVGImages;
-import com.lilithsthrone.utils.*;
+import com.lilithsthrone.utils.Colour;
+import com.lilithsthrone.utils.Pathing;
+import com.lilithsthrone.utils.TreeNode;
+import com.lilithsthrone.utils.Units;
+import com.lilithsthrone.utils.Util;
+import com.lilithsthrone.utils.comparators.ClothingTypeRarityComparator;
+import com.lilithsthrone.utils.comparators.ItemTypeRarityComparator;
+import com.lilithsthrone.utils.comparators.WeaponTypeRarityComparator;
 import com.lilithsthrone.world.WorldType;
 
 /**
@@ -107,8 +116,8 @@ public class PhoneDialogue {
 			} else if (index == 2) {
 				return new Response(
 						Main.getProperties().hasValue(PropertyValue.levelUpHightlight)
-							? "<span style='color:" + Colour.GENERIC_EXCELLENT.toWebHexString() + ";'>Perks</span>"
-							:"Perks",
+							? "<span style='color:" + Colour.GENERIC_EXCELLENT.toWebHexString() + ";'>Perk Tree</span>"
+							:"Perk Tree",
 						"View your character page.", CHARACTER_LEVEL_UP) {
 					@Override
 					public void effects() {
@@ -136,7 +145,7 @@ public class PhoneDialogue {
 						@Override
 						public void effects() {
 							Main.game.getPlayer().sortCharactersEncountered();
-							charactersEncountered = Main.game.getPlayer().getCharactersEncounteredAsGameCharacters();
+							charactersEncountered = Main.game.getPlayer().getCharactersEncounteredAsGameCharacters(false);
 						}
 					};
 				}
@@ -177,6 +186,18 @@ public class PhoneDialogue {
 						worldTypeMap = Main.game.getPlayer().getWorldLocation();
 					}
 				};
+				
+			} else if (index == 11) {
+				if(Main.game.isSavedDialogueNeutral()) {
+					return new Response("Combat Moves", "Adjust the moves you perform in combat.", CombatMovesSetup.COMBAT_MOVES_CORE) {
+						@Override
+						public void effects() {
+							CombatMovesSetup.setTarget(Main.game.getPlayer(), PhoneDialogue.MENU);
+						}
+					};
+				} else {
+					return new Response("Combat Moves", "You are too busy to change your combat moves.", null);
+				}
 				
 			} else if (index == 0){
 				return new ResponseEffectsOnly("Back", "Put your phone away."){
@@ -478,7 +499,7 @@ public class PhoneDialogue {
 		@Override
 		public String getContent() {
 //			return Main.game.getPlayer().getBodyDescription();
-			return Main.game.getPlayer().getCharacterInformationScreen();
+			return Main.game.getPlayer().getCharacterInformationScreen(true);
 		}
 
 		@Override
@@ -523,6 +544,15 @@ public class PhoneDialogue {
 					+ getAttributeBox(Main.game.getPlayer(), Attribute.MAJOR_PHYSIQUE, "")
 					+ getAttributeBox(Main.game.getPlayer(), Attribute.MAJOR_ARCANE, "")
 					+ getAttributeBox(Main.game.getPlayer(), Attribute.MAJOR_CORRUPTION, "")
+
+					+ (Main.game.isEnchantmentCapacityEnabled()
+						?"<div class='container-full-width' style='text-align:center; background:"+Colour.BACKGROUND_ALT.toWebHexString()+";'>"
+								+ "<b style='color:"+Colour.GENERIC_ENCHANTMENT.toWebHexString()+";'>"+Util.capitaliseSentence(Attribute.ENCHANTMENT_LIMIT.getName())+":</b>"
+								+ " <i>"
+									+(int)Main.game.getPlayer().getAttributeValue(Attribute.ENCHANTMENT_LIMIT)
+								+"</i>"
+							+ "</div>"
+						:"")
 					
 				+"</div>"
 				+"<div class='container-full-width'>"
@@ -546,21 +576,13 @@ public class PhoneDialogue {
 				+"<div class='container-full-width'>"
 				
 					+ "<h4 style='color:"+Colour.GENERIC_COMBAT.toWebHexString()+"; text-align:center;'>Combat Attributes</h4>"
-					+ getAttributeBox(Main.game.getPlayer(), Attribute.CRITICAL_CHANCE,
-							"Critical Hit Chance:<br/>"
-							+ "<b>"+Units.number(Util.getModifiedDropoffValue(Main.game.getPlayer().getAttributeValue(Attribute.CRITICAL_CHANCE), Attribute.CRITICAL_CHANCE.getUpperLimit()))+"%</b>",
-							true)
 					+ getAttributeBox(Main.game.getPlayer(), Attribute.CRITICAL_DAMAGE,
 							"Critical Hit Damage:<br/>"
 							+ "<b>"+Units.number(Util.getModifiedDropoffValue(Main.game.getPlayer().getAttributeValue(Attribute.CRITICAL_DAMAGE), Attribute.CRITICAL_DAMAGE.getUpperLimit()))+"%</b>",
 							true)
-					+ getAttributeBox(Main.game.getPlayer(), Attribute.DODGE_CHANCE,
-							"Dodge Chance:<br/>"
-							+ "<b>"+Units.number(Util.getModifiedDropoffValue(Main.game.getPlayer().getAttributeValue(Attribute.DODGE_CHANCE), Attribute.DODGE_CHANCE.getUpperLimit()))+"%</b>",
-							true)
-					+ getAttributeBox(Main.game.getPlayer(), Attribute.MISS_CHANCE,
-							"Miss Chance:<br/>"
-							+ "<b>"+Units.number(Util.getModifiedDropoffValue(Main.game.getPlayer().getAttributeValue(Attribute.MISS_CHANCE), Attribute.MISS_CHANCE.getUpperLimit()))+"%</b>",
+					+ getAttributeBox(Main.game.getPlayer(), Attribute.ENERGY_SHIELDING,
+							"Bonus Shielding (per turn in combat):<br/>"
+							+ "<b>"+Units.number(Util.getModifiedDropoffValue(Main.game.getPlayer().getAttributeValue(Attribute.ENERGY_SHIELDING), Attribute.ENERGY_SHIELDING.getUpperLimit()))+"</b>",
 							true)
 					
 
@@ -589,8 +611,8 @@ public class PhoneDialogue {
 							+ "<b>"+Units.number((100+Util.getModifiedDropoffValue(Main.game.getPlayer().getAttributeValue(Attribute.DAMAGE_PHYSICAL), Attribute.DAMAGE_PHYSICAL.getUpperLimit())))+"%</b>",
 							true)
 					+ getAttributeBox(Main.game.getPlayer(), Attribute.RESISTANCE_PHYSICAL,
-							"Physical Resistance:<br/>"
-							+ "<b>"+Units.number(Util.getModifiedDropoffValue(Main.game.getPlayer().getAttributeValue(Attribute.RESISTANCE_PHYSICAL), Attribute.RESISTANCE_PHYSICAL.getUpperLimit()))+"%</b>",
+							"Physical Block/Turn:<br/>"
+									+ "<b>"+Units.number(Main.game.getPlayer().getAttributeValue(Attribute.RESISTANCE_PHYSICAL))+"</b>",
 							true)
 					
 					+ getAttributeBox(Main.game.getPlayer(), Attribute.DAMAGE_FIRE,
@@ -598,8 +620,8 @@ public class PhoneDialogue {
 							+ "<b>"+Units.number((100+Util.getModifiedDropoffValue(Main.game.getPlayer().getAttributeValue(Attribute.DAMAGE_FIRE), Attribute.DAMAGE_FIRE.getUpperLimit())))+"%</b>",
 							true)
 					+ getAttributeBox(Main.game.getPlayer(), Attribute.RESISTANCE_FIRE,
-							"Fire Resistance:<br/>"
-							+ "<b>"+Units.number(Util.getModifiedDropoffValue(Main.game.getPlayer().getAttributeValue(Attribute.RESISTANCE_FIRE), Attribute.RESISTANCE_FIRE.getUpperLimit()))+"%</b>",
+							"Fire Block/Turn:<br/>"
+									+ "<b>"+Units.number(Main.game.getPlayer().getAttributeValue(Attribute.RESISTANCE_FIRE))+"</b>",
 							true)
 					
 					+ getAttributeBox(Main.game.getPlayer(), Attribute.DAMAGE_ICE,
@@ -607,8 +629,8 @@ public class PhoneDialogue {
 							+ "<b>"+Units.number((100+Util.getModifiedDropoffValue(Main.game.getPlayer().getAttributeValue(Attribute.DAMAGE_ICE), Attribute.DAMAGE_ICE.getUpperLimit())))+"%</b>",
 							true)
 					+ getAttributeBox(Main.game.getPlayer(), Attribute.RESISTANCE_ICE,
-							"Ice Resistance:<br/>"
-							+ "<b>"+Units.number(Util.getModifiedDropoffValue(Main.game.getPlayer().getAttributeValue(Attribute.RESISTANCE_ICE), Attribute.RESISTANCE_ICE.getUpperLimit()))+"%</b>",
+							"Ice Block/Turn:<br/>"
+									+ "<b>"+Units.number(Main.game.getPlayer().getAttributeValue(Attribute.RESISTANCE_ICE))+"</b>",
 							true)
 
 					+ getAttributeBox(Main.game.getPlayer(), Attribute.DAMAGE_POISON,
@@ -616,8 +638,8 @@ public class PhoneDialogue {
 							+ "<b>"+Units.number((100+Util.getModifiedDropoffValue(Main.game.getPlayer().getAttributeValue(Attribute.DAMAGE_POISON), Attribute.DAMAGE_POISON.getUpperLimit())))+"%</b>",
 							true)
 					+ getAttributeBox(Main.game.getPlayer(), Attribute.RESISTANCE_POISON,
-							"Poison Resistance:<br/>"
-							+ "<b>"+Units.number(Util.getModifiedDropoffValue(Main.game.getPlayer().getAttributeValue(Attribute.RESISTANCE_POISON), Attribute.RESISTANCE_POISON.getUpperLimit()))+"%</b>",
+							"Poison Block/Turn:<br/>"
+									+ "<b>"+Units.number(Main.game.getPlayer().getAttributeValue(Attribute.RESISTANCE_POISON))+"</b>",
 							true)
 
 					+ getAttributeBox(Main.game.getPlayer(), Attribute.DAMAGE_LUST,
@@ -625,8 +647,8 @@ public class PhoneDialogue {
 							+ "<b>"+Units.number((100+Util.getModifiedDropoffValue(Main.game.getPlayer().getAttributeValue(Attribute.DAMAGE_LUST), Attribute.DAMAGE_LUST.getUpperLimit())))+"%</b>",
 							true)
 					+ getAttributeBox(Main.game.getPlayer(), Attribute.RESISTANCE_LUST,
-							"Lust Resistance:<br/>"
-							+ "<b>"+Units.number(Util.getModifiedDropoffValue(Main.game.getPlayer().getAttributeValue(Attribute.RESISTANCE_LUST), Attribute.RESISTANCE_LUST.getUpperLimit()))+"%</b>",
+							"Lust Block/Turn:<br/>"
+									+ "<b>"+Units.number(Main.game.getPlayer().getAttributeValue(Attribute.RESISTANCE_LUST))+"</b>",
 							true)
 
 				+"</div>"
@@ -637,15 +659,10 @@ public class PhoneDialogue {
 			for(Subspecies subspecies : Subspecies.values()) {
 				Attribute damageModifier = subspecies.getDamageMultiplier();
 				if(!encounteredAttributes.contains(damageModifier)) {
-					Attribute resistanceModifier = subspecies.getResistanceMultiplier();
 					UtilText.nodeContentSB.append(
 							getAttributeBox(Main.game.getPlayer(), damageModifier,
 									Util.capitaliseSentence(damageModifier.getName())+":<br/>"
 									+ "<b>"+Units.number((100+Util.getModifiedDropoffValue(Main.game.getPlayer().getAttributeValue(damageModifier), damageModifier.getUpperLimit())))+"%</b>",
-									true)
-							+ getAttributeBox(Main.game.getPlayer(), resistanceModifier,
-									Util.capitaliseSentence(resistanceModifier.getName())+":<br/>"
-									+ "<b>"+Units.number(Util.getModifiedDropoffValue(Main.game.getPlayer().getAttributeValue(resistanceModifier), resistanceModifier.getUpperLimit()))+"%</b>",
 									true));
 					encounteredAttributes.add(damageModifier);
 				}
@@ -691,8 +708,7 @@ public class PhoneDialogue {
 		boolean knowsVagina = character.isAreaKnownByCharacter(CoverableArea.VAGINA, Main.game.getPlayer());
 		boolean knowsAnus = character.isAreaKnownByCharacter(CoverableArea.ANUS, Main.game.getPlayer());
 		
-		return "<div class='container-full-width'>"
-				+ "<h6 style='color:"+Colour.TRANSFORMATION_GENERIC.toWebHexString()+"; text-align:center;'>Core Attributes</h6>"
+		return "<h6 style='color:"+Colour.TRANSFORMATION_GENERIC.toWebHexString()+"; text-align:center;'>Core Attributes</h6>"
 				+ statHeader()
 				+ statRow(Colour.ANDROGYNOUS, "Femininity",
 						Colour.TEXT, String.valueOf(character.getFemininityValue()),
@@ -760,8 +776,12 @@ public class PhoneDialogue {
 						Colour.TEXT, !knowsNipples?"Unknown":Units.fluid(character.getBreastRawMilkStorageValue()),
 						Colour.GENERIC_SEX, !knowsNipples?"Unknown":Util.capitaliseSentence(character.getBreastMilkStorage().getDescriptor()),
 						false)
-				+ statRow(Colour.TRANSFORMATION_GENERIC, "Milk Regeneration (%/minute)",
-						Colour.TEXT, !knowsNipples?"Unknown":String.valueOf(Math.round((character.getBreastLactationRegeneration().getPercentageRegen()*60*100)*100)/100f),
+				+ statRow(Colour.TRANSFORMATION_GENERIC, "Milk Regeneration Per Breast",
+						Colour.TEXT, !knowsNipples?"Unknown":Units.fluid(character.getLactationRegenerationPerSecond(false)*60)+"/minute",
+						Colour.GENERIC_SEX, !knowsNipples?"Unknown":Util.capitaliseSentence(character.getBreastLactationRegeneration().getName()),
+						false)
+				+ statRow(Colour.TRANSFORMATION_GENERIC, "Milk Regeneration Total",
+						Colour.TEXT, !knowsNipples?"Unknown":Units.fluid(character.getLactationRegenerationPerSecond(true)*60)+"/minute",
 						Colour.GENERIC_SEX, !knowsNipples?"Unknown":Util.capitaliseSentence(character.getBreastLactationRegeneration().getName()),
 						false)
 				+ statRow(Colour.TRANSFORMATION_GENERIC, "Capacity",
@@ -793,12 +813,16 @@ public class PhoneDialogue {
 									Colour.TEXT, !knowsCrotchNipples?"Unknown":String.valueOf(character.getBreastCrotchRows()),
 									Colour.GENERIC_SEX, !knowsCrotchNipples?"Unknown":Util.capitaliseSentence(Util.intToString(character.getBreastCrotchRows()))+" pair"+(character.getBreastCrotchRows()==1?"":"s"),
 									true)
-							+ statRow(Colour.TRANSFORMATION_GENERIC, "Milk Storage (mL)",
-									Colour.TEXT, !knowsCrotchNipples?"Unknown":String.valueOf(character.getBreastCrotchRawMilkStorageValue()),
+							+ statRow(Colour.TRANSFORMATION_GENERIC, "Milk Storage",
+									Colour.TEXT, !knowsCrotchNipples?"Unknown":Units.fluid(character.getBreastCrotchRawMilkStorageValue()),
 									Colour.GENERIC_SEX, !knowsCrotchNipples?"Unknown":Util.capitaliseSentence(character.getBreastCrotchMilkStorage().getDescriptor()),
 									false)
-							+ statRow(Colour.TRANSFORMATION_GENERIC, "Milk Regeneration (%/minute)",
-									Colour.TEXT, !knowsCrotchNipples?"Unknown":String.valueOf(Math.round((character.getBreastCrotchLactationRegeneration().getPercentageRegen()*60*100)*100)/100f),
+							+ statRow(Colour.TRANSFORMATION_GENERIC, "Milk Regeneration Per Crotch-boob",
+									Colour.TEXT, !knowsCrotchNipples?"Unknown":Units.fluid(character.getCrotchLactationRegenerationPerSecond(false)*60)+"/minute",
+									Colour.GENERIC_SEX, !knowsCrotchNipples?"Unknown":Util.capitaliseSentence(character.getBreastCrotchLactationRegeneration().getName()),
+									false)
+							+ statRow(Colour.TRANSFORMATION_GENERIC, "Milk Regeneration Total",
+									Colour.TEXT, !knowsCrotchNipples?"Unknown":Units.fluid(character.getCrotchLactationRegenerationPerSecond(true)*60)+"/minute",
 									Colour.GENERIC_SEX, !knowsCrotchNipples?"Unknown":Util.capitaliseSentence(character.getBreastCrotchLactationRegeneration().getName()),
 									false)
 							+ statRow(Colour.TRANSFORMATION_GENERIC, "Capacity (inches)",
@@ -834,8 +858,8 @@ public class PhoneDialogue {
 						Colour.TEXT, !knowsPenis?"Unknown":(character.getPenisType() == PenisType.NONE ? "N/A" : String.valueOf(character.getPenisCumStorage().getPregnancyModifier())),
 						Colour.GENERIC_SEX, !knowsPenis?"Unknown":"N/A",
 						true)
-				+ (Main.getProperties().hasValue(PropertyValue.cumRegenerationContent) ? statRow(Colour.TRANSFORMATION_GENERIC, "Cum Regeneration (%/minute)",
-						Colour.TEXT, !knowsPenis?"Unknown":String.valueOf(Math.round((character.getPenisCumProductionRegeneration().getPercentageRegen()*60*100)*100)/100f),
+				+ (Main.getProperties().hasValue(PropertyValue.cumRegenerationContent) ? statRow(Colour.TRANSFORMATION_GENERIC, "Cum Regeneration",
+						Colour.TEXT, !knowsPenis?"Unknown":Units.fluid(character.getCumRegenerationPerSecond()*60)+"/minute",
 						Colour.GENERIC_SEX, !knowsPenis?"Unknown":Util.capitaliseSentence(character.getPenisCumProductionRegeneration().getName()),
 						false)
 				+ statRow(Colour.TRANSFORMATION_GENERIC, "Cum Expulsion (% of stored cum)",
@@ -886,8 +910,7 @@ public class PhoneDialogue {
 						Colour.TEXT, !knowsAnus?"Unknown":String.valueOf(character.getAssPlasticity().getValue()),
 						Colour.GENERIC_SEX, !knowsAnus?"Unknown":Util.capitaliseSentence(character.getAssPlasticity().getDescriptor()),
 						true)
-				
-				+"</div>";
+				;
 	}
 	
 	public static final DialogueNode CHARACTER_STATS_BODY = new DialogueNode("Body Stats", "", true) {
@@ -1076,11 +1099,23 @@ public class PhoneDialogue {
 			String child_name = ChildMet(npc) ? npc.getName(true) : "Unknown";
 			String race_color = npc.getRace().getColour().toWebHexString();
 			String species_name = female
-								? npc.getSubspecies().getSingularFemaleName(npc)
-								: npc.getSubspecies().getSingularMaleName(npc);
+								? Util.capitaliseSentence(npc.getSubspecies().getSingularFemaleName(npc))
+								: Util.capitaliseSentence(npc.getSubspecies().getSingularMaleName(npc));
 			String mother = npc.getMother() == null ? "???" : (npc.getMother().isPlayer() ? "[style.colourExcellent(You)]" : npc.getMother().getName(true));
 			String father = npc.getFather() == null ? "???" : (npc.getFather().isPlayer() ? "[style.colourExcellent(You)]" : npc.getFather().getName(true));
-			String extraRelationships = Main.game.getPlayer().getRelationshipStrTo(npc, Relationship.Parent);
+			Set<Relationship> extraRelationships = Main.game.getPlayer().getRelationshipsTo(npc, Relationship.Parent);
+			boolean isGreyedOut = extraRelationships.isEmpty();
+			List<String> relationships = extraRelationships.stream().map((relationship) -> relationship.getName(Main.game.getPlayer())).collect(Collectors.toList());
+			if(npc.getMother()!=null && npc.getMother().isPlayer()) {
+				relationships.add(0, "Mother");
+				
+				if(npc.getFather()!=null && npc.getFather().isPlayer()) {
+					relationships.add(1, "father");
+				}
+				
+			} else {
+				relationships.add(0, "Father");
+			}
 
 			output.append("<tr>");
 				output.append("<td style='min-width:100px;'>");
@@ -1106,9 +1141,9 @@ public class PhoneDialogue {
 				output.append("<td style='min-width:100px;'>");
 					output.append("<b>");
 						output.append(
-								extraRelationships.isEmpty()
-									?"[style.italicsDisabled(None)]"
-									:extraRelationships);
+								isGreyedOut
+									?"[style.boldDisabled("+Util.stringsToStringList(relationships, false)+")]"
+									:Util.stringsToStringList(relationships, false));
 					output.append("</b>");
 				output.append("</td>");
 			output.append("</tr>");
@@ -1139,7 +1174,7 @@ public class PhoneDialogue {
 			OffspringHeaderDisplay(UtilText.nodeContentSB, "Fathered", "Sons", Colour.MASCULINE.toWebHexString(), sonsFathered);
 			OffspringHeaderDisplay(UtilText.nodeContentSB, "Fathered", "Daughters", Colour.FEMININE.toWebHexString(), daughtersFathered);
 
-			for (NPC npc : Main.game.getOffspring()) {
+			for (NPC npc : Main.game.getOffspring(false)) {
 				childrenMet += ChildMet(npc) ? 1 : 0;
 			}
 			int totalChildren = (sonsBirthed+daughtersBirthed+sonsFathered+daughtersFathered);
@@ -1157,10 +1192,10 @@ public class PhoneDialogue {
 					+ "<div class='container-full-width' style='text-align:center;'>"
 					
 					+ "<table align='center'>"
-					+ "<tr><th>Name</th><th>Race</th><th>Mother</th><th>Father</th><th>Your additional relationships</th></tr>"
+					+ "<tr><th>Name</th><th>Race</th><th>Mother</th><th>Father</th><th>You are their:</th></tr>"
 					+ "<tr style='height:8px;'></tr>");
 			
-			for(NPC npc : Main.game.getOffspring()) {
+			for(NPC npc : Main.game.getOffspring(false)) {
 				OffspringTableLine(UtilText.nodeContentSB, npc);
 			}
 			
@@ -1693,13 +1728,13 @@ public class PhoneDialogue {
 	static {
 		
 		itemsDiscoveredList.addAll(ItemType.getAllItems());
-		itemsDiscoveredList.sort(new ItemRarityComparator());
+		itemsDiscoveredList.sort(new ItemTypeRarityComparator());
 		
-		weaponsDiscoveredList.addAll(WeaponType.getAllweapons());
-		weaponsDiscoveredList.sort(new WeaponRarityComparator());
+		weaponsDiscoveredList.addAll(WeaponType.getAllWeapons());
+		weaponsDiscoveredList.sort(new WeaponTypeRarityComparator());
 		
 		clothingDiscoveredList.addAll(ClothingType.getAllClothing());
-		clothingDiscoveredList.sort(new ClothingRarityComparator());
+		clothingDiscoveredList.sort(new ClothingTypeRarityComparator());
 	}
 	public static final DialogueNode WEAPON_CATALOGUE = new DialogueNode("Discovered Weapons", "", true) {
 
@@ -1768,8 +1803,14 @@ public class PhoneDialogue {
 					journalSB.append(
 							"<div class='container-full-width' style='margin-bottom:0;'>"
 							+ "<div class='container-full-width' style='width:calc(40% - 16px)'>"
-									+ "<b style='color:" + clothing.getRarity().getColour().toWebHexString() + ";'>" + Util.capitaliseSentence(clothing.getName()) + "</b> ("+Util.capitaliseSentence(clothing.getSlot().getName())+")"
-							+ "</div>"
+									+ "<b style='color:" + clothing.getRarity().getColour().toWebHexString() + ";'>" + Util.capitaliseSentence(clothing.getName()) + "</b> (");
+					
+					for(int i=0; i<clothing.getEquipSlots().size(); i++) {
+						InventorySlot slot = clothing.getEquipSlots().get(i);
+						journalSB.append(Util.capitaliseSentence(slot.getName())+(i==clothing.getEquipSlots().size()-1?"":"/"));
+					}
+					
+					journalSB.append(")</div>"
 							+ "<div class='container-full-width' style='width:calc(60% - 16px)'>");
 					
 					for (Colour c : clothing.getAllAvailablePrimaryColours()) {
@@ -1782,7 +1823,14 @@ public class PhoneDialogue {
 				} else {
 					journalSB.append(
 						"<div class='container-full-width' style='text-align:center; margin-bottom:0;'>"
-								+ "[style.boldDisabled(Undiscovered ("+Util.capitaliseSentence(clothing.getSlot().getName())+"))]"
+								+ "[style.boldDisabled(Undiscovered (");
+
+					for(int i=0; i<clothing.getEquipSlots().size(); i++) {
+						InventorySlot slot = clothing.getEquipSlots().get(i);
+						journalSB.append(Util.capitaliseSentence(slot.getName())+(i==clothing.getEquipSlots().size()-1?"":"/"));
+					}
+					
+					journalSB.append("))]"
 						+ "</div>");
 				}
 			}
@@ -2076,8 +2124,7 @@ public class PhoneDialogue {
 		}
 	};
 
-	public static final DialogueNode CHARACTER_LEVEL_UP = new DialogueNode("Perks", "", true) {
-
+	public static final DialogueNode CHARACTER_LEVEL_UP = new DialogueNode("Perk Tree", "", true) {
 
 		@Override
 		public String getHeaderContent() {
@@ -2091,52 +2138,9 @@ public class PhoneDialogue {
 								+ " Unlike perks, <b>traits will have no effect on your character until they're slotted into your 'Active Traits' bar</b>.<br/>"
 							+ "Perks require perk points to unlock. You earn one perk point each time you level up, and earn an extra two perk points every five levels.<br/><br/>"
 							+ "In addition to the perks that can be purchased via perk points, there are also several special, hidden perks that are unlocked via special events."
-							+ " There are currently [style.boldPerk("+Perk.getHiddenPerks().size()+")] special perks in the game."
-					+ "</details>"
-						
-					+ "<div class='container-full-width' style='padding:8px; text-align:center;'>"
-					+ "<h6 style='text-align:center;'>Active Traits</h6>");
-
-			UtilText.nodeContentSB.append(
-					"<div id='OCCUPATION_" + Main.game.getPlayer().getHistory().getAssociatedPerk()+ "' class='square-button small' style='width:8%; display:inline-block; float:none; border:2px solid " + Colour.TRAIT.toWebHexString() + ";'>"
-						+ "<div class='square-button-content'>"+Main.game.getPlayer().getHistory().getAssociatedPerk().getSVGString()+"</div>"
-					+ "</div>");
+					+ "</details>");
 			
-			for(int i=0;i<GameCharacter.MAX_TRAITS;i++) {
-				Perk p = null;
-				if(i<Main.game.getPlayer().getTraits().size()) {
-					p = Main.game.getPlayer().getTraits().get(i);
-				}
-				if(p!=null) {
-					UtilText.nodeContentSB.append("<div id='TRAIT_" + p + "' class='square-button small' style='width:8%; display:inline-block; float:none; border:2px solid " + Colour.TRAIT.toWebHexString() + ";'>"
-							+ "<div class='square-button-content'>"+p.getSVGString()+"</div>"
-							+ "</div>");
-					
-				} else {
-					UtilText.nodeContentSB.append("<div id='TRAIT_" + i + "' class='square-button small' style='display:inline-block; float:none;'></div>");
-					
-				}
-			}
-			
-			UtilText.nodeContentSB.append("<h6 style='text-align:center;'>Special Perks</h6>");
-			
-			for(Perk hiddenPerk : Perk.getHiddenPerks()) {
-//				if(Main.game.getPlayer().getSpecialPerks().contains(hiddenPerk)) {
-					UtilText.nodeContentSB.append("<div id='HIDDEN_PERK_" + hiddenPerk + "' class='square-button round small' style='width:6%; display:inline-block; float:none; border:1% solid " + Colour.TRAIT.toWebHexString() + ";'>"
-							+ "<div class='square-button-content'>"+hiddenPerk.getSVGString()+"</div>"
-							+ (Main.game.getPlayer().getSpecialPerks().contains(hiddenPerk)
-									?""
-									:"<div style='position:absolute; left:0; top:0; margin:0; padding:0; width:100%; height:100%; background-color:#000; opacity:0.95; border-radius:50%;'></div>")
-							+ "</div>");
-					
-//				} else {
-//					UtilText.nodeContentSB.append("<div id='HIDDEN_PERK_" + hiddenPerk + "' class='square-button round small' style='width:6%; display:inline-block; float:none; border:1% solid " + Colour.BASE_GREY.toWebHexString() + ";'>"
-//							+ "<div class='square-button-content'>"+SVGImages.SVG_IMAGE_PROVIDER.getRaceUnknown()+"</div>"
-//							+ "</div>");
-//				}
-			}
-			
-			UtilText.nodeContentSB.append(PerkManager.MANAGER.getPerkTreeDisplay(Main.game.getPlayer()));
+			UtilText.nodeContentSB.append(PerkManager.MANAGER.getPerkTreeDisplay(Main.game.getPlayer(), true));
 			
 			UtilText.nodeContentSB.append("</div>"
 					+ "<div class='container-full-width' style='padding:8px; text-align:center;'>"
@@ -2157,7 +2161,7 @@ public class PhoneDialogue {
 				return new Response("Reset", "Reset all perks and traits, refunding all points spent. (This is a temporary action while the perk tree is still under development.)", CHARACTER_LEVEL_UP) {
 					@Override
 					public void effects() {
-						Main.game.getPlayer().resetPerksMap();
+						Main.game.getPlayer().resetPerksMap(false, false);
 					}
 				};
 				
@@ -2247,7 +2251,10 @@ public class PhoneDialogue {
 							}
 							@Override
 							public void effects() {
-								Main.game.getTextStartStringBuilder().append(Spell.ELEMENTAL_ARCANE.applyEffect(Main.game.getPlayer(), Main.game.getPlayer(), true, false));
+								Main.game.getTextStartStringBuilder().append(
+										"<p>"
+											+Spell.ELEMENTAL_ARCANE.applyEffect(Main.game.getPlayer(), Main.game.getPlayer(), true, false)
+										+"</p>");
 							}
 						};
 					}
@@ -2348,7 +2355,10 @@ public class PhoneDialogue {
 							}
 							@Override
 							public void effects() {
-								Main.game.getTextStartStringBuilder().append(Spell.ELEMENTAL_EARTH.applyEffect(Main.game.getPlayer(), Main.game.getPlayer(), true, false));
+								Main.game.getTextStartStringBuilder().append(
+										"<p>"
+											+Spell.ELEMENTAL_EARTH.applyEffect(Main.game.getPlayer(), Main.game.getPlayer(), true, false)
+										+"</p>");
 							}
 						};
 					}
@@ -2449,7 +2459,10 @@ public class PhoneDialogue {
 							}
 							@Override
 							public void effects() {
-								Main.game.getTextStartStringBuilder().append(Spell.ELEMENTAL_WATER.applyEffect(Main.game.getPlayer(), Main.game.getPlayer(), true, false));
+								Main.game.getTextStartStringBuilder().append(
+										"<p>"
+											+Spell.ELEMENTAL_WATER.applyEffect(Main.game.getPlayer(), Main.game.getPlayer(), true, false)
+										+"</p>");
 							}
 						};
 					}
@@ -2550,7 +2563,10 @@ public class PhoneDialogue {
 							}
 							@Override
 							public void effects() {
-								Main.game.getTextStartStringBuilder().append(Spell.ELEMENTAL_AIR.applyEffect(Main.game.getPlayer(), Main.game.getPlayer(), true, false));
+								Main.game.getTextStartStringBuilder().append(
+										"<p>"
+											+Spell.ELEMENTAL_AIR.applyEffect(Main.game.getPlayer(), Main.game.getPlayer(), true, false)
+										+"</p>");
 							}
 						};
 					}
@@ -2638,12 +2654,14 @@ public class PhoneDialogue {
 							return new Response("Fire Elemental", "You can only summon your elemental in a neutral scene!", null);
 						}
 						
-					} else if(Main.game.getPlayer().getMana()<Spell.ELEMENTAL_FIRE.getModifiedCost(Main.game.getPlayer())) {
-						return new Response("Fire Elemental", "You need at least <b>"+Spell.ELEMENTAL_FIRE.getModifiedCost(Main.game.getPlayer())+"</b> [style.boldMana(aura)] in order to cast this spell!", null);
-						
 					} else {
+						String description = "Summon your elemental by binding it to the school of Fire! This will cost <b>"+Spell.ELEMENTAL_FIRE.getModifiedCost(Main.game.getPlayer())+"</b> [style.boldMana(aura)]!";
+						if(Main.game.getPlayer().getMana()<Spell.ELEMENTAL_FIRE.getModifiedCost(Main.game.getPlayer())) {
+							description = "Summon your elemental by binding it to the school of Fire! This will cost <b>"
+									+Math.round(Spell.ELEMENTAL_FIRE.getModifiedCost(Main.game.getPlayer())*0.25f)+"</b> [style.boldHealth("+Attribute.HEALTH_MAXIMUM.getName()+")]!";
+						}
 						return new Response("Fire Elemental",
-								"Summon your elemental by binding it to the school of Fire! This will cost <b>"+Spell.ELEMENTAL_FIRE.getModifiedCost(Main.game.getPlayer())+"</b> [style.boldMana(aura)]!",
+								description,
 								CHARACTER_SPELLS_FIRE) {
 							@Override
 							public DialogueNode getNextDialogue() {
@@ -2651,7 +2669,10 @@ public class PhoneDialogue {
 							}
 							@Override
 							public void effects() {
-								Main.game.getTextStartStringBuilder().append(Spell.ELEMENTAL_FIRE.applyEffect(Main.game.getPlayer(), Main.game.getPlayer(), true, false));
+								Main.game.getTextStartStringBuilder().append(
+										"<p>"
+											+Spell.ELEMENTAL_FIRE.applyEffect(Main.game.getPlayer(), Main.game.getPlayer(), true, false)
+										+"</p>");
 							}
 						};
 					}

@@ -253,8 +253,8 @@ public enum Units {
             return sizeAsImperial(cm, vType, uType);
     }
 
-    private final static String INCH_SYMBOL = "&quot;";
-    private final static String FOOT_SYMBOL = "&#39;";
+    public final static String INCH_SYMBOL = "&quot;";
+    public final static String FOOT_SYMBOL = "&#39;";
     /**
      * Converts a size, given in centimetres, to the imperial form.
      * @param cm Amount of centimetres to format
@@ -262,18 +262,23 @@ public enum Units {
      * @param uType The format of the units, see {@link UnitType}
      * @return A string containing the imperial, formatted size, including unit
      */
+    @SuppressWarnings("incomplete-switch")
     public static String sizeAsImperial(double cm, ValueType vType, UnitType uType) {
         // Convert centimetres to inches
         double inches = cm / 2.54;
 
         // Wrap inches to feet
-        long feet = (long) (inches / 12);
-        double remainingInches = roundTo(inches % 12, 0.25);
+        double roundingFactor = (vType == ValueType.PRECISE || Math.abs(inches) < 1) ? 0.25 : 1;
+        long feet = (long) (roundTo(inches, roundingFactor) / 12);
+        double remainingInches = roundTo(inches, roundingFactor) % 12;
+
 
         StringBuilder output = new StringBuilder();
 
-        boolean both = (uType == UnitType.SHORT || uType == UnitType.LONG) && feet != 0 && remainingInches != 0;
-        boolean wrap = both || vType == ValueType.TEXT || (feet != 0 && remainingInches == 0);
+        boolean both = uType != UnitType.NONE && vType != ValueType.TEXT
+                && feet != 0 && remainingInches != 0;
+        boolean wrap = (vType == ValueType.TEXT && Math.abs(inches) >= 11.5)
+                || both || (feet != 0 && remainingInches == 0);
         double usedValue = wrap ? feet : inches;
 
         // Append first unit, which may be either feet or inches
@@ -293,7 +298,7 @@ public enum Units {
                 }
 
                 output.append(" ");
-                if (usedValue > 1) output.append(wrap ? "feet" : "inches");
+                if (Math.abs(usedValue) >= 1 + roundingFactor / 2 || usedValue == 0.0) output.append(wrap ? "feet" : "inches");
                 else output.append(wrap ? "foot" : "inch");
                 break;
             case LONG_SINGULAR:
@@ -303,19 +308,18 @@ public enum Units {
         // Append second unit for long or short notation and if neither value is 0
         if (both) {
             if (uType == UnitType.LONG) output.append(" and ");
+            if (uType == UnitType.LONG_SINGULAR) output.append("-");
+            remainingInches = Math.abs(roundTo(remainingInches, roundingFactor));
             output.append(value(remainingInches, vType, true));
             switch (uType) {
                 case SHORT:
                     output.append(INCH_SYMBOL);
                     break;
                 case LONG:
-                    output.append(" ").append(remainingInches > 1 ? "inches" : "inch");
+                    output.append(" ").append(remainingInches >= 1 + roundingFactor / 2 ? "inches" : "inch");
                     break;
-				case LONG_SINGULAR: // Innoxia: I added these two case labels to remove the warning of this switch statement requiring them. I assume they're not used, but just in case, I copied over what is found in LONG:
-                    output.append(" ").append(remainingInches > 1 ? "inches" : "inch");
-					break;
-				case NONE:
-					break;
+                case LONG_SINGULAR:
+                    break;
             }
         }
 
@@ -370,6 +374,10 @@ public enum Units {
             return fluidAsImperial(ml, vType, uType);
     }
 
+    public static float mlToOz(float ml) {
+    	return (float) (ml / 28.4131);
+    }
+    
     /**
      * Converts a fluid volume, given in millilitres, to the imperial form.
      * @param ml Amount of millilitres to convert
@@ -394,7 +402,7 @@ public enum Units {
      */
     public static String fluidAsMetric(double ml, ValueType vType, UnitType uType) {
         double l = ml / 1000;
-        return valueWithUnit(ml, "mL", "millilitre", l, "L", "litre", vType, uType, false); // Innoxa's note: I usually prefer the lowercase l for ml and l, but LT's font makes it look bad.
+        return valueWithUnit(ml, "mL", "millilitre", l, "L", "litre", vType, uType, false); // Innoxia's note: I usually prefer the lowercase l for ml and l, but LT's font makes it look bad.
     }
 
     /**
@@ -472,7 +480,13 @@ public enum Units {
         StringBuilder output = new StringBuilder();
         boolean wrap = Math.abs(wrappedValue) >= 1 && vType != ValueType.PRECISE;
         double usedValue = wrap ? wrappedValue : value;
-
+        if (useQuarters) usedValue = roundTo(usedValue, 0.25);
+        
+        if(value>0 && usedValue==0) {
+        	output.append("&lt;");
+        	usedValue = 0.25;
+        }
+        
         // Append value with increased precision if it is wrapped and numeric
         output.append(value(usedValue, wrap && vType == ValueType.NUMERIC ? ValueType.PRECISE : vType, useQuarters));
 
@@ -492,7 +506,7 @@ public enum Units {
                 }
 
                 output.append(" ").append(wrap ? wrappedUnit : unit);
-                if (Math.abs(usedValue) > 1) output.append("s");
+                if (Math.abs(usedValue) > 1 || usedValue == 0.0) output.append("s");
                 break;
             case LONG_SINGULAR:
                 output.append("-").append((wrap ? wrappedUnit : unit));
@@ -511,7 +525,7 @@ public enum Units {
         value = roundTo(Math.abs(value), 0.25);
         double floor = Math.floor(value);
 
-        if (value == floor) return number(floor);
+        if (value == floor) return (negative ? '-' : "") + number(floor);
 
         int quarters = (int) Math.round((value - floor) / 0.25);
         return (negative ? '-' : "") + (floor == 0 ? "" : number(floor)) + getQuarterSymbol(quarters);
@@ -569,7 +583,7 @@ public enum Units {
      */
     public static float round(double value, int places) {
         if (places < 0) throw new IllegalArgumentException("Amount of fractional places cannot be less than 0.");
-        return BigDecimal.valueOf(value).setScale(places, BigDecimal.ROUND_HALF_UP).floatValue();
+        return BigDecimal.valueOf(value).setScale(places, RoundingMode.HALF_UP).floatValue();
     }
 
     /**

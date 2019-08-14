@@ -7,16 +7,18 @@ import com.lilithsthrone.utils.Util;
 
 /**
  * @since 0.2.1
- * @version 0.3.1
+ * @version 0.3.4
  * @author Innoxia
  */
 public enum ItemTag {
 
+	HIDDEN_IN_DEBUG_SPAWNER(false),
+	
 	REMOVE_FROM_DEBUG_SPAWNER(false),
 
 	NOT_FOR_SALE(false),
 	
-	REINDEER_GIFT(false), // Can be found in the presents that the reindeer sell (who appear in DOminion during winter months).
+	REINDEER_GIFT(false), // Can be found in the presents that the reindeer sell (who appear in Dominion during winter months).
 	SOLD_BY_RALPH(false), // Will also be used for any future consumable and miscellaneous item vendors.
 	SOLD_BY_NYAN(false), // Clothing
 	SOLD_BY_KATE(false), // Jewellery
@@ -103,18 +105,33 @@ public enum ItemTag {
 			false),
 	
 	// These 'FITS' tags are used to check for whether clothing is suitable for certain body parts. They should be pretty self-explanatory.
-	FITS_HOOFS(
+	FITS_HOOFS_EXCLUSIVE(
 			Util.newArrayListOfValues(
 					"[style.colourBestial(Only fits hoofs)]"),
 			false),
-	FITS_TALONS(
+	FITS_HOOFS(
+			Util.newArrayListOfValues(
+					"[style.colourBestial(Fits hoofs)]"),
+			false),
+	
+	FITS_TALONS_EXCLUSIVE(
 			Util.newArrayListOfValues(
 					"[style.colourBestial(Only fits talons)]"),
 			false),
-	FITS_HARPY_WINGS(
+	FITS_TALONS(
+			Util.newArrayListOfValues(
+					"[style.colourBestial(Fits talons)]"),
+			false),
+	
+	FITS_HARPY_WINGS_EXCLUSIVE(
 			Util.newArrayListOfValues(
 					"[style.colourBestial(Only fits arm-wings)]"),
 			false),
+	FITS_HARPY_WINGS(
+			Util.newArrayListOfValues(
+					"[style.colourBestial(Fits arm-wings)]"),
+			false),
+	
 	FITS_NON_BIPED_BODY_HUMANOID(
 			Util.newArrayListOfValues(
 					"[style.colourHuman(Fits humanoid parts of non-biped bodies)]"),
@@ -135,7 +152,11 @@ public enum ItemTag {
 	FITS_CEPHALOPOD_BODY(
 			Util.newArrayListOfValues(
 					"[style.colourBestial(Only fits cephalopod bodies)]"),false), //octopuses and squids
-	
+
+	RIGID_MATERIAL( // The clothing is made out of a rigid material, and as such, groping actions cannot be performed on it. Used for chastity cages/belts.
+			Util.newArrayListOfValues(
+					"[style.colourTerrible(Blocks groping actions)]"),
+			false),
 	
 	PREVENTS_ERECTION_PHYSICAL( // Prevents the wearer from getting an erection during sex, by means of physically limiting the space into which the erection could take shape (i.e. chastity cages). As of 0.3.1, only affects descriptors.
 			Util.newArrayListOfValues(
@@ -156,20 +177,20 @@ public enum ItemTag {
 	
 	PLUGS_ANUS( // Counts as being inserted into the wearer's anus. E.g. butt plugs or anal beads
 			Util.newArrayListOfValues(
-					"[style.colourSex(Plugs asshole)]"),
+					"[style.colourSex(Plugs asshole (does not get dirty from creampies))]"),
 			true),
 	SEALS_ANUS( // Counts as sealing(false), but not inserted into(false), the wearer's anus. E.g. Tape
 			Util.newArrayListOfValues(
-					"[style.colourSex(Seals asshole)]"),
+					"[style.colourSex(Seals asshole (does not get dirty from creampies))]"),
 			true),
 	
 	PLUGS_VAGINA( // Counts as being inserted into the wearer's vagina. E.g. insertable dildo
 			Util.newArrayListOfValues(
-					"[style.colourSex(Plugs pussy)]"),
+					"[style.colourSex(Plugs pussy (does not get dirty from creampies))]"),
 			true),
 	SEALS_VAGINA( // Counts as sealing, but not inserted into, the wearer's vagina. E.g. Tape
 			Util.newArrayListOfValues(
-					"[style.colourSex(Seals pussy)]"),
+					"[style.colourSex(Seals pussy (does not get dirty from creampies))]"),
 			true) {
 		@Override
 		public List<String> getClothingTooltipAdditions() {
@@ -183,11 +204,11 @@ public enum ItemTag {
 	
 	PLUGS_NIPPLES( // Counts as being inserted into the wearer's nipples. E.g. insertable nipple-dildos
 			Util.newArrayListOfValues(
-					"[style.colourSex(Plugs nipples)]"),
+					"[style.colourSex(Plugs nipples (does not get dirty from creampies))]"),
 			true),
 	SEALS_NIPPLES( // Counts as sealing, but not inserted into, the wearer's nipples. E.g. Pasties
 			Util.newArrayListOfValues(
-					"[style.colourSex(Seals nipples)]"),
+					"[style.colourSex(Seals nipples (does not get dirty from creampies))]"),
 			true),
 
 	

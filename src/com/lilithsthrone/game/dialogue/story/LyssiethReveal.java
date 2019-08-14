@@ -49,7 +49,7 @@ public class LyssiethReveal {
 		@Override
 		public Response getResponse(int responseTab, int index) {
 			if(index==1) {
-				return new Response("Follow", "Let Elizabeth lead you towards Lysseth's throne room.", FORWARDS_1) {
+				return new Response("Follow", "Let Elizabeth lead you towards Lyssieth's throne room.", FORWARDS_1) {
 					@Override
 					public void effects() {
 						Main.game.getPlayer().setLocation(new Vector2i(Main.game.getPlayer().getLocation().getX(), Main.game.getPlayer().getLocation().getY()+1));
@@ -377,7 +377,7 @@ public class LyssiethReveal {
 						public void effects() {
 							Main.game.getTextEndStringBuilder().append(UtilText.parseFromXMLFile("misc/lyssiethReveal", "LAB_QUESTION_WORLD"));
 							Main.game.getDialogueFlags().setFlag(DialogueFlagValue.lyssiethQuestionAsked1, true);
-							Main.game.getTextEndStringBuilder().append(AbstractItemEffectType.getBookEffect(Subspecies.LILIN, false));
+							Main.game.getTextEndStringBuilder().append(AbstractItemEffectType.getBookEffect(Main.game.getPlayer(), Subspecies.LILIN, false));
 						}
 					};
 				}

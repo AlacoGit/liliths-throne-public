@@ -36,7 +36,7 @@ import java.util.*;
 
 /**
  * @since 0.1.0
- * @version 0.3.1
+ * @version 0.3.2
  * @author Innoxia
  */
 public class Properties {
@@ -70,8 +70,18 @@ public class Properties {
 			"Randomly-generated NPCs will only have udders or crotch-boobs if they have a non-bipedal body. (Default setting.)",
 			"Randomly-generated greater-anthro-morphs, as well as taurs, will have udders and crotch boobs."};
 	
+
+	public int autoSaveFrequency = 0;
+	public static String[] autoSaveLabels = new String[] {"Always", "Daily", "Weekly"};
+	public static String[] autoSaveDescriptions = new String[] {
+			"The game will autosave every time you transition to a new map.",
+			"The game will autosave when you transition to a new map, at a maximum rate of once per in-game day.",
+			"The game will autosave when you transition to a new map, at a maximum rate of once per in-game week."};
+	
 	public int forcedTFPercentage = 40;
 	public int forcedFetishPercentage = 0;
+
+	public float randomRacePercentage = 0.15f;
 
 	public int pregnancyBreastGrowthVariance = 2;
 	public int pregnancyBreastGrowth = 1;
@@ -80,9 +90,16 @@ public class Properties {
 	public int pregnancyLactationIncrease = 250;
 	public int pregnancyLactationLimit = 1000;
 	
-	public Set<PropertyValue> values;
+	public int breastSizePreference = 0;
+	public int penisSizePreference = 0;
+//	public String[] breastSizePreferenceLabels = new String[] {"Minimum", "Tiny", "Small", "Reduced", "Default", "Big", "Huge", "Massive", "Maximum"};
+//	public int[] breastSizePreferenceMultiplierLabels = new int[] {-8, -6, -4, -2, 0, 2, 4, 8, 16};
 	
+	public Set<PropertyValue> values;
+
+	// Difficulty settings
 	public DifficultyLevel difficultyLevel = DifficultyLevel.NORMAL;
+	public float AIblunderRate = 0.0f; /// The amount of times the AI will use random weight selection for an action instead of the proper one. 1.0 means every time, 0.0 means never.
 	
 	public AndrogynousIdentification androgynousIdentification = AndrogynousIdentification.CLOTHING_FEMININE;
 
@@ -236,7 +253,9 @@ public class Properties {
 			createXMLElementWithValue(doc, settings, "humanEncountersLevel", String.valueOf(humanEncountersLevel));
 			createXMLElementWithValue(doc, settings, "multiBreasts", String.valueOf(multiBreasts));
 			createXMLElementWithValue(doc, settings, "udders", String.valueOf(udders));
+			createXMLElementWithValue(doc, settings, "autoSaveFrequency", String.valueOf(autoSaveFrequency));
 			createXMLElementWithValue(doc, settings, "forcedTFPercentage", String.valueOf(forcedTFPercentage));
+			createXMLElementWithValue(doc, settings, "randomRacePercentage", String.valueOf(randomRacePercentage)); 
 
 			createXMLElementWithValue(doc, settings, "pregnancyBreastGrowthVariance", String.valueOf(pregnancyBreastGrowthVariance));
 			createXMLElementWithValue(doc, settings, "pregnancyBreastGrowth", String.valueOf(pregnancyBreastGrowth));
@@ -244,10 +263,14 @@ public class Properties {
 			createXMLElementWithValue(doc, settings, "pregnancyLactationIncreaseVariance", String.valueOf(pregnancyLactationIncreaseVariance));
 			createXMLElementWithValue(doc, settings, "pregnancyLactationIncrease", String.valueOf(pregnancyLactationIncrease));
 			createXMLElementWithValue(doc, settings, "pregnancyLactationLimit", String.valueOf(pregnancyLactationLimit));
+
+			createXMLElementWithValue(doc, settings, "breastSizePreference", String.valueOf(breastSizePreference));
+			createXMLElementWithValue(doc, settings, "penisSizePreference", String.valueOf(penisSizePreference));
 			
 			createXMLElementWithValue(doc, settings, "forcedFetishPercentage", String.valueOf(forcedFetishPercentage));
 
 			createXMLElementWithValue(doc, settings, "difficultyLevel", difficultyLevel.toString());
+			createXMLElementWithValue(doc, settings, "AIblunderRate", String.valueOf(AIblunderRate));
 			
 			
 			
@@ -573,6 +596,12 @@ public class Properties {
 					if(Main.isVersionOlderThan(versionNumber, "0.3.0.5")) {
 						values.add(PropertyValue.bipedalCloaca);
 					}
+					if(Main.isVersionOlderThan(versionNumber, "0.3.1.7")) {
+						values.add(PropertyValue.footContent);
+					}
+					if(Main.isVersionOlderThan(versionNumber, "0.3.3.9")) {
+						values.add(PropertyValue.enchantmentLimits);
+					}
 					for(int i=0; i < element.getElementsByTagName("propertyValue").getLength(); i++){
 						Element e = (Element) element.getElementsByTagName("propertyValue").item(i);
 						
@@ -639,6 +668,10 @@ public class Properties {
 				if(element.getElementsByTagName("difficultyLevel").item(0)!=null) {
 					difficultyLevel = DifficultyLevel.valueOf(((Element)element.getElementsByTagName("difficultyLevel").item(0)).getAttribute("value"));
 				}
+
+				if(element.getElementsByTagName("AIblunderRate").item(0)!=null) {
+					AIblunderRate = Float.valueOf(((Element)element.getElementsByTagName("AIblunderRate").item(0)).getAttribute("value"));
+				}
 				
 				if(element.getElementsByTagName("androgynousIdentification").item(0)!=null) {
 					androgynousIdentification = AndrogynousIdentification.valueOf(((Element)element.getElementsByTagName("androgynousIdentification").item(0)).getAttribute("value"));
@@ -662,11 +695,21 @@ public class Properties {
 					udders = 1;
 				}
 				
+				if(element.getElementsByTagName("autoSaveFrequency").item(0)!=null) {
+					autoSaveFrequency = Integer.valueOf(((Element)element.getElementsByTagName("autoSaveFrequency").item(0)).getAttribute("value"));
+				} else {
+					autoSaveFrequency = 0;
+				}
+				
 				if(element.getElementsByTagName("forcedTFPercentage").item(0)!=null) {
 					forcedTFPercentage = Integer.valueOf(((Element)element.getElementsByTagName("forcedTFPercentage").item(0)).getAttribute("value"));
 				}
 				if(element.getElementsByTagName("forcedFetishPercentage").item(0)!=null) {
 					forcedFetishPercentage = Integer.valueOf(((Element)element.getElementsByTagName("forcedFetishPercentage").item(0)).getAttribute("value"));
+				}
+				// Randomized percentage of body pref race.
+				if(element.getElementsByTagName("randomRacePercentage").item(0)!=null) {
+					randomRacePercentage = Float.parseFloat(((Element)element.getElementsByTagName("randomRacePercentage").item(0)).getAttribute("value"));
 				}
 
 				// Forced TF preference:
@@ -687,6 +730,9 @@ public class Properties {
 					pregnancyLactationIncreaseVariance = Integer.valueOf(((Element)element.getElementsByTagName("pregnancyLactationIncreaseVariance").item(0)).getAttribute("value"));
 					pregnancyLactationIncrease = Integer.valueOf(((Element)element.getElementsByTagName("pregnancyLactationIncrease").item(0)).getAttribute("value"));
 					pregnancyLactationLimit = Integer.valueOf(((Element)element.getElementsByTagName("pregnancyLactationLimit").item(0)).getAttribute("value"));
+
+					breastSizePreference = Integer.valueOf(((Element)element.getElementsByTagName("breastSizePreference").item(0)).getAttribute("value"));
+					penisSizePreference = Integer.valueOf(((Element)element.getElementsByTagName("penisSizePreference").item(0)).getAttribute("value"));
 				}catch(Exception ex) {
 				}
 				
@@ -1065,5 +1111,10 @@ public class Properties {
 
 	public void setForcedFetishTendency(ForcedFetishTendency forcedFetishTendency) {
 		this.forcedFetishTendency = forcedFetishTendency;
+	}
+	
+	public float getRandomRacePercentage() {
+		return randomRacePercentage;
+		
 	}
 }

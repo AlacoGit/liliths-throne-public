@@ -10,7 +10,7 @@ import org.w3c.dom.Element;
 
 import com.lilithsthrone.game.Game;
 import com.lilithsthrone.game.character.CharacterImportSetting;
-import com.lilithsthrone.game.character.attributes.Attribute;
+import com.lilithsthrone.game.character.EquipClothingSetting;
 import com.lilithsthrone.game.character.body.Covering;
 import com.lilithsthrone.game.character.body.types.BodyCoveringType;
 import com.lilithsthrone.game.character.body.valueEnums.AreolaeSize;
@@ -33,6 +33,8 @@ import com.lilithsthrone.game.character.body.valueEnums.OrificeElasticity;
 import com.lilithsthrone.game.character.body.valueEnums.OrificePlasticity;
 import com.lilithsthrone.game.character.body.valueEnums.TongueLength;
 import com.lilithsthrone.game.character.body.valueEnums.Wetness;
+import com.lilithsthrone.game.character.effects.PerkCategory;
+import com.lilithsthrone.game.character.effects.PerkManager;
 import com.lilithsthrone.game.character.fetishes.Fetish;
 import com.lilithsthrone.game.character.gender.Gender;
 import com.lilithsthrone.game.character.markings.Scar;
@@ -101,7 +103,7 @@ public class Roxy extends NPC {
 					+ " With a patch over one eye, and visible scarring down one side of her face, Roxy is clearly no stranger to violence."
 					+ " She has some particularly vulgar mannerisms, and has little patience for any of her customers.",
 				33, Month.AUGUST, 2,
-				10, Gender.F_V_B_FEMALE, Subspecies.RAT_MORPH, RaceStage.GREATER,
+				15, Gender.F_V_B_FEMALE, Subspecies.RAT_MORPH, RaceStage.GREATER,
 				new CharacterInventory(30), WorldType.GAMBLING_DEN, PlaceType.GAMBLING_DEN_TRADER, true);
 
 		buyModifier=0.4f;
@@ -119,6 +121,20 @@ public class Roxy extends NPC {
 		if(Main.isVersionOlderThan(Game.loadingVersion, "0.2.10.5")) {
 			resetBodyAfterVersion_2_10_5();
 		}
+		if(Main.isVersionOlderThan(Game.loadingVersion, "0.3.3.6")) {
+			this.setLevel(15);
+			this.resetPerksMap(true);
+		}
+	}
+
+	@Override
+	public void setupPerks(boolean autoSelectPerks) {
+		PerkManager.initialisePerks(this,
+				Util.newArrayListOfValues(),
+				Util.newHashMapOfValues(
+						new Value<>(PerkCategory.PHYSICAL, 1),
+						new Value<>(PerkCategory.LUST, 5),
+						new Value<>(PerkCategory.ARCANE, 0)));
 	}
 
 	@Override
@@ -127,10 +143,6 @@ public class Roxy extends NPC {
 		// Persona:
 
 		if(setPersona) {
-			this.setAttribute(Attribute.MAJOR_PHYSIQUE, 25);
-			this.setAttribute(Attribute.MAJOR_ARCANE, 0);
-			this.setAttribute(Attribute.MAJOR_CORRUPTION, 50);
-	
 			this.setPersonality(Util.newHashMapOfValues(
 					new Value<>(PersonalityTrait.AGREEABLENESS, PersonalityWeight.AVERAGE),
 					new Value<>(PersonalityTrait.CONSCIENTIOUSNESS, PersonalityWeight.AVERAGE),
@@ -223,9 +235,9 @@ public class Roxy extends NPC {
 	}
 	
 	@Override
-	public void equipClothing(boolean replaceUnsuitableClothing, boolean addWeapons, boolean addScarsAndTattoos, boolean addAccessories) {
+	public void equipClothing(List<EquipClothingSetting> settings) {
 
-		this.unequipAllClothingIntoVoid(true);
+		this.unequipAllClothingIntoVoid(true, true);
 
 		this.setScar(InventorySlot.EYES, new Scar(ScarType.CLAW_MARKS, true));
 		
@@ -253,8 +265,8 @@ public class Roxy extends NPC {
 
 		this.equipClothingFromNowhere(AbstractClothingType.generateClothing(ClothingType.CHEST_FULLCUP_BRA, Colour.CLOTHING_BLACK, false), true, this);
 		this.equipClothingFromNowhere(AbstractClothingType.generateClothing(ClothingType.TORSO_SKATER_DRESS, Colour.CLOTHING_GREY, false), true, this);
-		this.equipClothingFromNowhere(AbstractClothingType.generateClothing(ClothingType.SOCK_KNEEHIGH_SOCKS, Colour.CLOTHING_BLACK, false), true, this);
-		this.equipClothingFromNowhere(AbstractClothingType.generateClothing(ClothingType.FOOT_THIGH_HIGH_BOOTS, Colour.CLOTHING_BLACK, false), true, this);
+		this.equipClothingFromNowhere(AbstractClothingType.generateClothing("innoxia_sock_kneehigh_socks", Colour.CLOTHING_BLACK, false), true, this);
+		this.equipClothingFromNowhere(AbstractClothingType.generateClothing("innoxia_foot_thigh_high_boots", Colour.CLOTHING_BLACK, false), true, this);
 
 	}
 	
@@ -283,9 +295,8 @@ public class Roxy extends NPC {
 	public void dailyReset() {
 		clearNonEquippedInventory();
 		
-		for(int i=0;i<25;i++) {
-			this.addItem(AbstractItemType.generateItem(ItemType.DYE_BRUSH), false);
-		}
+		this.addItem(AbstractItemType.generateItem(ItemType.DYE_BRUSH), 25, false, false);
+		this.addItem(AbstractItemType.generateItem(ItemType.REFORGE_HAMMER), 10, false, false);
 		
 		for (AbstractItemType item : itemsForSale) {
 			for (int i = 0; i < 6 + (Util.random.nextInt(12)); i++) {

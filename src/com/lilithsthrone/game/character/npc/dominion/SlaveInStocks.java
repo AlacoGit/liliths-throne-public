@@ -2,6 +2,7 @@ package com.lilithsthrone.game.character.npc.dominion;
 
 import java.time.Month;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.w3c.dom.Document;
@@ -9,13 +10,13 @@ import org.w3c.dom.Element;
 
 import com.lilithsthrone.game.character.CharacterImportSetting;
 import com.lilithsthrone.game.character.CharacterUtils;
+import com.lilithsthrone.game.character.EquipClothingSetting;
 import com.lilithsthrone.game.character.attributes.Attribute;
 import com.lilithsthrone.game.character.gender.Gender;
 import com.lilithsthrone.game.character.npc.NPC;
 import com.lilithsthrone.game.character.npc.misc.GenericSexualPartner;
 import com.lilithsthrone.game.character.persona.Name;
 import com.lilithsthrone.game.character.persona.Occupation;
-import com.lilithsthrone.game.character.persona.SexualOrientation;
 import com.lilithsthrone.game.character.race.Race;
 import com.lilithsthrone.game.character.race.RaceStage;
 import com.lilithsthrone.game.character.race.RacialBody;
@@ -26,8 +27,6 @@ import com.lilithsthrone.game.dialogue.utils.UtilText;
 import com.lilithsthrone.game.inventory.CharacterInventory;
 import com.lilithsthrone.game.inventory.clothing.AbstractClothingType;
 import com.lilithsthrone.game.inventory.clothing.ClothingType;
-import com.lilithsthrone.game.inventory.item.AbstractItemType;
-import com.lilithsthrone.game.inventory.item.ItemType;
 import com.lilithsthrone.game.occupantManagement.SlaveJobSetting;
 import com.lilithsthrone.game.occupantManagement.SlavePermission;
 import com.lilithsthrone.game.occupantManagement.SlavePermissionSetting;
@@ -104,20 +103,21 @@ public class SlaveInStocks extends NPC {
 					"[npc.Name] is a slave, who, for one reason or another, has been locked into the stocks for public use."));
 			
 			// PERSONALITY & BACKGROUND:
-			
-			if(this.isFeminine()) {
-				if(Math.random()>0.5f) {
-					this.setHistory(Occupation.NPC_PROSTITUTE);
-					setSexualOrientation(SexualOrientation.AMBIPHILIC);
-					setName(Name.getRandomProstituteTriplet());
-					useItem(AbstractItemType.generateItem(ItemType.PROMISCUITY_PILL), this, false);
-				} else {
-					this.setHistory(Occupation.NPC_MUGGER);
-				}
-				
-			} else {
-				this.setHistory(Occupation.NPC_MUGGER);
-			}
+
+			this.setHistory(Occupation.NPC_SLAVE);
+//			if(this.isFeminine()) {
+//				if(Math.random()>0.5f) {
+//					this.setHistory(Occupation.NPC_PROSTITUTE);
+//					setSexualOrientation(SexualOrientation.AMBIPHILIC);
+//					setName(Name.getRandomProstituteTriplet());
+//					useItem(AbstractItemType.generateItem(ItemType.PROMISCUITY_PILL), this, false);
+//				} else {
+//					this.setHistory(Occupation.NPC_MUGGER);
+//				}
+//				
+//			} else {
+//				this.setHistory(Occupation.NPC_MUGGER);
+//			}
 			
 			// ADDING FETISHES:
 			
@@ -132,10 +132,9 @@ public class SlaveInStocks extends NPC {
 			resetInventory(true);
 			inventory.setMoney(10 + Util.random.nextInt(getLevel()*10) + 1);
 
-			equipClothing(true, true, true, true);
+			equipClothing(EquipClothingSetting.getAllClothingSettings());
 			
 			CharacterUtils.applyMakeup(this, true);
-
 
 			if(Math.random()<0.8f) {
 				this.addSlaveJobSettings(SlaveJobSetting.SEX_ORAL);
@@ -178,7 +177,7 @@ public class SlaveInStocks extends NPC {
 	}
 
 	@Override
-	public void equipClothing(boolean replaceUnsuitableClothing, boolean addWeapons, boolean addScarsAndTattoos, boolean addAccessories) {
+	public void equipClothing(List<EquipClothingSetting> settings) {
 		this.equipClothingFromNowhere(AbstractClothingType.generateClothing(ClothingType.NECK_SLAVE_COLLAR), true, this);
 	}
 	
