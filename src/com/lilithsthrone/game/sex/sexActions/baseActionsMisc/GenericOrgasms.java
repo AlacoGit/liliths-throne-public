@@ -5331,10 +5331,11 @@ public class GenericOrgasms {
 					
 				} else {
 					return !Sex.isDom(Sex.getCharacterTargetedForSexAction(this)) // Doms will not deny other doms.
-							&& Sex.getCharacterPerformingAction().getFetishDesire(Fetish.FETISH_DENIAL).isPositive();
+							&& Sex.getCharacterPerformingAction().getFetishDesire(Fetish.FETISH_DENIAL).isPositive()
+							&& (Math.random()*100) >= 5; //5% chance to not deny orgasm
 				}
 			}
-			return false;
+		return false;
 		}
 		
 		@Override

@@ -838,8 +838,6 @@ public class SlaveDialogue {
 						
 					} else if (index == 2) {
 						if(companionCharacter==null || charactersPresent.size()<2) {
-							System.out.println(companionCharacter.getName());
-							System.out.println(charactersPresent.size());
 							return new Response("Spitroast (front)", "You'd need a third person to be present in order to get a spitroast going...", null);
 							
 						} else if(targetedCharacterForSex.isPlayer()) {
