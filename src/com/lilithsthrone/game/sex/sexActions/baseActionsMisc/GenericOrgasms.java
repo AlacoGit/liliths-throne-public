@@ -46,10 +46,7 @@ import com.lilithsthrone.game.sex.managers.OrgasmBehaviour;
 import com.lilithsthrone.game.sex.positions.AbstractSexPosition;
 import com.lilithsthrone.game.sex.positions.slots.SexSlot;
 import com.lilithsthrone.game.sex.positions.slots.SexSlotGeneric;
-import com.lilithsthrone.game.sex.sexActions.SexAction;
-import com.lilithsthrone.game.sex.sexActions.SexActionInterface;
-import com.lilithsthrone.game.sex.sexActions.SexActionPriority;
-import com.lilithsthrone.game.sex.sexActions.SexActionType;
+import com.lilithsthrone.game.sex.sexActions.*;
 import com.lilithsthrone.game.sex.sexActions.baseActions.PenisMouth;
 import com.lilithsthrone.main.Main;
 import com.lilithsthrone.utils.Util;
@@ -5334,6 +5331,50 @@ public class GenericOrgasms {
 			}
 		}
 	};
+
+	/**
+	 * Action taken to deny your own orgasm
+	 * @Author Alaco
+	 */
+
+	public static final SexAction PLAYER_SELF_DENIAL = new SexAction(
+			SexActionType.ORGASM_NO_AROUSAL_RESET,
+			ArousalIncrease.NEGATIVE_MAJOR,
+			ArousalIncrease.TWO_LOW,
+			CorruptionLevel.ZERO_PURE,
+			null,
+			SexParticipantType.SELF) {
+
+		@Override
+		public SexActionLimitation getLimitation(){
+			return SexActionLimitation.PLAYER_ONLY;
+		}
+
+		@Override
+		public String getActionTitle() {
+			return "Hold back";
+		}
+
+		@Override
+		public String getActionDescription() {
+			return "You can feel your orgasm approaching, hold it back!";
+		}
+
+		@Override
+		public String getDescription() {
+			return "As you feel your orgasm approaching you summon your willpower and force yourself to hold it back.";
+		}
+
+		@Override
+		public void applyEffects() {
+			SexFlags.playerPreparedForCharactersOrgasm.remove(Sex.getCharacterPerformingAction());
+		}
+
+		@Override
+		public List<Fetish> getFetishes(GameCharacter character) {
+				return Util.newArrayListOfValues(Fetish.FETISH_DENIAL_SELF);
+		}
+	};
 	
 	public static final SexAction GENERIC_PREPARATION_DENIAL = new SexAction(
 			SexActionType.PREPARE_FOR_PARTNER_ORGASM,
@@ -5463,7 +5504,7 @@ public class GenericOrgasms {
 		@Override
 		public void applyEffects() {
 			Sex.addCharacterDeniedOrgasm(Sex.getCharacterTargetedForSexAction(this));
-			
+
 			Sex.incrementNumberOfDeniedOrgasms(Sex.getCharacterPerformingAction(), Sex.getCharacterTargetedForSexAction(this), 1);
 		}
 		
