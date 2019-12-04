@@ -5490,7 +5490,7 @@ public class GenericOrgasms {
 	 */
 
 	public static final SexAction PLAYER_SELF_DENIAL = new SexAction(
-			SexActionType.ORGASM_NO_AROUSAL_RESET,
+			SexActionType.ORGASM_DENIAL,
 			ArousalIncrease.NEGATIVE_MAJOR,
 			ArousalIncrease.TWO_LOW,
 			CorruptionLevel.ZERO_PURE,
