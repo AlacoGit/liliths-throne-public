@@ -3,10 +3,19 @@
 	<groupId>innoxia</groupId>
 	<artifactId>lilithsthrone</artifactId>
 	<packaging>jar</packaging>
+<<<<<<< Updated upstream
 	<version>0.4.9</version>
 	<name>Lilith's Throne</name>
+=======
+	<version>1</version>
+	<name>lilithsthrone</name>
+
+>>>>>>> Stashed changes
 	<properties>
+		<junit.jupiter.version>5.8.2</junit.jupiter.version>
+		<javafx.version>18.0.1</javafx.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+<<<<<<< Updated upstream
 		<maven.compiler.release>17</maven.compiler.release>
 		<javafx.version>18.0.2</javafx.version>
 		<nashorn.version>15.4</nashorn.version>
@@ -55,11 +64,33 @@
 			<artifactId>javafx-fxml</artifactId>
 			<version>${javafx.version}</version>
 			<classifier>${target.platform}</classifier>
+=======
+		<maven.compiler.release>18</maven.compiler.release>
+		<nashorn.version>15.4</nashorn.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-controls</artifactId>
+			<version>${javafx.version}</version>
+		</dependency>
+		<dependency>
+  			<groupId>org.openjdk.nashorn</groupId>
+  			<artifactId>nashorn-core</artifactId>
+  			<version>${nashorn.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-fxml</artifactId> 
+			<version>${javafx.version}</version>
+>>>>>>> Stashed changes
 		</dependency>
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-web</artifactId>
 			<version>${javafx.version}</version>
+<<<<<<< Updated upstream
 			<classifier>${target.platform}</classifier>
 		</dependency>
 		<dependency>
@@ -87,6 +118,30 @@
 			<version>${nashorn.version}</version>
 		</dependency>
 	</dependencies>
+=======
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<version>${junit.jupiter.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-params</artifactId>
+			<version>${junit.jupiter.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>${junit.jupiter.version}</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+
+
+>>>>>>> Stashed changes
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<resources>
@@ -94,14 +149,18 @@
 				<directory>src/com/lilithsthrone/res</directory>
 				<targetPath>com/lilithsthrone/res</targetPath>
 			</resource>
+<<<<<<< Updated upstream
 			<resource>
 				<directory>res</directory>
 				<targetPath>${project.build.directory}/${project.name} (${target.platform})/res</targetPath>
 			</resource>
+=======
+>>>>>>> Stashed changes
 		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
+<<<<<<< Updated upstream
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>${maven-compile-plugin.version}</version>
 				<configuration>
@@ -144,6 +203,52 @@
 					</execution>
 				</executions>
 			</plugin>
+=======
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.2.2</version>
+				<configuration>
+					<finalName>${project.name}</finalName>
+					<archive>
+						<manifest>
+							<mainClass>com.lilithsthrone.main.Main</mainClass>
+						</manifest>
+						<manifestEntries>
+							<Class-Path>.</Class-Path>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.10.1</version>
+				<configuration>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.0.0-M7</version>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.6.0</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>java</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<mainClass>com.lilithsthrone.main.Main</mainClass>
+				</configuration>
+			</plugin>
+			<plugin>
+		        <artifactId>maven-jlink-plugin</artifactId>
+		        <version>3.1.0</version>
+		        <extensions>true</extensions>
+	      </plugin>
+>>>>>>> Stashed changes
 		</plugins>
 	</build>
 </project>
