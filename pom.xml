@@ -8,7 +8,7 @@
 	<name>Lilith's Throne</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.release>17</maven.compiler.release>
+		<maven.compiler.release>8</maven.compiler.release>
 		<javafx.version>18.0.2</javafx.version>
 		<nashorn.version>15.4</nashorn.version>
 		<javafx.maven.plugin.version>0.0.8</javafx.maven.plugin.version>
@@ -43,20 +43,6 @@
 		</profile>
 	</profiles>
 
-	<dependencies>
-
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-base</artifactId>
-			<version>${javafx.version}</version>
-			<classifier>${target.platform}</classifier>
-		</dependency>
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-fxml</artifactId>
-			<version>${javafx.version}</version>
-			<classifier>${target.platform}</classifier>
-	</properties>
 
 	<dependencies>
 		<dependency>
@@ -97,12 +83,6 @@
 			<artifactId>javafx-media</artifactId>
 			<version>${javafx.version}</version>
 			<classifier>${target.platform}</classifier>
-		</dependency>
-
-		<dependency>
-			<groupId>org.openjdk.nashorn</groupId>
-			<artifactId>nashorn-core</artifactId>
-			<version>${nashorn.version}</version>
 		</dependency>
 	</dependencies>
 
@@ -164,6 +144,7 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>3.2.2</version>
 				<configuration>
@@ -176,12 +157,6 @@
 							<Class-Path>.</Class-Path>
 						</manifestEntries>
 					</archive>
-				</configuration>
-			</plugin>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.10.1</version>
-				<configuration>
 				</configuration>
 			</plugin>
 			<plugin>
